@@ -10,7 +10,7 @@
 #include "zoo/spider/ifile_event_listener.h"
 #include "zoo/spider/aliases.h"
 #include "zoo/spider/message.h"
-#include "zoo/spider/response_wrapper.h"
+#include "zoo/spider/response_wrapper.hpp"
 #include "zoo/common/api.h"
 
 #include <memory>

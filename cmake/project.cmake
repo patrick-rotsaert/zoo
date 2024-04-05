@@ -51,7 +51,7 @@ function(add_project_library TARGET)
 
 	if(WIN32)
 		if(NOT BUILD_SHARED_LIBS)
-			set(TARGET_OUTPUT_NAME ${TARGET_OUTPUT_NAME}-static)
+			set(TARGET_OUTPUT_NAME ${TARGET_OUTPUT_NAME}_static)
 		endif()
 		set(TARGET_OUTPUT_NAME "${TARGET_OUTPUT_NAME}_${${PROJECT_NAME}_VERSION_MAJOR}_${${PROJECT_NAME}_VERSION_MINOR}")
 	endif()
@@ -162,7 +162,7 @@ function(add_project_library TARGET)
 	endforeach()
 
 	foreach(TARGET ${LINK_TARGETS})
-		set_target_properties(${TARGET} PROPERTIES DEBUG_POSTFIX "-d")
+		set_target_properties(${TARGET} PROPERTIES DEBUG_POSTFIX "_d")
 	endforeach()
 
 	# Set other target properties

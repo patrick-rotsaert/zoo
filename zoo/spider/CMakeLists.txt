@@ -39,7 +39,7 @@ add_project_library(spider
 		file_response.h
 		error_response.h
 		empty_response.h
-		response_wrapper.h
+		response_wrapper.hpp
 		ifile_event_listener.h
 		noop_file_event_listener.h
 		dispatcher.hpp
