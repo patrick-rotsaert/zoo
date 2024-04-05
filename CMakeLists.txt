@@ -32,18 +32,7 @@ if(ZOO_CPACK)
 	set(ZOO_INSTALL ON)
 endif()
 
-# Let ZOO_SHARED_LIBS override BUILD_SHARED_LIBS
-if(DEFINED ZOO_SHARED_LIBS)
-    set(BUILD_SHARED_LIBS "${ZOO_SHARED_LIBS}")
-endif()
-
 include(cmake/project.cmake)
-
-# Threads
-if(ZOO_THREAD_SAFE)
-	project_find_package(Threads REQUIRED)
-	list(APPEND EXTRA_PUBLIC_LIBRARIES Threads::Threads)
-endif()
 
 add_subdirectory(zoo)
 

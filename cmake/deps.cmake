@@ -26,6 +26,7 @@ function(project_find_package NAME)
 	set(${NAME}_FOUND ${${NAME}_FOUND} PARENT_SCOPE)
 endfunction()
 
+include(${CMAKE_CURRENT_LIST_DIR}/deps/threads.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/deps/gtest.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/deps/fmtlib.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/deps/spdlog.cmake)

@@ -7,10 +7,6 @@
 
 cmake_minimum_required(VERSION 3.19)
 
-set(EXTRA_SOURCES)
-set(EXTRA_PUBLIC_LIBRARIES)
-set(EXTRA_PUBLIC_HEADERS)
-
 add_project_library(bitcask
 	TARGET_OUTPUT_NAME
 		${PROJECT_NAME}_bitcask
@@ -33,9 +29,7 @@ add_project_library(bitcask
 		${EXTRA_SOURCES}
 	PUBLIC_HEADERS
 		bitcask.h
-		${EXTRA_PUBLIC_HEADERS}
 	PUBLIC_LIBRARIES
 		zoo::common
 		fmt::fmt
-		${EXTRA_PUBLIC_LIBRARIES}
 )

@@ -19,6 +19,10 @@ if(ZOO_USE_SPDLOG)
 	endif()
 endif()
 
+if(ZOO_THREAD_SAFE)
+	list(APPEND EXTRA_PUBLIC_LIBRARIES Threads::Threads)
+endif()
+
 add_project_library(common
 	TARGET_OUTPUT_NAME
 		${PROJECT_NAME}_common
