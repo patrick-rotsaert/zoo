@@ -16,7 +16,6 @@
 #include "zoo/squid/core/detail/type_traits.h"
 
 #include "zoo/common/misc/always_false.hpp"
-#include "zoo/common/config.h"
 #include "zoo/common/api.h"
 
 #include "zoo/squid/core/detail/bind_oarchive.h"

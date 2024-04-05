@@ -10,7 +10,6 @@
 
 // Options
 #cmakedefine ZOO_THREAD_SAFE
-#cmakedefine ZOO_USE_SPDLOG
 
 // Logging verbosity of the library
 // Values are as in zoo/logging/log_level.h

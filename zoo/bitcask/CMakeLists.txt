@@ -9,7 +9,7 @@ cmake_minimum_required(VERSION 3.19)
 
 add_project_library(bitcask
 	TARGET_OUTPUT_NAME
-		${PROJECT_NAME}_bitcask
+		zoo_bitcask
 	SOURCES
 		bitcask.cpp
 		datadir.cpp
@@ -26,7 +26,6 @@ add_project_library(bitcask
 		file.cpp
 		file.h
 		hton.h
-		${EXTRA_SOURCES}
 	PUBLIC_HEADERS
 		bitcask.h
 	PUBLIC_LIBRARIES

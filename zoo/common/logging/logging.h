@@ -33,6 +33,7 @@ public:
 } // namespace zoo
 
 // Macro for logging using a fmtlib format string
+#undef zlog
 #define zlog(lvl, ...)                                                                                                                     \
 	do                                                                                                                                     \
 	{                                                                                                                                      \
@@ -44,7 +45,7 @@ public:
 		}                                                                                                                                  \
 	} while (false)
 
-// Macros for eliding logging code at compile time
+// Macros for filtering logging code at compile time
 #undef ZOO_MIN_LOG
 #define ZOO_MIN_LOG(minlvl, lvl, ...)                                                                                                      \
 	do                                                                                                                                     \
@@ -55,5 +56,14 @@ public:
 		}                                                                                                                                  \
 	} while (false)
 
+// The default ZOO_LOGGING_LEVEL is defined in zoo/common/config.h but can be overridden by defining it prior to including this file, e.g.
+// ```
+// #define ZOO_LOGGING_LEVEL info
+// ```
+// will only compile calls to ZOO_LOG(info, ...) and higher levels.
 #undef ZOO_LOG
+#ifdef ZOO_LOGGING_LEVEL
 #define ZOO_LOG(lvl, ...) ZOO_MIN_LOG(ZOO_LOGGING_LEVEL, lvl, __VA_ARGS__)
+#else
+#define ZOO_LOG(lvl, ...) ZOO_MIN_LOG(off, lvl, __VA_ARGS__)
+#endif

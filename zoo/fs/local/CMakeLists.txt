@@ -7,7 +7,7 @@
 
 add_project_library(fs_local
 	TARGET_OUTPUT_NAME
-		${PROJECT_NAME}_fs_local
+		zoo_fs_local
 	ALIAS
 		zoo::fs::local
 	SOURCES

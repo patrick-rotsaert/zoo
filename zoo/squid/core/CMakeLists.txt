@@ -7,7 +7,7 @@
 
 add_project_library(squid_core
 	TARGET_OUTPUT_NAME
-		${PROJECT_NAME}_squid_core
+		zoo_squid_core
 	ALIAS
 		zoo::squid::core
 	SOURCES

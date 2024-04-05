@@ -11,7 +11,6 @@
 
 #include "zoo/common/conversion/conversion.h"
 #include "zoo/common/misc/throw_exception.h"
-#include "zoo/common/config.h"
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>

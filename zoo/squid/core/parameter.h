@@ -11,7 +11,6 @@
 #include "zoo/squid/core/error.h"
 #include "zoo/common/misc/is_optional.hpp"
 #include "zoo/common/misc/is_scoped_enum.hpp"
-#include "zoo/common/config.h"
 #include "zoo/common/api.h"
 
 #include <boost/date_time/gregorian/greg_date.hpp>

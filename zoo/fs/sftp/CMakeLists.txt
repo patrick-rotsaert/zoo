@@ -7,7 +7,7 @@
 
 add_project_library(fs_sftp
 	TARGET_OUTPUT_NAME
-		${PROJECT_NAME}_fs_sftp
+		zoo_fs_sftp
 	ALIAS
 		zoo::fs::sftp
 	SOURCES

@@ -7,7 +7,7 @@
 
 add_project_library(squid_postgresql
 	TARGET_OUTPUT_NAME
-		${PROJECT_NAME}_squid_postgresql
+		zoo_squid_postgresql
 	ALIAS
 		zoo::squid::postgresql
 	SOURCES

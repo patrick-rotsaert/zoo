@@ -7,7 +7,7 @@
 
 add_project_library(squid_mysql
 	TARGET_OUTPUT_NAME
-		${PROJECT_NAME}_squid_mysql
+		zoo_squid_mysql
 	ALIAS
 		zoo::squid::mysql
 	SOURCES

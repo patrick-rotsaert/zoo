@@ -8,7 +8,6 @@
 #pragma once
 
 #include "zoo/common/api.h"
-#include "zoo/common/config.h"
 #include "zoo/squid/postgresql/connection.h"
 #include "zoo/squid/postgresql/detail/libpqfwd.h"
 

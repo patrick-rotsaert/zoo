@@ -7,7 +7,7 @@
 
 add_project_library(squid_sqlite
 	TARGET_OUTPUT_NAME
-		${PROJECT_NAME}_squid_sqlite
+		zoo_squid_sqlite
 	ALIAS
 		zoo::squid::sqlite
 	SOURCES

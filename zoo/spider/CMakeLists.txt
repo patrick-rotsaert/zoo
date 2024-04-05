@@ -7,7 +7,7 @@
 
 add_project_library(spider
 	TARGET_OUTPUT_NAME
-		${PROJECT_NAME}_spider
+		zoo_spider
 	SOURCES
 		listener.cpp
 		http_session.cpp

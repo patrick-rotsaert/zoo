@@ -7,7 +7,7 @@
 
 add_project_library(fs_core
 	TARGET_OUTPUT_NAME
-		${PROJECT_NAME}_fs_core
+		zoo_fs_core
 	ALIAS
 		zoo::fs::core
 	SOURCES

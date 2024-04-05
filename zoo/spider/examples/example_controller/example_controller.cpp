@@ -15,7 +15,6 @@
 #include "zoo/spider/aliases.h"
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/formatters.hpp"
-#include "zoo/common/config.h"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/signal_set.hpp>
@@ -24,10 +23,7 @@
 #include <boost/throw_exception.hpp>
 #include <boost/exception/all.hpp>
 
-#ifdef ZOO_USE_SPDLOG
 #include <spdlog/spdlog.h>
-#endif
-
 #include <fmt/format.h>
 
 #include <thread>
@@ -279,10 +275,8 @@ int main(int argc, char* argv[])
 	auto const doc_root = boost::filesystem::path{ argv[3] };
 	auto const threads  = std::max<int>(1, std::atoi(argv[4]));
 
-#ifdef ZOO_USE_SPDLOG
 	spdlog::set_level(spdlog::level::trace);
 	spdlog::set_pattern("%L [%Y-%m-%d %H:%M:%S.%f Δt=%iμs](%t) %^%v%$ [%s:%#]");
-#endif
 
 	zlog(info, "application started");
 

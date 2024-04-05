@@ -8,7 +8,6 @@
 #pragma once
 
 #include "zoo/squid/core/types.h"
-#include "zoo/common/config.h"
 
 #include <mysql/mysql.h>
 

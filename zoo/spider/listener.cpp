@@ -7,8 +7,8 @@
 
 #include "zoo/spider/listener.h"
 #include "zoo/spider/http_session.h"
-#include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/formatters.hpp"
+#include "zoo/common/logging/logging.h"
 
 #include <boost/asio/strand.hpp>
 #include <boost/asio/ip/tcp.hpp>

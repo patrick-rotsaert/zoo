@@ -14,7 +14,6 @@
 #include "zoo/spider/noop_file_event_listener.h"
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/formatters.hpp"
-#include "zoo/common/config.h"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/signal_set.hpp>
@@ -22,10 +21,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/describe.hpp>
 
-#ifdef ZOO_USE_SPDLOG
 #include <spdlog/spdlog.h>
-#endif
-
 #include <fmt/format.h>
 
 #include <thread>
@@ -76,10 +72,8 @@ int main(int argc, char* argv[])
 
 	using namespace zoo::spider;
 
-#ifdef ZOO_USE_SPDLOG
 	spdlog::set_level(spdlog::level::trace);
 	spdlog::set_pattern("%L [%Y-%m-%d %H:%M:%S.%f Δt=%iμs](%t) %^%v%$ [%s:%#]");
-#endif
 
 	zlog(info, "application started");
 

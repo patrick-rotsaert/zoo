@@ -7,17 +7,7 @@
 
 cmake_minimum_required(VERSION 3.19)
 
-set(EXTRA_SOURCES)
 set(EXTRA_PUBLIC_LIBRARIES)
-set(EXTRA_PUBLIC_HEADERS)
-
-if(ZOO_USE_SPDLOG)
-	list(APPEND EXTRA_PUBLIC_LIBRARIES spdlog::spdlog)
-	list(APPEND EXTRA_SOURCES logging/spdlog_backend.cpp logging/spdlog_backend.h)
-	if(ZOO_INSTALL)
-		list(APPEND EXTRA_PUBLIC_HEADERS logging/spdlog_backend.h)
-	endif()
-endif()
 
 if(ZOO_THREAD_SAFE)
 	list(APPEND EXTRA_PUBLIC_LIBRARIES Threads::Threads)
@@ -25,29 +15,30 @@ endif()
 
 add_project_library(common
 	TARGET_OUTPUT_NAME
-		${PROJECT_NAME}_common
+		zoo_common
 	SOURCES
 		conversion/conversion.cpp
 		lockfile/lockfile.cpp
 		lockfile/lockfile_impl_posix.hpp
 		logging/ibackend.cpp
+		logging/spdlog_backend.cpp
 		logging/logging.cpp
 		misc/demangle.cpp
 		misc/uuid.cpp
 		misc/quoted_c.cpp
+		misc/lock_types.hpp
 		version.cpp
 		version.h.in
 		config.h.in
-		${EXTRA_SOURCES}
 	PUBLIC_HEADERS
 		api.h
 		conversion/conversion.h
 		lockfile/lockfile.h
 		logging/ibackend.h
+		logging/spdlog_backend.h
 		logging/logging.h
 		logging/log_level.h
 		misc/formatters.hpp
-		misc/lock_types.hpp
 		misc/synchronized_queue.hpp
 		misc/always_false.hpp
 		misc/demangle.h
@@ -57,16 +48,16 @@ add_project_library(common
 		misc/throw_exception.h
 		misc/uuid.h
 		misc/quoted_c.h
-		${EXTRA_PUBLIC_HEADERS}
-	PUBLIC_LIBRARIES
-		fmt::fmt
-		${EXTRA_PUBLIC_LIBRARIES}
 	UNIT_TEST_SOURCES
 		test/unit/conversion/test_conversion.cpp
 		test/unit/lockfile/test_lockfile.cpp
+	PUBLIC_LIBRARIES
+		fmt::fmt
+		spdlog::spdlog
+		${EXTRA_PUBLIC_LIBRARIES}
 	PUBLIC_INCLUDE_DIRS
 		${PROJECT_BINARY_DIR} # for configured headers, see below
-)
+	)
 
 #
 # Build time logging levels

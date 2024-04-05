@@ -8,7 +8,6 @@
 #pragma once
 
 #include "zoo/common/api.h"
-#include "zoo/common/config.h"
 #include "zoo/common/misc/throw_exception.h"
 
 #include <boost/date_time/gregorian/greg_date.hpp>

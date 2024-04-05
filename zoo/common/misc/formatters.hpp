@@ -8,7 +8,6 @@
 #pragma once
 
 #include "zoo/common/conversion/conversion.h"
-#include "zoo/common/config.h"
 
 #include <fmt/core.h>
 #include <fmt/ostream.h>
