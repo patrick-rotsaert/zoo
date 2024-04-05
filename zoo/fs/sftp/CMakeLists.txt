@@ -5,9 +5,9 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 #
 
-add_project_library(fs-sftp
+add_project_library(fs_sftp
 	TARGET_OUTPUT_NAME
-		${PROJECT_NAME}-fs-sftp
+		${PROJECT_NAME}_fs_sftp
 	ALIAS
 		zoo::fs::sftp
 	SOURCES

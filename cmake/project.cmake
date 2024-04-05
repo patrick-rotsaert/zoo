@@ -175,7 +175,7 @@ function(add_project_library TARGET)
 	if(ZOO_INSTALL)
 		# Install the library
 		install(TARGETS ${TARGET}
-			EXPORT ${PROJECT_NAME}_Targets
+			EXPORT zoo_targets
 			RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 			        COMPONENT ${COMPONENT_RUNTIME}
 			LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

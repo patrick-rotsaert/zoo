@@ -65,7 +65,7 @@ add_project_library(common
 		test/unit/conversion/test_conversion.cpp
 		test/unit/lockfile/test_lockfile.cpp
 	PUBLIC_INCLUDE_DIRS
-		${CMAKE_CURRENT_BINARY_DIR}/.. # for configured headers, see below
+		${PROJECT_BINARY_DIR} # for configured headers, see below
 )
 
 #
@@ -95,8 +95,8 @@ configure_file(
 )
 
 if(ZOO_INSTALL)
-	install_project_header(${CMAKE_CURRENT_BINARY_DIR}/version.h ${CMAKE_CURRENT_BINARY_DIR}/..)
-	install_project_header(${CMAKE_CURRENT_BINARY_DIR}/config.h ${CMAKE_CURRENT_BINARY_DIR}/..)
+	install_project_header(${CMAKE_CURRENT_BINARY_DIR}/version.h ${PROJECT_BINARY_DIR})
+	install_project_header(${CMAKE_CURRENT_BINARY_DIR}/config.h ${PROJECT_BINARY_DIR})
 endif()
 
 if(ZOO_BUILD_EXAMPLES)

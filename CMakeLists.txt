@@ -36,9 +36,9 @@ include(cmake/project.cmake)
 
 add_subdirectory(zoo)
 
-# if(ZOO_INSTALL)
-# 	add_subdirectory(install)
+if(ZOO_INSTALL)
+	add_subdirectory(install)
 # 	if(ZOO_CPACK)
 # 		add_subdirectory(cpack)
 # 	endif()
-# endif()
+endif()
