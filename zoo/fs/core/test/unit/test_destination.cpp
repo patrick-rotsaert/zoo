@@ -1,0 +1,33 @@
+//
+// Copyright (C) 2022-2024 Patrick Rotsaert
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+
+#include "zoo/fs/core/destination.h"
+#include <gtest/gtest.h>
+
+namespace zoo {
+namespace fs {
+
+TEST(DestinationTests, test_ctor)
+{
+	{
+		auto x = destination{ "/foo/bar", std::nullopt, false, destination::conflict_policy::OVERWRITE };
+		EXPECT_EQ(x.path, "/foo/bar");
+		EXPECT_EQ(x.expand_time_placeholders, std::nullopt);
+		EXPECT_FALSE(x.create_parents);
+		EXPECT_EQ(x.on_name_conflict, destination::conflict_policy::OVERWRITE);
+	}
+	{
+		auto x = destination{ "/foo/bar", destination::time_expansion::UTC, true, destination::conflict_policy::FAIL };
+		EXPECT_EQ(x.path, "/foo/bar");
+		EXPECT_EQ(x.expand_time_placeholders, destination::time_expansion::UTC);
+		EXPECT_TRUE(x.create_parents);
+		EXPECT_EQ(x.on_name_conflict, destination::conflict_policy::FAIL);
+	}
+}
+
+} // namespace fs
+} // namespace zoo

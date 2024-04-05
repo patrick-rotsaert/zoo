@@ -1,0 +1,17 @@
+//
+// Copyright (C) 2024 Patrick Rotsaert
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+
+// clang-format off
+#pragma once
+
+// Options
+#cmakedefine ZOO_THREAD_SAFE
+#cmakedefine ZOO_USE_SPDLOG
+
+// Logging verbosity of the library
+// Values are as in zoo/logging/log_level.h
+#define ZOO_LOGGING_LEVEL @ZOO_LOGGING_LEVEL@

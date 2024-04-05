@@ -1,0 +1,38 @@
+//
+// Copyright (C) 2024 Patrick Rotsaert
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+// clang-format off
+
+#pragma once
+
+#include "zoo/common/api.h"
+
+#define ZOO_VERSION_MAJOR ${${PROJECT_NAME}_VERSION_MAJOR}
+#define ZOO_VERSION_MINOR ${${PROJECT_NAME}_VERSION_MINOR}
+#define ZOO_VERSION_PATCH ${${PROJECT_NAME}_VERSION_PATCH}
+
+// Library version number
+// MMmmpppp
+// ->   MM = major
+// ->   mm = minor
+// -> pppp = patch
+#define ZOO_VERSION_NUMBER ${${PROJECT_NAME}_VERSION_NUMBER}
+
+// clang-format on
+namespace zoo {
+
+class ZOO_EXPORT version final
+{
+	static ZOO_EXPORT int number(); // returns ZOO_VERSION_NUMBER
+
+	static ZOO_EXPORT int major(); // returns ZOO_VERSION_MAJOR
+	static ZOO_EXPORT int minor(); // returns ZOO_VERSION_MINOR
+	static ZOO_EXPORT int patch(); // returns ZOO_VERSION_PATCH
+
+	static ZOO_EXPORT void check(); // asserts that Version::number() == ZOO_VERSION_NUMBER
+};
+
+} // namespace zoo

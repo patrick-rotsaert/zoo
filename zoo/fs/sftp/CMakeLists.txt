@@ -1,0 +1,73 @@
+#
+# Copyright (C) 2022-2024 Patrick Rotsaert
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE or copy at
+# http://www.boost.org/LICENSE_1_0.txt)
+#
+
+add_project_library(fs-sftp
+	TARGET_OUTPUT_NAME
+		${PROJECT_NAME}-fs-sftp
+	ALIAS
+		zoo::fs::sftp
+	SOURCES
+		issh_api.cpp
+		issh_api.h
+		issh_knownhosts.cpp
+		issh_identity_factory.cpp
+		ssh_api.cpp
+		ssh_api.h
+		sftp_access.cpp
+		sftp_watcher.cpp
+		sftp_watcher.h
+		sftp_exceptions.cpp
+		sftp_file.cpp
+		sftp_file.h
+		sftp_session.cpp
+		sftp_session.h
+		ssh_connection.cpp
+		ssh_connection.h
+		ssh_server_pubkey.cpp
+		ssh_server_pubkey.h
+		ssh_pubkey_hash.cpp
+		ssh_pubkey_hash.h
+		ssh_private_key.cpp
+		ssh_private_key.h
+		ssh_public_key.cpp
+		ssh_public_key.h
+		ptr_types.h
+		make_attributes.cpp
+		make_attributes.h
+		make_direntry.cpp
+		make_direntry.h
+	PUBLIC_HEADERS
+		issh_knownhosts.h
+		issh_identity_factory.h
+		ssh_identity.h
+		sftp_access.h
+		sftp_exceptions.h
+		sftp_options.h
+	UNIT_TEST_SOURCES
+		test/unit/test_make_attributes.cpp
+		test/unit/test_make_direntry.cpp
+		test/unit/test_sftp_access.cpp
+		test/unit/test_sftp_exceptions.cpp
+		test/unit/test_sftp_file.cpp
+		test/unit/test_sftp_session.cpp
+		test/unit/sftp_fs_test_fixture.cpp
+		test/unit/sftp_fs_test_fixture.h
+	MOCK_SOURCES
+		test/unit/mock_ssh_api.cpp
+		test/unit/mock_ssh_api.h
+		test/unit/mock_ssh_identity_factory.cpp
+		test/unit/mock_ssh_identity_factory.h
+		test/unit/mock_ssh_knownhosts.cpp
+		test/unit/mock_ssh_knownhosts.h
+	PRIVATE_INCLUDE_DIRS
+		${CMAKE_CURRENT_BINARY_DIR}/../..
+	PUBLIC_LIBRARIES
+		zoo::fs::core
+		ssh::ssh
+	PRIVATE_LIBRARIES
+		fmt::fmt
+)
