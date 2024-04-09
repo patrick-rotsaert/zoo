@@ -6,10 +6,6 @@
 #
 
 add_project_library(squid_core
-	TARGET_OUTPUT_NAME
-		zoo_squid_core
-	ALIAS
-		zoo::squid::core
 	SOURCES
 		parameter.cpp
 		result.cpp
@@ -47,4 +43,6 @@ add_project_library(squid_core
 		test/unit/test_result.cpp
 	PUBLIC_LIBRARIES
 		zoo::common
+	FIND_PACKAGE_COMPONENT
+		squid
 )

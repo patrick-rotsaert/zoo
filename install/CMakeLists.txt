@@ -10,7 +10,7 @@ cmake_minimum_required(VERSION 3.19)
 include(CMakePackageConfigHelpers)
 
 if(NOT DEFINED zoo_INSTALL_CMAKEDIR)
-	set(zoo_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/zoo" CACHE STRING "Path to zoo CMake files")
+	set(zoo_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/zoo" CACHE STRING "Path to installed zoo CMake files")
 endif()
 
 if(BUILD_SHARED_LIBS)
@@ -19,12 +19,14 @@ else()
 	set(LINKAGE static)
 endif()
 
-install(EXPORT zoo_targets
-	DESTINATION "${zoo_INSTALL_CMAKEDIR}"
-	NAMESPACE zoo::
-	FILE zoo-${LINKAGE}-targets.cmake
-	COMPONENT ${COMPONENT_DEVELOPMENT}
-)
+foreach(comp ${zoo_FIND_PACKAGE_COMPONENTS})
+	install(EXPORT zoo_${comp}_targets
+		DESTINATION "${zoo_INSTALL_CMAKEDIR}"
+		NAMESPACE zoo::
+		FILE zoo-${comp}-${LINKAGE}-targets.cmake
+		COMPONENT ${COMPONENT_DEVELOPMENT}
+	)
+endforeach()
 
 write_basic_package_version_file(
     zoo-config-version.cmake

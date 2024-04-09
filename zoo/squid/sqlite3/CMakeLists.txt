@@ -6,10 +6,6 @@
 #
 
 add_project_library(squid_sqlite
-	TARGET_OUTPUT_NAME
-		zoo_squid_sqlite
-	ALIAS
-		zoo::squid::sqlite
 	SOURCES
 		error.cpp
 		statement.cpp
@@ -43,5 +39,7 @@ add_project_library(squid_sqlite
 		connection.h
 	PUBLIC_LIBRARIES
 		SQLite::SQLite3
-		zoo::squid::core
+		zoo::squid_core
+	FIND_PACKAGE_COMPONENT
+		squid
 )

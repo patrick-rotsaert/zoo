@@ -9,5 +9,5 @@ set(TARGET demo_mysql)
 add_executable(${TARGET} demo_mysql.cpp)
 
 target_compile_features(${TARGET} PRIVATE cxx_std_20)
-target_link_libraries(${TARGET} PRIVATE zoo::squid::mysql)
-target_link_libraries(${TARGET} PRIVATE zoo::squid::demo::common)
+target_link_libraries(${TARGET} PRIVATE zoo::squid_mysql)
+target_link_libraries(${TARGET} PRIVATE zoo::squid_demo_common)

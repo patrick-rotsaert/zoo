@@ -168,7 +168,7 @@ void string_to_time_point(std::string_view in, time_point& out)
 	// TODO: Use std::chrono::parse when it becomes available in libstdc++
 
 	// https://github.com/HowardHinnant/date.git would be a great alternative,
-	// but I prefer not to have any additional dependencies other than the database client libraries.
+	// but I prefer not to have any additional dependencies.
 
 	const auto parsed = parse_time_point(in);
 
@@ -198,7 +198,7 @@ void string_to_date(std::string_view in, date& out)
 	// TODO: Use std::chrono::parse when it becomes available in libstdc++
 
 	// https://github.com/HowardHinnant/date.git would be a great alternative,
-	// but I prefer not to have any additional dependencies other than the database client libraries.
+	// but I prefer not to have any additional dependencies.
 
 	const auto parsed = parse_date(in);
 
@@ -217,7 +217,7 @@ void string_to_time_of_day(std::string_view in, time_of_day& out)
 	// TODO: Use std::chrono::parse when it becomes available in libstdc++
 
 	// https://github.com/HowardHinnant/date.git would be a great alternative,
-	// but I prefer not to have any additional dependencies other than the database client libraries.
+	// but I prefer not to have any additional dependencies.
 
 	const auto parsed = parse_time_of_day(in);
 

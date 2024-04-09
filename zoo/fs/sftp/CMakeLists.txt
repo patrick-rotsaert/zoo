@@ -6,10 +6,6 @@
 #
 
 add_project_library(fs_sftp
-	TARGET_OUTPUT_NAME
-		zoo_fs_sftp
-	ALIAS
-		zoo::fs::sftp
 	SOURCES
 		issh_api.cpp
 		issh_api.h
@@ -66,8 +62,10 @@ add_project_library(fs_sftp
 	PRIVATE_INCLUDE_DIRS
 		${CMAKE_CURRENT_BINARY_DIR}/../..
 	PUBLIC_LIBRARIES
-		zoo::fs::core
+		zoo::fs_core
 		ssh::ssh
 	PRIVATE_LIBRARIES
 		fmt::fmt
+	FIND_PACKAGE_COMPONENT
+		fs
 )

@@ -14,8 +14,6 @@ if(ZOO_THREAD_SAFE)
 endif()
 
 add_project_library(common
-	TARGET_OUTPUT_NAME
-		zoo_common
 	SOURCES
 		conversion/conversion.cpp
 		lockfile/lockfile.cpp
@@ -57,7 +55,9 @@ add_project_library(common
 		${EXTRA_PUBLIC_LIBRARIES}
 	PUBLIC_INCLUDE_DIRS
 		${PROJECT_BINARY_DIR} # for configured headers, see below
-	)
+	FIND_PACKAGE_COMPONENT
+		common
+)
 
 #
 # Build time logging levels

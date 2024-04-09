@@ -6,10 +6,6 @@
 #
 
 add_project_library(fs_local
-	TARGET_OUTPUT_NAME
-		zoo_fs_local
-	ALIAS
-		zoo::fs::local
 	SOURCES
 		local_access.cpp
 		local_watcher.cpp
@@ -34,8 +30,10 @@ add_project_library(fs_local
 	PRIVATE_INCLUDE_DIRS
 		${CMAKE_CURRENT_BINARY_DIR}/../..
 	PUBLIC_LIBRARIES
-		zoo::fs::core
+		zoo::fs_core
 	PRIVATE_LIBRARIES
 		fmt::fmt
 		Boost::thread
+	FIND_PACKAGE_COMPONENT
+		fs
 )

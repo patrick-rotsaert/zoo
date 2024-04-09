@@ -9,5 +9,5 @@ set(TARGET demo_sqlite3)
 add_executable(${TARGET} demo_sqlite3.cpp)
 
 target_compile_features(${TARGET} PRIVATE cxx_std_20)
-target_link_libraries(${TARGET} PRIVATE zoo::squid::sqlite)
-target_link_libraries(${TARGET} PRIVATE zoo::squid::demo::common)
+target_link_libraries(${TARGET} PRIVATE zoo::squid_sqlite)
+target_link_libraries(${TARGET} PRIVATE zoo::squid_demo_common)

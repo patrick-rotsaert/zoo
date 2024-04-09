@@ -8,8 +8,6 @@
 cmake_minimum_required(VERSION 3.19)
 
 add_project_library(bitcask
-	TARGET_OUTPUT_NAME
-		zoo_bitcask
 	SOURCES
 		bitcask.cpp
 		datadir.cpp
@@ -31,4 +29,6 @@ add_project_library(bitcask
 	PUBLIC_LIBRARIES
 		zoo::common
 		fmt::fmt
+	FIND_PACKAGE_COMPONENT
+		bitcask
 )

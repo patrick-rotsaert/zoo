@@ -23,12 +23,12 @@ function(install_project_header HEADER BASE_DIR)
 	)
 endfunction()
 
+set(zoo_FIND_PACKAGE_COMPONENTS "" CACHE STRING "" FORCE)
+mark_as_advanced(zoo_FIND_PACKAGE_COMPONENTS)
+
 function(add_project_library TARGET)
-	set(OPTIONS)
-	set(ONE_VALUE_ARGS
-		TARGET_OUTPUT_NAME
-		ALIAS
-	)
+	set(OPTIONS SKIP_INSTALL)
+	set(ONE_VALUE_ARGS FIND_PACKAGE_COMPONENT)
 	set(MULTI_VALUE_ARGS
 		SOURCES
 		PUBLIC_HEADERS
@@ -43,11 +43,7 @@ function(add_project_library TARGET)
 	cmake_parse_arguments(P "${OPTIONS}" "${ONE_VALUE_ARGS}" "${MULTI_VALUE_ARGS}" ${ARGN})
 
 	# Set the target output name
-	if(P_TARGET_OUTPUT_NAME)
-		set(TARGET_OUTPUT_NAME ${P_TARGET_OUTPUT_NAME})
-	else()
-		set(TARGET_OUTPUT_NAME ${TARGET})
-	endif()
+	set(TARGET_OUTPUT_NAME zoo_${TARGET})
 
 	if(WIN32)
 		if(NOT BUILD_SHARED_LIBS)
@@ -89,11 +85,7 @@ function(add_project_library TARGET)
 	endif()
 
 	# Add library alias
-	if(P_ALIAS)
-		add_library(${P_ALIAS} ALIAS ${TARGET})
-	else()
-		add_library(zoo::${TARGET} ALIAS ${TARGET})
-	endif()
+	add_library(zoo::${TARGET} ALIAS ${TARGET})
 
 	# Hide all symbols by default
 	set_target_properties(${TARGET} PROPERTIES
@@ -172,10 +164,19 @@ function(add_project_library TARGET)
 		OUTPUT_NAME "${TARGET_OUTPUT_NAME}"
 	)
 
-	if(ZOO_INSTALL)
+	if(ZOO_INSTALL AND (NOT P_SKIP_INSTALL))
+		if(NOT P_FIND_PACKAGE_COMPONENT)
+			message(FATAL_ERROR "A FIND_PACKAGE_COMPONENT argument is required for installation")
+		endif()
+
+		set(tmp ${zoo_FIND_PACKAGE_COMPONENTS})
+		list(APPEND tmp ${P_FIND_PACKAGE_COMPONENT})
+		list(REMOVE_DUPLICATES tmp)
+		set(zoo_FIND_PACKAGE_COMPONENTS ${tmp} CACHE STRING "" FORCE)
+
 		# Install the library
 		install(TARGETS ${TARGET}
-			EXPORT zoo_targets
+			EXPORT zoo_${P_FIND_PACKAGE_COMPONENT}_targets
 			RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 			        COMPONENT ${COMPONENT_RUNTIME}
 			LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

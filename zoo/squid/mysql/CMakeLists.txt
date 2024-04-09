@@ -6,10 +6,6 @@
 #
 
 add_project_library(squid_mysql
-	TARGET_OUTPUT_NAME
-		zoo_squid_mysql
-	ALIAS
-		zoo::squid::mysql
 	SOURCES
 		error.cpp
 		statement.cpp
@@ -36,5 +32,7 @@ add_project_library(squid_mysql
 		test/unit/test_queryparameters.cpp
 	PUBLIC_LIBRARIES
 		MySQL::MySQL
-		zoo::squid::core
+		zoo::squid_core
+	FIND_PACKAGE_COMPONENT
+		squid
 )

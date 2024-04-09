@@ -8,13 +8,10 @@
 cmake_minimum_required(VERSION 3.19)
 
 add_project_library(squid_demo_common
-	TARGET_OUTPUT_NAME
-		zoo_squid_demo_common
-	ALIAS
-		zoo::squid::demo::common
-SOURCES
+	SOURCES
 		demo_common.cpp
 		demo_common.h
 	PUBLIC_LIBRARIES
-		zoo::squid::core
+		zoo::squid_core
+	SKIP_INSTALL
 )

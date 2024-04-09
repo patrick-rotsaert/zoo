@@ -6,10 +6,6 @@
 #
 
 add_project_library(fs_core
-	TARGET_OUTPUT_NAME
-		zoo_fs_core
-	ALIAS
-		zoo::fs::core
 	SOURCES
 		iaccess.cpp
 		iinterruptor.cpp
@@ -54,4 +50,6 @@ add_project_library(fs_core
 		Boost::filesystem
 	PRIVATE_LIBRARIES
 		fmt::fmt
+	FIND_PACKAGE_COMPONENT
+		fs
 )

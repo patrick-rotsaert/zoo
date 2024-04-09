@@ -6,8 +6,6 @@
 #
 
 add_project_library(spider
-	TARGET_OUTPUT_NAME
-		zoo_spider
 	SOURCES
 		listener.cpp
 		http_session.cpp
@@ -56,6 +54,8 @@ add_project_library(spider
 		Boost::json
 		Boost::date_time
 		fmt::fmt
+	FIND_PACKAGE_COMPONENT
+		spider
 )
 
 if(ZOO_BUILD_EXAMPLES)

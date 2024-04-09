@@ -6,10 +6,6 @@
 #
 
 add_project_library(squid_postgresql
-	TARGET_OUTPUT_NAME
-		zoo_squid_postgresql
-	ALIAS
-		zoo::squid::postgresql
 	SOURCES
 		error.cpp
 		statement.cpp
@@ -40,5 +36,7 @@ add_project_library(squid_postgresql
 		test/unit/test_queryparameters.cpp
 	PUBLIC_LIBRARIES
 		PostgreSQL::PostgreSQL
-		zoo::squid::core
+		zoo::squid_core
+	FIND_PACKAGE_COMPONENT
+		squid
 )
