@@ -30,10 +30,11 @@ public:
 	connection_pool(const ibackend_connection_factory& factory, std::string_view connection_info, std::size_t count);
 	~connection_pool() noexcept;
 
+	connection_pool(connection_pool&&)            = default;
+	connection_pool& operator=(connection_pool&&) = default;
+
 	connection_pool(const connection_pool&)            = delete;
-	connection_pool(connection_pool&& src)             = default;
 	connection_pool& operator=(const connection_pool&) = delete;
-	connection_pool& operator=(connection_pool&&)      = default;
 
 	/// Acquire a backend connection
 	/// Waits indefinitely until the pool has a connection available.

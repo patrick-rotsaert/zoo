@@ -31,6 +31,12 @@ public:
 	                 std::shared_ptr<iinterruptor> interruptor);
 	~watcher() noexcept;
 
+	watcher(watcher&&)            = default;
+	watcher& operator=(watcher&&) = default;
+
+	watcher(const watcher&)            = delete;
+	watcher& operator=(const watcher&) = delete;
+
 	std::vector<direntry> watch() override;
 };
 

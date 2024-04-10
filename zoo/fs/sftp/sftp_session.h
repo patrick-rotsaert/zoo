@@ -35,10 +35,11 @@ public:
 	                 bool                                   lazy);
 	~session() noexcept;
 
-	session(const session&) = delete;
-	session(session&& src);
+	session(session&&) /*= default*/;
+	session& operator=(session&&) = default;
+
+	session(const session&)            = delete;
 	session& operator=(const session&) = delete;
-	session& operator=(session&&)      = default;
 
 	ssh_session  ssh();
 	sftp_session sftp();

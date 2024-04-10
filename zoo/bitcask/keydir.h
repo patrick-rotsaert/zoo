@@ -40,6 +40,12 @@ public:
 	keydir() noexcept;
 	~keydir() noexcept;
 
+	keydir(keydir&&)            = default;
+	keydir& operator=(keydir&&) = default;
+
+	keydir(const keydir&)            = delete;
+	keydir& operator=(const keydir&) = delete;
+
 	version_type next_version();
 
 	std::optional<info>                              get(const std::string_view& key) const;
@@ -57,4 +63,4 @@ public:
 };
 
 } // namespace bitcask
-}
+} // namespace zoo

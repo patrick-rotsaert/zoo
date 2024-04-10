@@ -26,10 +26,11 @@ public:
 	statement(std::shared_ptr<PGconn> connection, std::string_view query, bool reuse_statement);
 	~statement() noexcept;
 
+	statement(statement&&)            = default;
+	statement& operator=(statement&&) = default;
+
 	statement(const statement&)            = delete;
-	statement(statement&& src)             = default;
 	statement& operator=(const statement&) = delete;
-	statement& operator=(statement&&)      = default;
 
 	void execute(const std::map<std::string, parameter>& parameters, const std::vector<result>& results) override;
 	void execute(const std::map<std::string, parameter>& parameters, const std::map<std::string, result>& results) override;

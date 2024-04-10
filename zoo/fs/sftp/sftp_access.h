@@ -41,6 +41,12 @@ public:
 	                bool                                   lazy = false);
 	~access() noexcept;
 
+	access(access&&)            = default;
+	access& operator=(access&&) = default;
+
+	access(const access&)            = delete;
+	access& operator=(const access&) = delete;
+
 	bool                      is_remote() const override;
 	std::vector<direntry>     ls(const fspath& dir) override;
 	bool                      exists(const fspath& path) override;

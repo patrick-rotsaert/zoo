@@ -50,6 +50,12 @@ public:
 	request_router();
 	~request_router() noexcept override;
 
+	request_router(request_router&&)            = default;
+	request_router& operator=(request_router&&) = default;
+
+	request_router(const request_router&)            = delete;
+	request_router& operator=(const request_router&) = delete;
+
 	void add_route(std::set<verb>&& methods, boost::regex&& pattern, request_handler&& handler);
 	void add_route(std::set<verb>&& methods, boost::regex&& pattern, const std::shared_ptr<request_router>& router);
 
