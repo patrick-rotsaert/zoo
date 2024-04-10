@@ -25,8 +25,8 @@ class ZOO_EXPORT watcher final : public iwatcher
 	std::unique_ptr<impl> pimpl_;
 
 public:
-	explicit watcher(const fspath&                  dir,
-	                 std::uint32_t                  scan_interval_ms,
+	explicit watcher(const fspath&                 dir,
+	                 std::uint32_t                 scan_interval_ms,
 	                 std::shared_ptr<iaccess>      access,
 	                 std::shared_ptr<iinterruptor> interruptor);
 	~watcher() noexcept;

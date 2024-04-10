@@ -34,7 +34,7 @@ using sftp_attributes_ptr = std::shared_ptr<std::remove_pointer<sftp_attributes>
 
 class directory_reader final
 {
-	issh_api*               api_;
+	issh_api*                api_;
 	std::shared_ptr<session> session_;
 	fspath                   path_;
 	sftp_dir                 dir_;
@@ -98,16 +98,16 @@ class access::impl final : public iaccess, public std::enable_shared_from_this<i
 {
 	issh_api*                     api_;
 	std::shared_ptr<iinterruptor> interruptor_;
-	std::shared_ptr<session>       session_;
-	std::uint32_t                  watcher_scan_interval_ms_;
+	std::shared_ptr<session>      session_;
+	std::uint32_t                 watcher_scan_interval_ms_;
 
 public:
 	explicit impl(issh_api*                              api,
-	              const options&                          opts,
-	              std::shared_ptr<i_ssh_known_hosts>      known_hosts,
+	              const options&                         opts,
+	              std::shared_ptr<i_ssh_known_hosts>     known_hosts,
 	              std::shared_ptr<issh_identity_factory> ssh_identity_factory,
 	              std::shared_ptr<iinterruptor>          interruptor,
-	              bool                                    lazy)
+	              bool                                   lazy)
 	    : api_{ api }
 	    , interruptor_{ interruptor }
 	    , session_{ std::make_shared<session>(api, opts, known_hosts, ssh_identity_factory, interruptor, lazy) }
@@ -333,21 +333,21 @@ namespace {
 ssh_api g_api;
 }
 
-access::access(const options&                          opts,
-               std::shared_ptr<i_ssh_known_hosts>      known_hosts,
+access::access(const options&                         opts,
+               std::shared_ptr<i_ssh_known_hosts>     known_hosts,
                std::shared_ptr<issh_identity_factory> ssh_identity_factory,
                std::shared_ptr<iinterruptor>          interruptor,
-               bool                                    lazy)
+               bool                                   lazy)
     : pimpl_{ std::make_shared<impl>(&g_api, opts, known_hosts, ssh_identity_factory, interruptor, lazy) }
 {
 }
 
 access::access(issh_api&                              api,
-               const options&                          opts,
-               std::shared_ptr<i_ssh_known_hosts>      known_hosts,
+               const options&                         opts,
+               std::shared_ptr<i_ssh_known_hosts>     known_hosts,
                std::shared_ptr<issh_identity_factory> ssh_identity_factory,
                std::shared_ptr<iinterruptor>          interruptor,
-               bool                                    lazy)
+               bool                                   lazy)
     : pimpl_{ std::make_shared<impl>(&api, opts, known_hosts, ssh_identity_factory, interruptor, lazy) }
 {
 }

@@ -28,29 +28,29 @@ class ZOO_EXPORT access final : public iaccess, public std::enable_shared_from_t
 	std::shared_ptr<impl> pimpl_;
 
 public:
-	explicit access(const options&                          opts,
-	                std::shared_ptr<i_ssh_known_hosts>      known_hosts,
+	explicit access(const options&                         opts,
+	                std::shared_ptr<i_ssh_known_hosts>     known_hosts,
 	                std::shared_ptr<issh_identity_factory> ssh_identity_factory,
 	                std::shared_ptr<iinterruptor>          interruptor,
-	                bool                                    lazy = false);
+	                bool                                   lazy = false);
 	explicit access(issh_api&                              api,
-	                const options&                          opts,
-	                std::shared_ptr<i_ssh_known_hosts>      known_hosts,
+	                const options&                         opts,
+	                std::shared_ptr<i_ssh_known_hosts>     known_hosts,
 	                std::shared_ptr<issh_identity_factory> ssh_identity_factory,
 	                std::shared_ptr<iinterruptor>          interruptor,
-	                bool                                    lazy = false);
+	                bool                                   lazy = false);
 	~access() noexcept;
 
-	bool                       is_remote() const override;
-	std::vector<direntry>      ls(const fspath& dir) override;
-	bool                       exists(const fspath& path) override;
-	std::optional<attributes>  try_stat(const fspath& path) override;
-	attributes                 stat(const fspath& path) override;
-	std::optional<attributes>  try_lstat(const fspath& path) override;
-	attributes                 lstat(const fspath& path) override;
-	void                       remove(const fspath& path) override;
-	void                       mkdir(const fspath& path, bool parents) override;
-	void                       rename(const fspath& oldpath, const fspath& newpath) override;
+	bool                      is_remote() const override;
+	std::vector<direntry>     ls(const fspath& dir) override;
+	bool                      exists(const fspath& path) override;
+	std::optional<attributes> try_stat(const fspath& path) override;
+	attributes                stat(const fspath& path) override;
+	std::optional<attributes> try_lstat(const fspath& path) override;
+	attributes                lstat(const fspath& path) override;
+	void                      remove(const fspath& path) override;
+	void                      mkdir(const fspath& path, bool parents) override;
+	void                      rename(const fspath& oldpath, const fspath& newpath) override;
 	std::unique_ptr<ifile>    open(const fspath& path, int flags, mode_t mode) override;
 	std::shared_ptr<iwatcher> create_watcher(const fspath& dir, int cancelfd) override;
 };

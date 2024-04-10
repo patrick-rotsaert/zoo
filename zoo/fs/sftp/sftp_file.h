@@ -23,16 +23,16 @@ namespace sftp {
 class ZOO_EXPORT file final : public ifile
 {
 	issh_api*                     api_;
-	sftp_file                      fd_;
-	fspath                         path_;
-	std::shared_ptr<session>       session_;
+	sftp_file                     fd_;
+	fspath                        path_;
+	std::shared_ptr<session>      session_;
 	std::shared_ptr<iinterruptor> interruptor_;
 
 public:
 	explicit file(issh_api*                     api,
-	              sftp_file                      fd,
-	              const fspath&                  path,
-	              std::shared_ptr<session>       session,
+	              sftp_file                     fd,
+	              const fspath&                 path,
+	              std::shared_ptr<session>      session,
 	              std::shared_ptr<iinterruptor> interruptor);
 	~file() noexcept;
 

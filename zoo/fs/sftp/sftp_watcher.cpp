@@ -18,8 +18,8 @@ class watcher::impl final
 {
 	fspath                          dir_;
 	std::uint32_t                   scan_interval_ms_;
-	std::shared_ptr<iaccess>       access_;
-	std::shared_ptr<iinterruptor>  interruptor_;
+	std::shared_ptr<iaccess>        access_;
+	std::shared_ptr<iinterruptor>   interruptor_;
 	std::map<std::string, direntry> files_;
 
 public:
@@ -81,8 +81,8 @@ private:
 	}
 };
 
-watcher::watcher(const fspath&                  dir,
-                 std::uint32_t                  scan_interval_ms,
+watcher::watcher(const fspath&                 dir,
+                 std::uint32_t                 scan_interval_ms,
                  std::shared_ptr<iaccess>      access,
                  std::shared_ptr<iinterruptor> interruptor)
     : pimpl_{ std::make_unique<impl>(dir, scan_interval_ms, access, interruptor) }

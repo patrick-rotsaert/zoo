@@ -85,13 +85,13 @@ int convert_ssh_logging_verbosity(options::ssh_log_level in)
 class session::impl final
 {
 	issh_api*                              api_;
-	options                                 opts_;
-	std::shared_ptr<i_ssh_known_hosts>      known_hosts_;
+	options                                opts_;
+	std::shared_ptr<i_ssh_known_hosts>     known_hosts_;
 	std::shared_ptr<issh_identity_factory> ssh_identity_factory_;
 	std::shared_ptr<iinterruptor>          interruptor_;
-	ssh_session_ptr                         ssh_;
-	std::unique_ptr<ssh_connection>         connection_;
-	sftp_session_ptr                        sftp_;
+	ssh_session_ptr                        ssh_;
+	std::unique_ptr<ssh_connection>        connection_;
+	sftp_session_ptr                       sftp_;
 
 	static void connect_status_callback(void* userdata, float status)
 	{
@@ -158,8 +158,9 @@ class session::impl final
 				}
 				else
 				{
-					ZOO_THROW_EXCEPTION(ssh_host_key_unknown("Unknown SSH host") << ssh_host_key_unknown::ssh_host(this->opts_.host)
-					                                                      << ssh_host_key_unknown::ssh_host_pubkey_hash(hash.hash()));
+					ZOO_THROW_EXCEPTION(ssh_host_key_unknown("Unknown SSH host")
+					                    << ssh_host_key_unknown::ssh_host(this->opts_.host)
+					                    << ssh_host_key_unknown::ssh_host_pubkey_hash(hash.hash()));
 				}
 				break;
 			case i_ssh_known_hosts::result::CHANGED:
@@ -170,8 +171,9 @@ class session::impl final
 				}
 				else
 				{
-					ZOO_THROW_EXCEPTION(ssh_host_key_changed("SSH host key changed") << ssh_host_key_changed::ssh_host(this->opts_.host)
-					                                                          << ssh_host_key_changed::ssh_host_pubkey_hash(hash.hash()));
+					ZOO_THROW_EXCEPTION(ssh_host_key_changed("SSH host key changed")
+					                    << ssh_host_key_changed::ssh_host(this->opts_.host)
+					                    << ssh_host_key_changed::ssh_host_pubkey_hash(hash.hash()));
 				}
 				break;
 			}
@@ -311,11 +313,11 @@ class session::impl final
 
 public:
 	explicit impl(issh_api*                              api,
-	              const options&                          opts,
-	              std::shared_ptr<i_ssh_known_hosts>      known_hosts,
+	              const options&                         opts,
+	              std::shared_ptr<i_ssh_known_hosts>     known_hosts,
 	              std::shared_ptr<issh_identity_factory> ssh_identity_factory,
 	              std::shared_ptr<iinterruptor>          interruptor,
-	              bool                                    lazy)
+	              bool                                   lazy)
 	    : api_{ api }
 	    , opts_{ opts }
 	    , known_hosts_{ known_hosts }
@@ -362,11 +364,11 @@ public:
 };
 
 session::session(issh_api*                              api,
-                 const options&                          opts,
-                 std::shared_ptr<i_ssh_known_hosts>      known_hosts,
+                 const options&                         opts,
+                 std::shared_ptr<i_ssh_known_hosts>     known_hosts,
                  std::shared_ptr<issh_identity_factory> ssh_identity_factory,
                  std::shared_ptr<iinterruptor>          interruptor,
-                 bool                                    lazy)
+                 bool                                   lazy)
     : pimpl_{ std::make_unique<impl>(api, opts, known_hosts, ssh_identity_factory, interruptor, lazy) }
 {
 }
