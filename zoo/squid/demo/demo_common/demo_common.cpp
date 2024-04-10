@@ -176,6 +176,7 @@ void demo_bindings(connection& connection)
 
 	auto fetched = st.fetch();
 	assert(fetched);
+	(void)fetched;
 
 	fmt::print(
 	    "a={}"
@@ -274,6 +275,7 @@ void demo_result_by_name(connection& connection)
 
 	auto fetched = st.fetch();
 	assert(fetched);
+	(void)fetched;
 
 	assert(a == 42);
 	assert(b == "42");
@@ -292,6 +294,7 @@ void demo_query_stream(connection& connection)
 
 	st.execute();
 	auto fetched = st.fetch();
+	(void)fetched;
 
 	assert(fetched);
 	assert(bar == 42);
@@ -342,6 +345,7 @@ void demo_bind_struct(connection& connection)
 
 		auto fetched = st.fetch();
 		assert(fetched);
+		(void)fetched;
 
 		assert(s.a == 42);
 		assert(s.b == "42");
@@ -371,6 +375,7 @@ void demo_bind_struct(connection& connection)
 
 		auto fetched = st.fetch();
 		assert(fetched);
+		(void)fetched;
 
 		assert(a == 42);
 		assert(b == "42");
@@ -458,11 +463,13 @@ public:
 			this->st_fetch_->execute();
 			auto fetched = this->st_fetch_->fetch();
 			assert(fetched);
+			(void)fetched;
 		}
 		else
 		{
 			auto fetched = this->st_->fetch();
 			assert(fetched);
+			(void)fetched;
 		}
 	}
 };
