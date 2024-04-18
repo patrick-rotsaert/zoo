@@ -15,7 +15,7 @@ namespace zoo {
 namespace fs {
 namespace sftp {
 
-class ZOO_EXPORT mock_ssh_known_hosts : public i_ssh_known_hosts
+class ZOO_EXPORT mock_ssh_known_hosts : public issh_known_hosts
 {
 public:
 	explicit mock_ssh_known_hosts();

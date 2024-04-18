@@ -104,7 +104,7 @@ class access::impl final : public iaccess, public std::enable_shared_from_this<i
 public:
 	explicit impl(issh_api*                              api,
 	              const options&                         opts,
-	              std::shared_ptr<i_ssh_known_hosts>     known_hosts,
+	              std::shared_ptr<issh_known_hosts>      known_hosts,
 	              std::shared_ptr<issh_identity_factory> ssh_identity_factory,
 	              std::shared_ptr<iinterruptor>          interruptor,
 	              bool                                   lazy)
@@ -334,7 +334,7 @@ ssh_api g_api;
 }
 
 access::access(const options&                         opts,
-               std::shared_ptr<i_ssh_known_hosts>     known_hosts,
+               std::shared_ptr<issh_known_hosts>      known_hosts,
                std::shared_ptr<issh_identity_factory> ssh_identity_factory,
                std::shared_ptr<iinterruptor>          interruptor,
                bool                                   lazy)
@@ -344,7 +344,7 @@ access::access(const options&                         opts,
 
 access::access(issh_api&                              api,
                const options&                         opts,
-               std::shared_ptr<i_ssh_known_hosts>     known_hosts,
+               std::shared_ptr<issh_known_hosts>      known_hosts,
                std::shared_ptr<issh_identity_factory> ssh_identity_factory,
                std::shared_ptr<iinterruptor>          interruptor,
                bool                                   lazy)

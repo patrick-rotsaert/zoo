@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "zoo/common/api.h"
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
 #include <libssh/callbacks.h>
@@ -15,7 +16,7 @@ namespace zoo {
 namespace fs {
 namespace sftp {
 
-class issh_api
+class ZOO_EXPORT issh_api
 {
 public:
 	issh_api();

@@ -16,13 +16,19 @@ namespace sftp {
 
 class ssh_connection final
 {
-	issh_api*      api_;
+	issh_api*       api_;
 	ssh_session_ptr session_;
 
 public:
 	explicit ssh_connection(issh_api* api, ssh_session_ptr session);
 
 	~ssh_connection() noexcept;
+
+	ssh_connection(ssh_connection&&)            = default;
+	ssh_connection& operator=(ssh_connection&&) = default;
+
+	ssh_connection(const ssh_connection&)            = delete;
+	ssh_connection& operator=(const ssh_connection&) = delete;
 };
 
 } // namespace sftp

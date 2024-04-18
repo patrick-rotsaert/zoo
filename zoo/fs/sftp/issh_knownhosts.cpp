@@ -11,7 +11,7 @@ namespace zoo {
 namespace fs {
 namespace sftp {
 
-i_ssh_known_hosts::~i_ssh_known_hosts() noexcept
+issh_known_hosts::~issh_known_hosts() noexcept
 {
 }
 

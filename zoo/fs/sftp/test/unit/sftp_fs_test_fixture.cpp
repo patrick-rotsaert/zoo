@@ -22,10 +22,10 @@ std::vector<std::shared_ptr<ssh_identity>> SftpFsTestFixture::make_ssh_idents()
 	return { this->identity_ };
 }
 
-bool SftpFsTestFixture::setup_ssh_calls(i_ssh_known_hosts::result knownhosts_verify_result,
-                                        int                       user_auth_method,
-                                        ssh_auth_e                auth_method_result,
-                                        ssh_auth_e                auth_method2_result)
+bool SftpFsTestFixture::setup_ssh_calls(issh_known_hosts::result knownhosts_verify_result,
+                                        int                      user_auth_method,
+                                        ssh_auth_e               auth_method_result,
+                                        ssh_auth_e               auth_method2_result)
 {
 	unsigned char** saved_hash   = nullptr;
 	auto            sq           = testing::InSequence{};
@@ -79,9 +79,9 @@ bool SftpFsTestFixture::setup_ssh_calls(i_ssh_known_hosts::result knownhosts_ver
 	    .WillOnce(testing::Return(knownhosts_verify_result));
 	switch (knownhosts_verify_result)
 	{
-	case i_ssh_known_hosts::result::KNOWN:
+	case issh_known_hosts::result::KNOWN:
 		break;
-	case i_ssh_known_hosts::result::UNKNOWN:
+	case issh_known_hosts::result::UNKNOWN:
 		if (this->opts.allow_unknown_host_key)
 		{
 			EXPECT_CALL(*this->nice_ssh_known_hosts,
@@ -93,7 +93,7 @@ bool SftpFsTestFixture::setup_ssh_calls(i_ssh_known_hosts::result knownhosts_ver
 			expect_throw = true;
 		}
 		break;
-	case i_ssh_known_hosts::result::CHANGED:
+	case issh_known_hosts::result::CHANGED:
 		if (this->opts.allow_changed_host_key)
 		{
 			EXPECT_CALL(*this->nice_ssh_known_hosts,
@@ -188,7 +188,7 @@ bool SftpFsTestFixture::setup_ssh_calls(i_ssh_known_hosts::result knownhosts_ver
 
 void SftpFsTestFixture::setup_sftp_calls()
 {
-	EXPECT_TRUE(this->setup_ssh_calls(i_ssh_known_hosts::result::KNOWN, SSH_AUTH_METHOD_NONE, SSH_AUTH_SUCCESS));
+	EXPECT_TRUE(this->setup_ssh_calls(issh_known_hosts::result::KNOWN, SSH_AUTH_METHOD_NONE, SSH_AUTH_SUCCESS));
 	EXPECT_CALL(this->nice_ssh_api, sftp_new(mock_ssh_api::test_ssh_session))
 	    .Times(1)
 	    .WillOnce(testing::Return(mock_ssh_api::test_sftp_session));

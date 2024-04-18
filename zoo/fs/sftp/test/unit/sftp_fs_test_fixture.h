@@ -22,7 +22,7 @@ namespace sftp {
 class SftpFsTestFixture : public testing::Test
 {
 protected:
-	nice_mock_ssh_api                               nice_ssh_api;
+	nice_mock_ssh_api                               nice_ssh_api{};
 	std::shared_ptr<nice_mock_ssh_identity_factory> nice_ssh_identity_factory = std::make_shared<nice_mock_ssh_identity_factory>();
 	std::shared_ptr<nice_mock_ssh_known_hosts>      nice_ssh_known_hosts      = std::make_shared<nice_mock_ssh_known_hosts>();
 	options                                         opts = options{ .host = "host", .port = 2222, .user = "user", .password = "password" };
@@ -32,10 +32,10 @@ protected:
 
 	std::vector<std::shared_ptr<ssh_identity>> make_ssh_idents();
 
-	bool setup_ssh_calls(i_ssh_known_hosts::result knownhosts_verify_result,
-	                     int                       user_auth_method,
-	                     enum ssh_auth_e           auth_method_result,
-	                     enum ssh_auth_e           auth_method2_result = SSH_AUTH_SUCCESS);
+	bool setup_ssh_calls(issh_known_hosts::result knownhosts_verify_result,
+	                     int                      user_auth_method,
+	                     enum ssh_auth_e          auth_method_result,
+	                     enum ssh_auth_e          auth_method2_result = SSH_AUTH_SUCCESS);
 	void setup_sftp_calls();
 };
 

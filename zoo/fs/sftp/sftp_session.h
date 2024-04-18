@@ -29,14 +29,14 @@ class ZOO_EXPORT session final
 public:
 	explicit session(issh_api*                              api,
 	                 const options&                         opts,
-	                 std::shared_ptr<i_ssh_known_hosts>     known_hosts,
+	                 std::shared_ptr<issh_known_hosts>      known_hosts,
 	                 std::shared_ptr<issh_identity_factory> ssh_identity_factory,
 	                 std::shared_ptr<iinterruptor>          interruptor,
 	                 bool                                   lazy);
 	~session() noexcept;
 
-	session(session&&) /*= default*/;
-	session& operator=(session&&) = default;
+	session(session&&);
+	session& operator=(session&&);
 
 	session(const session&)            = delete;
 	session& operator=(const session&) = delete;

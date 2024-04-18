@@ -14,7 +14,7 @@ namespace zoo {
 namespace fs {
 namespace sftp {
 
-class ZOO_EXPORT i_ssh_known_hosts
+class ZOO_EXPORT issh_known_hosts
 {
 public:
 	enum class result
@@ -25,7 +25,7 @@ public:
 	};
 
 public:
-	virtual ~i_ssh_known_hosts() noexcept;
+	virtual ~issh_known_hosts() noexcept;
 
 	virtual result verify(const std::string& host, const std::string& pubkey_hash)  = 0;
 	virtual void   persist(const std::string& host, const std::string& pubkey_hash) = 0;

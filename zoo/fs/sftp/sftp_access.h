@@ -29,13 +29,13 @@ class ZOO_EXPORT access final : public iaccess, public std::enable_shared_from_t
 
 public:
 	explicit access(const options&                         opts,
-	                std::shared_ptr<i_ssh_known_hosts>     known_hosts,
+	                std::shared_ptr<issh_known_hosts>     known_hosts,
 	                std::shared_ptr<issh_identity_factory> ssh_identity_factory,
 	                std::shared_ptr<iinterruptor>          interruptor,
 	                bool                                   lazy = false);
 	explicit access(issh_api&                              api,
 	                const options&                         opts,
-	                std::shared_ptr<i_ssh_known_hosts>     known_hosts,
+	                std::shared_ptr<issh_known_hosts>     known_hosts,
 	                std::shared_ptr<issh_identity_factory> ssh_identity_factory,
 	                std::shared_ptr<iinterruptor>          interruptor,
 	                bool                                   lazy = false);

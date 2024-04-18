@@ -86,7 +86,7 @@ class session::impl final
 {
 	issh_api*                              api_;
 	options                                opts_;
-	std::shared_ptr<i_ssh_known_hosts>     known_hosts_;
+	std::shared_ptr<issh_known_hosts>      known_hosts_;
 	std::shared_ptr<issh_identity_factory> ssh_identity_factory_;
 	std::shared_ptr<iinterruptor>          interruptor_;
 	ssh_session_ptr                        ssh_;
@@ -147,10 +147,10 @@ class session::impl final
 
 			switch (this->known_hosts_->verify(this->opts_.host, hash.hash()))
 			{
-			case i_ssh_known_hosts::result::KNOWN:
+			case issh_known_hosts::result::KNOWN:
 				zlog(debug, "host is known");
 				break;
-			case i_ssh_known_hosts::result::UNKNOWN:
+			case issh_known_hosts::result::UNKNOWN:
 				zlog(debug, "host is unknown");
 				if (this->opts_.allow_unknown_host_key)
 				{
@@ -163,7 +163,7 @@ class session::impl final
 					                    << ssh_host_key_unknown::ssh_host_pubkey_hash(hash.hash()));
 				}
 				break;
-			case i_ssh_known_hosts::result::CHANGED:
+			case issh_known_hosts::result::CHANGED:
 				zlog(warn, "host key changed");
 				if (this->opts_.allow_changed_host_key)
 				{
@@ -314,7 +314,7 @@ class session::impl final
 public:
 	explicit impl(issh_api*                              api,
 	              const options&                         opts,
-	              std::shared_ptr<i_ssh_known_hosts>     known_hosts,
+	              std::shared_ptr<issh_known_hosts>      known_hosts,
 	              std::shared_ptr<issh_identity_factory> ssh_identity_factory,
 	              std::shared_ptr<iinterruptor>          interruptor,
 	              bool                                   lazy)
@@ -365,7 +365,7 @@ public:
 
 session::session(issh_api*                              api,
                  const options&                         opts,
-                 std::shared_ptr<i_ssh_known_hosts>     known_hosts,
+                 std::shared_ptr<issh_known_hosts>      known_hosts,
                  std::shared_ptr<issh_identity_factory> ssh_identity_factory,
                  std::shared_ptr<iinterruptor>          interruptor,
                  bool                                   lazy)
@@ -373,10 +373,9 @@ session::session(issh_api*                              api,
 {
 }
 
-session::session(session&& src)
-    : pimpl_{ std::move(src.pimpl_) }
-{
-}
+session::session(session&& src) = default;
+
+session& session::operator=(session&& src) = default;
 
 session::~session() noexcept
 {
