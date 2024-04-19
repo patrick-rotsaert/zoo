@@ -22,20 +22,20 @@ namespace sftp {
 
 class issh_api;
 
-class ZOO_EXPORT access final : public iaccess, public std::enable_shared_from_this<access>
+class ZOO_EXPORT access final : public iaccess
 {
 	class impl;
 	std::shared_ptr<impl> pimpl_;
 
 public:
 	explicit access(const options&                         opts,
-	                std::shared_ptr<issh_known_hosts>     known_hosts,
+	                std::shared_ptr<issh_known_hosts>      known_hosts,
 	                std::shared_ptr<issh_identity_factory> ssh_identity_factory,
 	                std::shared_ptr<iinterruptor>          interruptor,
 	                bool                                   lazy = false);
 	explicit access(issh_api&                              api,
 	                const options&                         opts,
-	                std::shared_ptr<issh_known_hosts>     known_hosts,
+	                std::shared_ptr<issh_known_hosts>      known_hosts,
 	                std::shared_ptr<issh_identity_factory> ssh_identity_factory,
 	                std::shared_ptr<iinterruptor>          interruptor,
 	                bool                                   lazy = false);

@@ -377,9 +377,7 @@ session::session(session&& src) = default;
 
 session& session::operator=(session&& src) = default;
 
-session::~session() noexcept
-{
-}
+session::~session() noexcept = default;
 
 ssh_session session::ssh()
 {

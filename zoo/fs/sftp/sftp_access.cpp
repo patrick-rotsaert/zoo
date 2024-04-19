@@ -114,8 +114,13 @@ public:
 	    , watcher_scan_interval_ms_{ opts.watcher_scan_interval_ms }
 	{
 		zlog(trace, "sftp access: host={}, port={}, user={}", opts.host, opts.port, opts.user);
-		(void)this->api_;
 	}
+
+	impl(impl&&)            = delete;
+	impl& operator=(impl&&) = delete;
+
+	impl(const impl&)            = delete;
+	impl& operator=(const impl&) = delete;
 
 	bool is_remote() const override
 	{
@@ -352,9 +357,7 @@ access::access(issh_api&                              api,
 {
 }
 
-access::~access() noexcept
-{
-}
+access::~access() noexcept = default;
 
 bool access::is_remote() const
 {
