@@ -26,7 +26,8 @@ protected:
 	std::shared_ptr<nice_mock_ssh_identity_factory> nice_ssh_identity_factory = std::make_shared<nice_mock_ssh_identity_factory>();
 	std::shared_ptr<nice_mock_ssh_known_hosts>      nice_ssh_known_hosts      = std::make_shared<nice_mock_ssh_known_hosts>();
 	options                                         opts = options{ .host = "host", .port = 2222, .user = "user", .password = "password" };
-	std::shared_ptr<ssh_identity>                   identity_ = std::make_shared<ssh_identity>();
+	std::shared_ptr<ssh_identity>                   identity = std::make_shared<ssh_identity>();
+	unsigned char**                                 saved_hash{};
 
 	SftpFsTestFixture();
 

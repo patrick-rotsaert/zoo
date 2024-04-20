@@ -13,13 +13,13 @@ namespace sftp {
 
 SftpFsTestFixture::SftpFsTestFixture()
 {
-	this->identity_->name = "ident_name";
-	this->identity_->pkey = "ident_pkey";
+	this->identity->name = "ident_name";
+	this->identity->pkey = "ident_pkey";
 }
 
 std::vector<std::shared_ptr<ssh_identity>> SftpFsTestFixture::make_ssh_idents()
 {
-	return { this->identity_ };
+	return { this->identity };
 }
 
 bool SftpFsTestFixture::setup_ssh_calls(issh_known_hosts::result knownhosts_verify_result,
@@ -27,9 +27,8 @@ bool SftpFsTestFixture::setup_ssh_calls(issh_known_hosts::result knownhosts_veri
                                         ssh_auth_e               auth_method_result,
                                         ssh_auth_e               auth_method2_result)
 {
-	unsigned char** saved_hash   = nullptr;
-	auto            sq           = testing::InSequence{};
-	auto            expect_throw = false;
+	auto sq           = testing::InSequence{};
+	auto expect_throw = false;
 	EXPECT_CALL(this->nice_ssh_api, ssh_new()).Times(1).WillOnce(testing::Return(mock_ssh_api::test_ssh_session));
 	EXPECT_CALL(this->nice_ssh_api, ssh_options_set(mock_ssh_api::test_ssh_session, SSH_OPTIONS_HOST, testing::NotNull()))
 	    .Times(1)
@@ -63,14 +62,14 @@ bool SftpFsTestFixture::setup_ssh_calls(issh_known_hosts::result knownhosts_veri
 		        *hash = mock_ssh_api::test_server_publickey_hash.data();
 		        *hlen = mock_ssh_api::test_server_publickey_hash.size();
 	        },
-	        testing::SaveArg<2>(&saved_hash),
+	        testing::SaveArg<2>(&this->saved_hash),
 	        testing::Return(0)));
 	EXPECT_CALL(this->nice_ssh_api,
 	            ssh_get_hexa(mock_ssh_api::test_server_publickey_hash.data(), mock_ssh_api::test_server_publickey_hash.size()))
 	    .Times(1)
 	    .WillOnce(testing::Return(mock_ssh_api::test_server_publickey_hash_hexa.data()));
 	EXPECT_CALL(this->nice_ssh_api, ssh_clean_pubkey_hash(testing::_)).Times(1).WillOnce(testing::DoAll([&](unsigned char** hash) {
-		EXPECT_EQ(hash, saved_hash);
+		EXPECT_EQ(hash, this->saved_hash);
 	}));
 	EXPECT_CALL(this->nice_ssh_api, ssh_string_free_char(testing::Eq(mock_ssh_api::test_server_publickey_hash_hexa.data()))).Times(1);
 	EXPECT_CALL(*this->nice_ssh_known_hosts,
@@ -129,7 +128,7 @@ bool SftpFsTestFixture::setup_ssh_calls(issh_known_hosts::result knownhosts_veri
 		{
 			EXPECT_CALL(*this->nice_ssh_identity_factory, create()).Times(1).WillOnce(testing::Return(this->make_ssh_idents()));
 			EXPECT_CALL(this->nice_ssh_api,
-			            ssh_pki_import_privkey_base64(testing::StrEq(this->identity_->pkey.c_str()),
+			            ssh_pki_import_privkey_base64(testing::StrEq(this->identity->pkey.c_str()),
 			                                          testing::IsNull(),
 			                                          testing::IsNull(),
 			                                          testing::IsNull(),

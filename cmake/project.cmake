@@ -113,6 +113,10 @@ function(add_project_library TARGET)
 			"$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:$<BUILD_INTERFACE:${MSVC_WARN_OPTS}>>"
 		)
 
+		# GDB
+		target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Debug>:$<$<CXX_COMPILER_ID:GNU>:-O0;-ggdb3>>)
+		target_compile_options(${TARGET} PRIVATE $<$<CONFIG:RelWithDebInfo>:$<$<CXX_COMPILER_ID:GNU>:-O2;-ggdb3>>)
+
 		# Set compiler definitions
 		if(P_PRIVATE_DEFINITIONS)
 			target_compile_definitions(${TARGET} PRIVATE ${P_PRIVATE_DEFINITIONS})
