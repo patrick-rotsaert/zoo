@@ -6,7 +6,19 @@
 #
 
 add_subdirectory(common)
-add_subdirectory(bitcask)
-add_subdirectory(fs)
-add_subdirectory(spider)
-add_subdirectory(squid)
+
+if(ZOO_WITH_BITCASK)
+	add_subdirectory(bitcask)
+endif()
+
+if(ZOO_WITH_FS)
+	add_subdirectory(fs)
+endif()
+
+if(ZOO_WITH_SPIDER)
+	add_subdirectory(spider)
+endif()
+
+if(ZOO_WITH_SQUID)
+	add_subdirectory(squid)
+endif()

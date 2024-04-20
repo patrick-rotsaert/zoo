@@ -13,24 +13,6 @@ include(GNUInstallDirs)
 
 enable_testing()
 
-include(cmake/vars.cmake)
-
-option(ZOO_BUILD_EXAMPLES "Build the examples." "${ZOO_IS_TOP_LEVEL}")
-option(ZOO_TEST "Build the tests." "${ZOO_IS_TOP_LEVEL}")
-option(ZOO_RUN_UNIT_TESTS_ON_BUILD "Run the unit tests during build." "${ZOO_IS_TOP_LEVEL}")
-option(ZOO_INSTALL "Include install rules for zoo." "${ZOO_IS_TOP_LEVEL}")
-option(ZOO_CPACK "Include cpack rules for zoo. Implies ZOO_INSTALL." "${ZOO_IS_TOP_LEVEL}")
-option(ZOO_THREAD_SAFE "Compile with locking code" ON)
-option(ZOO_FETCH_DEPS "Fetch dependencies if not found using find_package" OFF)
-option(ZOO_TREAT_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
-option(ZOO_SQUID_WITH_POSTGRESQL "Include Squid PostgreSQL backend" ON)
-option(ZOO_SQUID_WITH_MYSQL "Include Squid MySQL backend" ON)
-option(ZOO_SQUID_WITH_SQLITE3 "Include Squid SQLite3 backend" ON)
-
-if(ZOO_CPACK)
-	set(ZOO_INSTALL ON)
-endif()
-
 include(cmake/project.cmake)
 
 add_subdirectory(zoo)
