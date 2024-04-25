@@ -69,12 +69,12 @@ function(add_project_library TARGET)
 
 		if (P_MOCK_SOURCES)
 			target_sources(${TARGET}_unit_test PRIVATE ${P_MOCK_SOURCES})
-			target_link_libraries(${TARGET}_unit_test PRIVATE gmock)
+			target_link_libraries(${TARGET}_unit_test PRIVATE GTest::gmock GTest::gmock_main)
 		endif()
 
 		list(APPEND COMPILE_TARGETS ${TARGET}_unit_test)
 
-		target_link_libraries(${TARGET}_unit_test PRIVATE gtest_main)
+		target_link_libraries(${TARGET}_unit_test PRIVATE GTest::gtest GTest::gtest_main)
 		list(APPEND LINK_TARGETS ${TARGET}_unit_test)
 
 		gtest_discover_tests(${TARGET}_unit_test)

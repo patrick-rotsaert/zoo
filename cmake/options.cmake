@@ -15,7 +15,6 @@ option(ZOO_RUN_UNIT_TESTS_ON_BUILD "Run the unit tests during build." "${ZOO_IS_
 option(ZOO_INSTALL "Include install rules for zoo." "${ZOO_IS_TOP_LEVEL}")
 option(ZOO_CPACK "Include cpack rules for zoo. Implies ZOO_INSTALL." "${ZOO_IS_TOP_LEVEL}")
 option(ZOO_THREAD_SAFE "Compile with locking code" ON)
-option(ZOO_FETCH_DEPS "Fetch dependencies if not found using find_package" OFF)
 option(ZOO_TREAT_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 option(ZOO_WITH_BITCASK "Build bitcask library" "${ZOO_IS_TOP_LEVEL}")
 option(ZOO_WITH_FS "Build fs library" "${ZOO_IS_TOP_LEVEL}")

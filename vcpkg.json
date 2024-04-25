@@ -1,0 +1,27 @@
+{
+  "name": "zoo",
+  "version-string": "0.0.1",
+  "license": "BSL-1.0",
+  "dependencies": [
+    "fmt",
+    "spdlog",
+    "boost-date-time",
+    "boost-system",
+    "boost-filesystem",
+    "boost-thread",
+    "boost-url",
+    "boost-json",
+    "boost-describe",
+    "boost-asio",
+    "boost-regex",
+    "boost-serialization",
+    "boost-throw-exception",
+    "boost-uuid",
+    "boost-beast",
+    "libpq",
+    "libmysql",
+    "sqlite3",
+    "libssh",
+    "gtest"
+  ]
+}

@@ -52,6 +52,7 @@ add_project_library(common
 	PUBLIC_LIBRARIES
 		fmt::fmt
 		spdlog::spdlog
+		Boost::boost
 		${EXTRA_PUBLIC_LIBRARIES}
 	PUBLIC_INCLUDE_DIRS
 		${PROJECT_BINARY_DIR} # for configured headers, see below

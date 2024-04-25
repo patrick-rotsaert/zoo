@@ -231,7 +231,11 @@ public:
 
 			if (e->len)
 			{
-				zlog(trace, "inotify_event: name={0}, events={1}, idx={2}", std::quoted(e->name), describe_flags(e->mask), eventIndex);
+				zlog(trace,
+				     "inotify_event: name={0}, events={1}, idx={2}",
+				     fmt::streamed(std::quoted(e->name)),
+				     describe_flags(e->mask),
+				     eventIndex);
 			}
 			else
 			{

@@ -20,7 +20,7 @@
 #include <chrono>
 
 //#define BOOST_STACKTRACE_USE_BACKTRACE
-#include <boost/stacktrace.hpp>
+//#include <boost/stacktrace.hpp>
 
 #ifdef BOOST_WINDOWS_API
 #include <io.h>

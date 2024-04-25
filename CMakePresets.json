@@ -1,0 +1,130 @@
+{
+	"version": 6,
+	"configurePresets": [
+		{
+			"name": "core",
+			"hidden": true,
+			"generator": "Ninja",
+			"binaryDir": "${sourceDir}/out/build/${presetName}",
+			"installDir": "${sourceDir}/out/install/${presetName}"
+		},
+		{
+			"name": "ccache-env",
+			"hidden": true,
+			"cacheVariables": {
+				"CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+				"CMAKE_C_COMPILER_LAUNCHER": "ccache"
+			}
+		},
+		{
+			"name": "vcpkg",
+			"hidden": true,
+			"cacheVariables": {
+				"CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+			}
+		},
+		{
+			"name": "debug",
+			"hidden": true,
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug"
+			}
+		},
+		{
+			"name": "release",
+			"hidden": true,
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Release"
+			}
+		},
+		{
+			"name": "shared",
+			"hidden": true,
+			"cacheVariables": {
+				"BUILD_SHARED_LIBS": "True",
+				"VCPKG_TARGET_TRIPLET": "x64-linux-dynamic",
+				"VCPKG_LIBRARY_LINKAGE": "dynamic"
+			}
+		},
+		{
+			"name": "static",
+			"hidden": true,
+			"cacheVariables": {
+				"BUILD_SHARED_LIBS": "False"
+			}
+		},
+		{
+			"name": "msvc",
+			"hidden": true,
+			"cacheVariables": {
+				"CMAKE_CXX_COMPILER": "cl.exe",
+				"CMAKE_C_COMPILER": "cl.exe"
+			},
+			"condition": {
+				"type": "equals",
+				"lhs": "${hostSystemName}",
+				"rhs": "Windows"
+			}
+		},
+		{
+			"name": "gcc",
+			"hidden": true,
+			"cacheVariables": {
+				"CMAKE_CXX_COMPILER": "g++",
+				"CMAKE_C_COMPILER": "gcc"
+			}
+		},
+		{
+			"name": "msvc-debug",
+			"displayName": "MSVC - Debug",
+			"inherits": [
+				"core",
+				"debug",
+				"msvc"
+			]
+		},
+		{
+			"name": "msvc-release",
+			"displayName": "MSVC - Release",
+			"inherits": [
+				"core",
+				"release",
+				"msvc"
+			]
+		},
+		{
+			"name": "gcc-debug",
+			"displayName": "GCC - Debug",
+			"inherits": [
+				"core",
+				"debug",
+				"gcc"
+			]
+		},
+		{
+			"name": "gcc-debug-vcpkg",
+			"displayName": "GCC - Debug - vcpkg",
+			"inherits": [
+				"gcc-debug",
+				"vcpkg"
+			]
+		},
+		{
+			"name": "gcc-release",
+			"displayName": "GCC - Release",
+			"inherits": [
+				"core",
+				"release",
+				"gcc"
+			]
+		},
+		{
+			"name": "gcc-release-vcpkg",
+			"displayName": "GCC - Release - vcpkg",
+			"inherits": [
+				"gcc-release",
+				"vcpkg"
+			]
+		}
+	]
+}

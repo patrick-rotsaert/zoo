@@ -79,6 +79,8 @@ if(UNIX)
 			# The development package depends on the runtime + other dev packages
 			set(DEVELOPMENT_PACKAGE_DEPENDS
 				${CPACK_DEBIAN_${COMPONENT_RUNTIME_UC}_PACKAGE_NAME}
+				# FIXME: this depends if vcpkg is used or not
+				# Perhaps it's better not to set this in the DEB file
 				libfmt-dev
 				libspdlog-dev
 				libboost-dev

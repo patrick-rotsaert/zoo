@@ -7,7 +7,17 @@
 
 include_guard(GLOBAL)
 
+include(${PROJECT_SOURCE_DIR}/cmake/options.cmake)
+
 if(ZOO_SQUID_WITH_MYSQL)
-	list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/modules)
-	find_package(MySQL REQUIRED)
+	# If this project is included as a subdirectory, the MySQL::MySQL target may already be defined.
+	if(NOT TARGET MySQL::MySQL)
+		project_find_package(unofficial-libmysql CONFIG QUIET)
+		if(unofficial-libmysql_FOUND)
+			add_library(MySQL::MySQL ALIAS unofficial::libmysql::libmysql)
+		else()
+			list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/modules)
+			project_find_package(MySQL MODULE REQUIRED)
+		endif()
+	endif()
 endif()
