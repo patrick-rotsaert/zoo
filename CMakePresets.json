@@ -80,7 +80,8 @@
 			"inherits": [
 				"core",
 				"debug",
-				"msvc"
+				"msvc",
+				"vcpkg"
 			]
 		},
 		{
@@ -89,7 +90,8 @@
 			"inherits": [
 				"core",
 				"release",
-				"msvc"
+				"msvc",
+				"vcpkg"
 			]
 		},
 		{
