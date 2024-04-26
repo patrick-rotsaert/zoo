@@ -16,9 +16,9 @@
 #include <map>
 #include <memory>
 
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <windows.h>
 #include <fcntl.h>
+#include <io.h>
 
 namespace zoo {
 namespace lockfile {
@@ -79,39 +79,34 @@ class lockfile::impl final
 {
 	std::filesystem::path   path_;
 	detail::in_process_lock in_process_lock_;
-	int                     fd_;
+	HANDLE                  fd_;
 
 public:
 	explicit impl(const std::filesystem::path& path)
-
 	    : path_{ path }
 	    , in_process_lock_{ path }
-	    , fd_{ open(path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0600) }
+	    , fd_{ CreateFileW(path.c_str(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL) }
 	{
-		if (this->fd_ == -1)
+		if (fd_ == INVALID_HANDLE_VALUE)
 		{
-			ZOO_THROW_EXCEPTION((std::system_error{ std::error_code{ errno, std::system_category() }, path.string() + ": open" }));
+			ZOO_THROW_EXCEPTION(
+			    std::system_error{ static_cast<int>(::GetLastError()), std::system_category(), path.string() + ": CreateFileW" });
 		}
 
-		auto fl     = flock{};
-		fl.l_type   = F_WRLCK;
-		fl.l_whence = SEEK_SET;
-		fl.l_start  = 0;
-		fl.l_len    = 0;
-
-		if (fcntl(this->fd_, F_SETLK, &fl) == -1)
+		auto overlapped = OVERLAPPED{};
+		if (!LockFileEx(this->fd_, LOCKFILE_EXCLUSIVE_LOCK, 0, 1, 0, &overlapped))
 		{
-			close(this->fd_);
+			CloseHandle(this->fd_);
 			ZOO_THROW_EXCEPTION(
-			    (std::system_error{ std::error_code{ errno, std::system_category() }, path.string() + ": fcntl(F_SETLK)" }));
+			    std::system_error{ static_cast<int>(::GetLastError()), std::system_category(), path.string() + ": LockFileEx" });
 		}
 	}
 
 	~impl() noexcept
 	{
-		auto ec = std::error_code{};
+		CloseHandle(this->fd_);
+		std::error_code ec;
 		std::filesystem::remove(this->path_, ec);
-		close(this->fd_);
 	}
 };
 

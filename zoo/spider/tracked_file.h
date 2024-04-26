@@ -38,10 +38,10 @@ public:
 	tracked_file(tracked_file&& other)      = default;
 	tracked_file(const tracked_file& other) = delete;
 
-	tracked_file& operator=(tracked_file&& other)      = default;
+	tracked_file& operator=(tracked_file&& other) = default;
 	tracked_file& operator=(const tracked_file& other) = delete;
 
-	native_handle_type native_handle() const;
+	native_handle_type native_handle();
 
 	void native_handle(native_handle_type fd);
 
@@ -53,11 +53,11 @@ public:
 
 	std::uint64_t size(error_code& ec) const;
 
-	std::uint64_t pos(error_code& ec) const;
+	std::uint64_t pos(error_code& ec);
 
 	void seek(std::uint64_t offset, error_code& ec);
 
-	std::size_t read(void* buffer, std::size_t n, error_code& ec) const;
+	std::size_t read(void* buffer, std::size_t n, error_code& ec);
 
 	std::size_t write(void const* buffer, std::size_t n, error_code& ec);
 };

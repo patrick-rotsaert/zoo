@@ -203,7 +203,11 @@ TEST_F(QueryParameterTests, TestBindStringError)
 	EXPECT_CALL(api, bind_parameter_index(sqlite_api_mock::test_statement, testing::StrEq(":name"))).WillOnce(testing::Return(param_index));
 
 	EXPECT_CALL(api,
-	            bind_text(sqlite_api_mock::test_statement, param_index, testing::StrEq(param_value), param_value.length(), SQLITE_STATIC))
+	            bind_text(sqlite_api_mock::test_statement,
+	                      param_index,
+	                      testing::StrEq(param_value),
+	                      static_cast<int>(param_value.length()),
+	                      SQLITE_STATIC))
 	    .WillOnce(testing::Return(SQLITE_ERROR));
 
 	EXPECT_ANY_THROW((query_parameters::bind(api, *sqlite_api_mock::test_connection, *sqlite_api_mock::test_statement, this->parameters)));
@@ -221,7 +225,8 @@ TEST_F(QueryParameterTests, TestBindByteStringError)
 
 	EXPECT_CALL(api, bind_parameter_index(sqlite_api_mock::test_statement, testing::StrEq(":name"))).WillOnce(testing::Return(param_index));
 
-	EXPECT_CALL(api, bind_blob(sqlite_api_mock::test_statement, param_index, testing::_, param_value.length(), SQLITE_STATIC))
+	EXPECT_CALL(api,
+	            bind_blob(sqlite_api_mock::test_statement, param_index, testing::_, static_cast<int>(param_value.length()), SQLITE_STATIC))
 	    .WillOnce(testing::Return(SQLITE_ERROR));
 
 	EXPECT_ANY_THROW((query_parameters::bind(api, *sqlite_api_mock::test_connection, *sqlite_api_mock::test_statement, this->parameters)));

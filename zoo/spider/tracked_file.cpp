@@ -33,7 +33,7 @@ tracked_file::tracked_file(std::unique_ptr<ifile_event_listener>&& event_listene
 {
 }
 
-tracked_file::native_handle_type tracked_file::native_handle() const
+tracked_file::native_handle_type tracked_file::native_handle()
 {
 	return this->file_.native_handle();
 }
@@ -77,21 +77,21 @@ uint64_t tracked_file::size(error_code& ec) const
 	return this->file_.size(ec);
 }
 
-uint64_t tracked_file::pos(error_code& ec) const
+uint64_t tracked_file::pos(error_code& ec)
 {
 	return this->file_.pos(ec);
 }
 
 void tracked_file::seek(uint64_t offset, error_code& ec)
 {
-	return this->file_.seek(offset, ec);
+	this->file_.seek(offset, ec);
 	if (this->event_listener_)
 	{
 		this->event_listener_->on_seek(offset, ec);
 	}
 }
 
-std::size_t tracked_file::read(void* buffer, std::size_t n, error_code& ec) const
+std::size_t tracked_file::read(void* buffer, std::size_t n, error_code& ec)
 {
 	n = this->file_.read(buffer, n, ec);
 	if (this->event_listener_)

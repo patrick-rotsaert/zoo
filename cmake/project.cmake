@@ -40,6 +40,8 @@ function(add_project_library TARGET)
 		PUBLIC_INCLUDE_DIRS
 		PRIVATE_LIBRARIES
 		PUBLIC_LIBRARIES
+		MSVC_PRIVATE_COMPILER_OPTIONS
+		MSVC_PUBLIC_COMPILER_OPTIONS
 	)
 	cmake_parse_arguments(P "${OPTIONS}" "${ONE_VALUE_ARGS}" "${MULTI_VALUE_ARGS}" ${ARGN})
 
@@ -118,6 +120,11 @@ function(add_project_library TARGET)
 		target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Debug>:$<$<CXX_COMPILER_ID:GNU>:-O0;-ggdb3>>)
 		target_compile_options(${TARGET} PRIVATE $<$<CONFIG:RelWithDebInfo>:$<$<CXX_COMPILER_ID:GNU>:-O2;-ggdb3>>)
 
+		# Windows
+		target_compile_definitions(${TARGET} PRIVATE
+			"$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:$<BUILD_INTERFACE:_WIN32_WINNT=0x0601>>"
+		)
+
 		# Set compiler definitions
 		if(P_PRIVATE_DEFINITIONS)
 			target_compile_definitions(${TARGET} PRIVATE ${P_PRIVATE_DEFINITIONS})
@@ -155,6 +162,18 @@ function(add_project_library TARGET)
 		endif()
 		if(P_PRIVATE_LIBRARIES)
 			target_link_libraries(${TARGET} PRIVATE ${P_PRIVATE_LIBRARIES})
+		endif()
+
+		# MSVC compiler options
+		if(P_MSVC_PRIVATE_COMPILER_OPTIONS)
+			target_compile_options(${TARGET} PRIVATE
+				"$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:$<BUILD_INTERFACE:${P_MSVC_PRIVATE_COMPILER_OPTIONS}>>"
+			)
+		endif()
+		if(P_MSVC_PUBLIC_COMPILER_OPTIONS)
+			target_compile_options(${TARGET} PUBLIC
+				"$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:$<BUILD_INTERFACE:${P_MSVC_PUBLIC_COMPILER_OPTIONS}>>"
+			)
 		endif()
 	endforeach()
 

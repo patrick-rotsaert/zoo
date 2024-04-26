@@ -14,6 +14,7 @@
 #include "zoo/fs/core/exceptions.h"
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/formatters.hpp"
+#include "zoo/common/compat.h"
 #include <boost/filesystem/operations.hpp>
 #include <boost/scoped_array.hpp>
 #include <optional>
@@ -21,16 +22,6 @@
 
 //#define BOOST_STACKTRACE_USE_BACKTRACE
 //#include <boost/stacktrace.hpp>
-
-#ifdef BOOST_WINDOWS_API
-#include <io.h>
-#endif
-
-#ifdef BOOST_WINDOWS_API
-#define c_open(pathname, flags, mode) ::_open(pathname, flags, mode)
-#else
-#define c_open(pathname, flags, mode) ::open(pathname, flags, mode)
-#endif
 
 #define THROW_PATH_OP_ERROR(path, opname) ZOO_THROW_EXCEPTION(system_exception{} << error_path{ path } << error_opname{ opname })
 

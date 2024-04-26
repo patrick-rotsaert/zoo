@@ -8,6 +8,10 @@
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/logging/spdlog_backend.h"
 
+#if defined(_MSC_VER)
+#pragma warning(disable : 4458)
+#endif
+
 namespace zoo {
 namespace logging {
 

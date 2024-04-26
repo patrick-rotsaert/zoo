@@ -326,7 +326,7 @@ query_results::query_results(isqlite_api&                         api,
 	std::map<std::string_view, size_t> map{};
 	for (size_t index = 0; index < this->field_count_; ++index)
 	{
-		const auto column_name = api.column_name(statement.get(), index);
+		const auto column_name = api.column_name(statement.get(), static_cast<int>(index));
 		if (column_name == nullptr)
 		{
 			ZOO_THROW_EXCEPTION(error{ "sqlite3_column_name returned a nullptr" });
@@ -346,7 +346,8 @@ query_results::query_results(isqlite_api&                         api,
 		const auto index       = it->second;
 		const auto column_name = it->first;
 
-		this->columns_.push_back(std::make_unique<column>(result.second, column_name, api.column_type(statement.get(), index), index));
+		this->columns_.push_back(std::make_unique<column>(
+		    result.second, column_name, api.column_type(statement.get(), static_cast<int>(index)), static_cast<int>(index)));
 	}
 }
 

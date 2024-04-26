@@ -86,7 +86,7 @@ class datadir::impl final
 	fs::path                                          directory_{};
 	std::unique_ptr<lockfile::lockfile>               lockfile_{};
 	std::map<file_id_type, std::unique_ptr<datafile>> file_map_{};
-	off_t                                             max_file_size_{ 1024u * 1024u * 1024u };
+	off64_t                                           max_file_size_{ 1024u * 1024u * 1024u };
 	mutable shared_locker                             locker_{};
 	mutable locker                                    merge_locker_{};
 

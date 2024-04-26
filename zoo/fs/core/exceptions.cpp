@@ -83,7 +83,7 @@ system_exception::system_exception(std::error_code ec, const std::string& messag
 std::error_code system_exception::getLastErrorCode() noexcept
 {
 #ifdef BOOST_WINDOWS_API
-	return std::error_code{ ::GetLastError(), std::system_category() };
+	return std::error_code{ static_cast<int>(::GetLastError()), std::system_category() };
 #else
 	return std::error_code{ errno, std::system_category() };
 #endif

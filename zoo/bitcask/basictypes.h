@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "zoo/common/compat.h"
+
 #include <string>
 #include <cstdint>
 
@@ -30,4 +32,4 @@ constexpr auto file_id_bits    = sizeof(file_id_type) * 8u;
 constexpr auto file_id_nibbles = sizeof(file_id_type) * 2u;
 
 } // namespace bitcask
-}
+} // namespace zoo

@@ -401,7 +401,8 @@ query_results::query_results(std::shared_ptr<MYSQL_STMT> statement, const std::v
 	for (std::size_t i = 0, end = results.size(); i < end; ++i)
 	{
 		assert(i < this->binds_.size());
-		this->columns_.push_back(std::make_unique<column>(this->field_name(i), i, results[i], &this->binds_[i], statement.get()));
+		this->columns_.push_back(
+		    std::make_unique<column>(this->field_name(i), static_cast<unsigned int>(i), results[i], &this->binds_[i], statement.get()));
 	}
 
 	if (mysql_stmt_bind_result(this->statement_.get(), &this->binds_.front()))
@@ -449,8 +450,8 @@ query_results::query_results(std::shared_ptr<MYSQL_STMT> statement, const std::m
 		}
 
 		assert(it->second < this->binds_.size());
-		this->columns_.push_back(
-		    std::make_unique<column>(result.first, it->second, result.second, &this->binds_[it->second], statement.get()));
+		this->columns_.push_back(std::make_unique<column>(
+		    result.first, static_cast<unsigned int>(it->second), result.second, &this->binds_[it->second], statement.get()));
 	}
 
 	if (0 != mysql_stmt_bind_result(this->statement_.get(), &this->binds_.front()))

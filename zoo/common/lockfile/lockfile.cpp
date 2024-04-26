@@ -8,7 +8,7 @@
 #include "zoo/common/lockfile/lockfile.h"
 
 #if defined(_WIN32)
-#error not implemented
+#include "zoo/common/lockfile/lockfile_impl_windows.hpp"
 #else
 #include "zoo/common/lockfile/lockfile_impl_posix.hpp"
 #endif

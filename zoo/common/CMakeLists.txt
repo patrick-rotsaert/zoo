@@ -13,11 +13,17 @@ if(ZOO_THREAD_SAFE)
 	list(APPEND EXTRA_PUBLIC_LIBRARIES Threads::Threads)
 endif()
 
+if(WIN32)
+	# for boost::uuid
+	list(APPEND EXTRA_PUBLIC_LIBRARIES bcrypt)
+endif()
+
 add_project_library(common
 	SOURCES
 		conversion/conversion.cpp
 		lockfile/lockfile.cpp
 		lockfile/lockfile_impl_posix.hpp
+		lockfile/lockfile_impl_windows.hpp
 		logging/ibackend.cpp
 		logging/spdlog_backend.cpp
 		logging/logging.cpp
@@ -30,6 +36,7 @@ add_project_library(common
 		config.h.in
 	PUBLIC_HEADERS
 		api.h
+		compat.h
 		conversion/conversion.h
 		lockfile/lockfile.h
 		logging/ibackend.h

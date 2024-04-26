@@ -11,6 +11,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#if defined(_MSC_VER)
+#pragma warning(disable : 4458)
+#endif
 namespace zoo {
 namespace fs {
 

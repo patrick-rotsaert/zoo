@@ -29,6 +29,11 @@
 #include <optional>
 #include <sstream>
 
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4702)
+#endif
+
 namespace zoo {
 namespace squid {
 
@@ -61,10 +66,10 @@ public:
 
 	virtual ~basic_statement() noexcept;
 
-	basic_statement(const basic_statement&)            = delete;
-	basic_statement(basic_statement&& src)             = default;
+	basic_statement(const basic_statement&) = delete;
+	basic_statement(basic_statement&& src)  = default;
 	basic_statement& operator=(const basic_statement&) = delete;
-	basic_statement& operator=(basic_statement&&)      = default;
+	basic_statement& operator=(basic_statement&&) = default;
 
 	///
 	/// Query modifier methods
@@ -259,3 +264,7 @@ public:
 
 } // namespace squid
 } // namespace zoo
+
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif

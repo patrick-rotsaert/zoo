@@ -8,6 +8,7 @@
 #pragma once
 
 #include "zoo/common/misc/lock_types.hpp"
+#include "zoo/common/compat.h"
 
 #include <filesystem>
 #include <memory>
@@ -26,10 +27,10 @@ public:
 	explicit file(int fd, const std::filesystem::path& path);
 	~file() noexcept; // closes the descriptor
 
-	file(file&&)            = delete;
+	file(file&&)  = delete;
 	file& operator=(file&&) = delete;
 
-	file(const file&)            = delete;
+	file(const file&) = delete;
 	file& operator=(const file&) = delete;
 
 	static std::unique_ptr<file> open(const std::filesystem::path& path, int flags, mode_t mode);
@@ -70,4 +71,4 @@ public:
 };
 
 } // namespace bitcask
-}
+} // namespace zoo

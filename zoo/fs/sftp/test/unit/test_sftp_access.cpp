@@ -12,6 +12,10 @@
 #include "zoo/fs/core/ifile.h"
 #include <gtest/gtest.h>
 
+#if defined(_MSC_VER)
+#pragma warning(disable : 4459)
+#endif
+
 namespace zoo {
 namespace fs {
 namespace sftp {
