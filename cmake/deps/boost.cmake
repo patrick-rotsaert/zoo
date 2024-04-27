@@ -21,5 +21,5 @@ endforeach()
 
 # If this project is included as a subdirectory, the Boost targets may already be defined.
 if(NOT _found_all_boost_targets)
-	project_find_package(Boost REQUIRED COMPONENTS ${_boost_libs})
+	project_find_package(Boost 1.81 REQUIRED COMPONENTS ${_boost_libs})
 endif()
