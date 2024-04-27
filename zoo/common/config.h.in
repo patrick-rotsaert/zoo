@@ -13,4 +13,6 @@
 
 // Logging verbosity of the library
 // Values are as in zoo/logging/log_level.h
-#define ZOO_LOGGING_LEVEL @ZOO_LOGGING_LEVEL@
+#if !defined(ZOO_LOGGING_LEVEL)
+# define ZOO_LOGGING_LEVEL @ZOO_LOGGING_LEVEL@
+#endif

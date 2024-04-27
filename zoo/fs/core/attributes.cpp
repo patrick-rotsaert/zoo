@@ -178,7 +178,7 @@ mode_t attributes::get_mode() const
 
 void attributes::set_mode(mode_t mode)
 {
-	//zlog(debug, "mode={0:o}", mode);
+	//ZOO_LOG(debug, "mode={0:o}", mode);
 	this->type  = convert_file_type(mode);
 	this->mode  = convert_file_mode(mode);
 	this->uperm = convert_file_perm(mode, S_IRUSR, S_IWUSR, S_IXUSR);

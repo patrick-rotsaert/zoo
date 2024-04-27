@@ -181,7 +181,7 @@ public:
 			ZOO_THROW_EXCEPTION(system_exception{} << error_opname{ "pipe" });
 		}
 
-		zlog(debug, "watching {}", this->dir_);
+		ZOO_LOG(debug, "watching {}", this->dir_);
 	}
 
 	~impl() noexcept
@@ -244,15 +244,15 @@ public:
 
 			if (e->len)
 			{
-				zlog(trace,
-				     "inotify_event: name={0}, events={1}, idx={2}",
-				     fmt::streamed(std::quoted(e->name)),
-				     describe_flags(e->mask),
-				     eventIndex);
+				ZOO_LOG(trace,
+				        "inotify_event: name={0}, events={1}, idx={2}",
+				        fmt::streamed(std::quoted(e->name)),
+				        describe_flags(e->mask),
+				        eventIndex);
 			}
 			else
 			{
-				zlog(trace, "inotify_event: name={0}, events={1}, idx={2}", "null", describe_flags(e->mask), eventIndex);
+				ZOO_LOG(trace, "inotify_event: name={0}, events={1}, idx={2}", "null", describe_flags(e->mask), eventIndex);
 			}
 
 			if (e->mask & IN_DELETE_SELF)
@@ -312,7 +312,7 @@ public:
 					}
 					catch (const std::exception& e)
 					{
-						zlog(err, "Getting direntry for {} failed: {}", path, e);
+						ZOO_LOG(err, "Getting direntry for {} failed: {}", path, e);
 						// Maybe the file has since been removed
 						// Maybe we don't have read permission
 						// In any case, just ignore the file

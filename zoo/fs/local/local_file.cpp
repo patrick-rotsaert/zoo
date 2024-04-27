@@ -41,14 +41,14 @@ file::file(int fd, const fspath& path, std::shared_ptr<iinterruptor> interruptor
 
 file::~file() noexcept
 {
-	zlog(trace, "close fd={}", this->fd_);
+	ZOO_LOG(trace, "close fd={}", this->fd_);
 	c_close(this->fd_);
 }
 
 std::size_t file::read(void* buf, std::size_t count)
 {
 	this->interruptor_->throw_if_interrupted();
-	zlog(trace, "read fd={} count={}", this->fd_, count);
+	ZOO_LOG(trace, "read fd={} count={}", this->fd_, count);
 	auto rc = c_read(this->fd_, buf, count);
 	if (rc < 0)
 	{
@@ -60,7 +60,7 @@ std::size_t file::read(void* buf, std::size_t count)
 std::size_t file::write(const void* buf, std::size_t count)
 {
 	this->interruptor_->throw_if_interrupted();
-	zlog(trace, "write fd={} count={}", this->fd_, count);
+	ZOO_LOG(trace, "write fd={} count={}", this->fd_, count);
 	auto rc = c_write(this->fd_, buf, count);
 	if (rc < 0)
 	{

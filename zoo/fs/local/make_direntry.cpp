@@ -28,7 +28,7 @@ direntry make_direntry(const boost::filesystem::directory_entry& e)
 
 	if (st.type() == boost::filesystem::symlink_file)
 	{
-		zlog(trace, "read_symlink path={}", path);
+		ZOO_LOG(trace, "read_symlink path={}", path);
 		auto ec               = boost::system::error_code{};
 		result.symlink_target = boost::filesystem::read_symlink(path, ec);
 		if (ec)

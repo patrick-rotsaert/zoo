@@ -24,7 +24,7 @@ direntry make_direntry(issh_api* api, const fspath& path, sftp_session sftp, con
 	entry.attr = make_attributes(a);
 	if (entry.attr.is_lnk())
 	{
-		zlog(trace, "sftp_readlink path={}", path);
+		ZOO_LOG(trace, "sftp_readlink path={}", path);
 		const auto target = api->sftp_readlink(sftp, path.string().c_str());
 		if (target)
 		{

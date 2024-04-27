@@ -69,7 +69,7 @@ public:
 			ZOO_THROW_EXCEPTION(std::system_error{ static_cast<int>(::GetLastError()), std::system_category(), "CreateEvent" });
 		}
 
-		zlog(debug, "watching {}", this->dir_);
+		ZOO_LOG(debug, "watching {}", this->dir_);
 	}
 
 	~impl() noexcept
@@ -90,7 +90,7 @@ public:
 			}
 			catch (const std::exception& e)
 			{
-				zlog(err, "Getting direntry for {} failed: {}", path, e);
+				ZOO_LOG(err, "Getting direntry for {} failed: {}", path, e);
 				// Maybe the file has since been removed
 				// Maybe we don't have read permission
 				// In any case, just ignore the file
@@ -116,24 +116,24 @@ public:
 					if (err == ERROR_SHARING_VIOLATION)
 					{
 						// File still open by other process
-						zlog(trace, "sharing violation for {}", path);
+						ZOO_LOG(trace, "sharing violation for {}", path);
 						++it;
 					}
 					else if (err == ERROR_FILE_NOT_FOUND)
 					{
 						// File was removed
-						zlog(trace, "file {} no longer exists", path);
+						ZOO_LOG(trace, "file {} no longer exists", path);
 						it = this->added_files_.erase(it);
 					}
 					else
 					{
-						zlog(trace, "opening {} failed with error {}", path, err);
+						ZOO_LOG(trace, "opening {} failed with error {}", path, err);
 						++it;
 					}
 				}
 				else
 				{
-					zlog(trace, "opening {} succeeded", path);
+					ZOO_LOG(trace, "opening {} succeeded", path);
 					CloseHandle(handle);
 					add_entry_lamdba(path);
 					it = this->added_files_.erase(it);
@@ -158,7 +158,7 @@ public:
 			                                           &this->overlapped_,                                           // lpOverlapped
 			                                           NULL                                                          // lpCompletionRoutine
 			);
-			zlog(trace, "ReadDirectoryChangesW: {}", success);
+			ZOO_LOG(trace, "ReadDirectoryChangesW: {}", success);
 
 			if (!success)
 			{
@@ -187,7 +187,7 @@ public:
 				auto bytes_returned = DWORD{};
 
 				const auto success = GetOverlappedResult(this->directory_handle_, &this->overlapped_, &bytes_returned, FALSE);
-				zlog(trace, "GetOverlappedResult: {}, bytes_returned: {}", success, bytes_returned);
+				ZOO_LOG(trace, "GetOverlappedResult: {}, bytes_returned: {}", success, bytes_returned);
 
 				if (!success)
 				{
@@ -213,28 +213,28 @@ public:
 					switch (notifyInfo->Action)
 					{
 					case FILE_ACTION_ADDED:
-						zlog(trace, "   added: {}", path);
+						ZOO_LOG(trace, "   added: {}", path);
 						this->added_files_.insert(filename);
 						break;
 					case FILE_ACTION_REMOVED:
-						zlog(trace, " removed: {}", path);
+						ZOO_LOG(trace, " removed: {}", path);
 						this->added_files_.erase(filename);
 						break;
 					case FILE_ACTION_MODIFIED:
-						zlog(trace, "modified: {}", path);
+						ZOO_LOG(trace, "modified: {}", path);
 						this->added_files_.insert(filename);
 						break;
 					case FILE_ACTION_RENAMED_OLD_NAME:
-						zlog(trace, "ren from: {}", path);
+						ZOO_LOG(trace, "ren from: {}", path);
 						this->added_files_.erase(filename);
 						break;
 					case FILE_ACTION_RENAMED_NEW_NAME:
-						zlog(trace, "ren   to: {}", path);
+						ZOO_LOG(trace, "ren   to: {}", path);
 						this->added_files_.erase(filename);
 						add_entry_lamdba(path);
 						break;
 					default:
-						zlog(warn, "Unknown action {}", notifyInfo->Action);
+						ZOO_LOG(warn, "Unknown action {}", notifyInfo->Action);
 						break;
 					}
 

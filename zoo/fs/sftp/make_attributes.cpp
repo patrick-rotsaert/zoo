@@ -47,7 +47,7 @@ std::chrono::system_clock::time_point convert_file_time(uint32_t sec)
 
 attributes make_attributes(const sftp_attributes in)
 {
-	zlog(trace, "flags {0:x}h {0:b}b", in->flags);
+	ZOO_LOG(trace, "flags {0:x}h {0:b}b", in->flags);
 
 	auto result = attributes{};
 
