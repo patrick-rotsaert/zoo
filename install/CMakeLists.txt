@@ -5,8 +5,6 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 #
 
-cmake_minimum_required(VERSION 3.19)
-
 include(CMakePackageConfigHelpers)
 
 if(NOT DEFINED zoo_INSTALL_CMAKEDIR)

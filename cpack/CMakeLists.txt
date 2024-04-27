@@ -5,8 +5,6 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 #
 
-cmake_minimum_required(VERSION 3.19)
-
 include(InstallRequiredSystemLibraries)
 
 set(CPACK_PACKAGE_NAME "lib${PROJECT_NAME}")
