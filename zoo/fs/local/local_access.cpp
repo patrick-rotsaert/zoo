@@ -198,9 +198,9 @@ std::unique_ptr<ifile> access::open(const fspath& path, int flags, mode_t mode)
 	}
 }
 
-std::shared_ptr<iwatcher> access::create_watcher(const fspath& dir, int cancelfd)
+std::shared_ptr<iwatcher> access::create_watcher(const fspath& dir)
 {
-	return std::make_shared<watcher>(dir, cancelfd);
+	return std::make_shared<watcher>(dir);
 }
 
 direntry access::get_direntry(const fspath& path)

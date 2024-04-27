@@ -23,7 +23,7 @@ private:
 	std::unique_ptr<impl> pimpl_;
 
 public:
-	explicit watcher(const fspath& dir, int cancelfd);
+	explicit watcher(const fspath& dir);
 	~watcher() noexcept;
 
 	watcher(watcher&&)            = default;
@@ -33,6 +33,7 @@ public:
 	watcher& operator=(const watcher&) = delete;
 
 	std::vector<direntry> watch() override;
+	void                  cancel() override;
 };
 
 } // namespace local

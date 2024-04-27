@@ -38,6 +38,7 @@ public:
 	watcher& operator=(const watcher&) = delete;
 
 	std::vector<direntry> watch() override;
+	void                  cancel() override;
 };
 
 } // namespace sftp

@@ -34,7 +34,7 @@ public:
 	void                      mkdir(const fspath& path, bool parents) override;
 	void                      rename(const fspath& oldpath, const fspath& newpath) override;
 	std::unique_ptr<ifile>    open(const fspath& path, int flags, mode_t mode) override;
-	std::shared_ptr<iwatcher> create_watcher(const fspath& dir, int cancelfd) override; // note: cancelfd is currently ignored on windows
+	std::shared_ptr<iwatcher> create_watcher(const fspath& dir) override;
 
 	static direntry get_direntry(const fspath& path);
 };

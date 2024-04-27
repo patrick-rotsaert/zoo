@@ -17,8 +17,8 @@ namespace zoo {
 namespace fs {
 namespace local {
 
-watcher::watcher(const fspath& dir, int cancelfd)
-    : pimpl_{ std::make_unique<impl>(dir, cancelfd) }
+watcher::watcher(const fspath& dir)
+    : pimpl_{ std::make_unique<impl>(dir) }
 {
 }
 
@@ -29,6 +29,11 @@ watcher::~watcher() noexcept
 std::vector<direntry> watcher::watch()
 {
 	return this->pimpl_->watch();
+}
+
+void watcher::cancel()
+{
+	return this->pimpl_->cancel();
 }
 
 } // namespace local

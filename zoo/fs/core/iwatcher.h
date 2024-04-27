@@ -20,7 +20,8 @@ class ZOO_EXPORT iwatcher
 public:
 	virtual ~iwatcher() noexcept;
 
-	virtual std::vector<direntry> watch() = 0;
+	virtual std::vector<direntry> watch()  = 0;
+	virtual void                  cancel() = 0;
 };
 
 } // namespace fs

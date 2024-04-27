@@ -327,9 +327,8 @@ public:
 		}
 	}
 
-	std::shared_ptr<iwatcher> create_watcher(const fspath& dir, int cancelfd) override
+	std::shared_ptr<iwatcher> create_watcher(const fspath& dir) override
 	{
-		(void)cancelfd;
 		return std::make_shared<watcher>(dir, this->watcher_scan_interval_ms_, this->shared_from_this(), this->interruptor_);
 	}
 };
@@ -414,9 +413,9 @@ std::unique_ptr<ifile> access::open(const fspath& path, int flags, mode_t mode)
 	return this->pimpl_->open(path, flags, mode);
 }
 
-std::shared_ptr<iwatcher> access::create_watcher(const fspath& dir, int cancelfd)
+std::shared_ptr<iwatcher> access::create_watcher(const fspath& dir)
 {
-	return this->pimpl_->create_watcher(dir, cancelfd);
+	return this->pimpl_->create_watcher(dir);
 }
 
 } // namespace sftp

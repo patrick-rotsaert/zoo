@@ -62,6 +62,11 @@ public:
 		return result;
 	}
 
+	void cancel()
+	{
+		// TODO
+	}
+
 private:
 	std::map<std::string, direntry> list_files()
 	{
@@ -96,6 +101,11 @@ watcher::~watcher() noexcept
 std::vector<direntry> watcher::watch()
 {
 	return this->pimpl_->watch();
+}
+
+void watcher::cancel()
+{
+	return this->pimpl_->cancel();
 }
 
 } // namespace sftp

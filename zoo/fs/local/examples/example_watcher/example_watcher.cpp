@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
 	zlog(info, "application started");
 
 	auto access  = local::access(std::make_shared<noop_interruptor>());
-	auto watcher = access.create_watcher(dir, 0);
+	auto watcher = access.create_watcher(dir);
 	for (;;)
 	{
 		auto entries = watcher->watch();

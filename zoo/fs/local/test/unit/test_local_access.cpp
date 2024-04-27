@@ -164,10 +164,10 @@ TEST_F(LocalAccessTests, test_create_watcher)
 {
 	const auto p = this->work_dir() / "dir";
 	auto       a = access{ std::make_shared<noop_interruptor>() };
-	EXPECT_ANY_THROW(a.create_watcher(p, 0));
+	EXPECT_ANY_THROW(a.create_watcher(p)); // the dir does not exist
 	boost::filesystem::create_directory(p);
-	EXPECT_NO_THROW(a.create_watcher(p, 0));
-	EXPECT_NE(a.create_watcher(p, 0).get(), nullptr);
+	EXPECT_NO_THROW(a.create_watcher(p));
+	EXPECT_NE(a.create_watcher(p).get(), nullptr);
 }
 
 } // namespace local

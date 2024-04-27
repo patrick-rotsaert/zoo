@@ -45,12 +45,7 @@ public:
 	virtual void                      rename(const fspath& oldpath, const fspath& newpath) = 0;
 	virtual std::unique_ptr<ifile>    open(const fspath& path, int flags, mode_t mode)     = 0;
 
-	/// @brief Create a directory watcher.
-	/// The caller must provide a file descriptor @a cancelfd that the implementation can
-	/// monitor (through select, poll, ...) for read events, e.g. the read end of a pipe.
-	/// The caller can then cancel the watcher by making the file descriptor readable, e.g.
-	/// by writing to the write end of the pipe.
-	virtual std::shared_ptr<iwatcher> create_watcher(const fspath& dir, int cancelfd) = 0;
+	virtual std::shared_ptr<iwatcher> create_watcher(const fspath& dir) = 0;
 };
 
 } // namespace fs

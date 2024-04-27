@@ -30,7 +30,7 @@ class watcher::impl final
 	HANDLE directory_handle_;
 
 public:
-	impl(const fspath& dir, int /*FIXME: cancelfd*/)
+	impl(const fspath& dir)
 	    : dir_{ dir }
 	    , directory_handle_{}
 	{
@@ -110,6 +110,11 @@ public:
 		}
 
 		return result;
+	}
+
+	void cancel()
+	{
+		// TODO
 	}
 };
 

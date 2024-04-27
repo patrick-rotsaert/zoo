@@ -14,6 +14,7 @@
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/formatters.hpp"
 
+#include <boost/algorithm/string/join.hpp>
 #include <boost/thread/interruption.hpp>
 #include <boost/filesystem/operations.hpp>
 
@@ -150,29 +151,35 @@ std::string describe_flags(uint32_t mask)
 class watcher::impl final
 {
 	fspath dir_;
-	int    cancelfd_;
 	int    inotifyfd_;
 	int    watchfd_;
+	int    cancelpipe_[2];
 
 public:
-	impl(const fspath& dir, int cancelfd)
+	impl(const fspath& dir)
 	    : dir_{ dir }
-	    , cancelfd_{ cancelfd }
+	    , inotifyfd_{}
+	    , watchfd_{}
+	    , cancelpipe_{}
 	{
-		const auto fd = inotify_init();
-		if (fd == -1)
+		this->inotifyfd_ = inotify_init();
+		if (this->inotifyfd_ == -1)
 		{
 			ZOO_THROW_EXCEPTION(system_exception{} << error_opname{ "inotify_init" });
 		}
 
-		this->watchfd_ = inotify_add_watch(fd, this->dir_.c_str(), IN_ALL_EVENTS & ~(IN_MODIFY | IN_ACCESS));
+		this->watchfd_ = inotify_add_watch(this->inotifyfd_, this->dir_.c_str(), IN_ALL_EVENTS & ~(IN_MODIFY | IN_ACCESS));
 		if (this->watchfd_ == -1)
 		{
-			close(fd);
+			close(this->inotifyfd_);
 			ZOO_THROW_EXCEPTION(system_exception{} << error_opname{ "inotify_add_watch" } << error_path{ this->dir_ });
 		}
 
-		this->inotifyfd_ = fd;
+		if (pipe(this->cancelpipe_))
+		{
+			close(this->inotifyfd_);
+			ZOO_THROW_EXCEPTION(system_exception{} << error_opname{ "pipe" });
+		}
 
 		zlog(debug, "watching {}", this->dir_);
 	}
@@ -180,6 +187,8 @@ public:
 	~impl() noexcept
 	{
 		close(this->inotifyfd_);
+		close(this->cancelpipe_[0]);
+		close(this->cancelpipe_[1]);
 	}
 
 	std::vector<direntry> watch()
@@ -189,9 +198,9 @@ public:
 		auto rfds = fd_set{};
 		FD_ZERO(&rfds);
 		FD_SET(this->inotifyfd_, &rfds);
-		FD_SET(this->cancelfd_, &rfds);
+		FD_SET(this->cancelpipe_[0], &rfds);
 
-		const auto maxfd = std::max(this->inotifyfd_, this->cancelfd_);
+		const auto maxfd = std::max(this->inotifyfd_, this->cancelpipe_[0]);
 
 		const auto rc = ::select(maxfd + 1, &rfds, 0, 0, nullptr);
 		if (rc < 0)
@@ -203,7 +212,7 @@ public:
 			// time out?
 			return result;
 		}
-		else if (FD_ISSET(this->cancelfd_, &rfds))
+		else if (FD_ISSET(this->cancelpipe_[0], &rfds))
 		{
 			ZOO_THROW_EXCEPTION(interrupted_exception{});
 		}
@@ -293,11 +302,18 @@ public:
 				}
 				if (name)
 				{
+					// FIXME: this throws if the file has since been removed, it shouldn't
 					result.push_back(access::get_direntry(this->dir_ / name.value()));
 				}
 			}
 		}
 		return result;
+	}
+
+	void cancel()
+	{
+		auto c = char{ 1 };
+		write(this->cancelpipe_[1], &c, 1);
 	}
 };
 
