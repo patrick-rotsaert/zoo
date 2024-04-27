@@ -17,6 +17,7 @@
 
 #include <filesystem>
 #include <optional>
+#include <set>
 
 #include <windows.h>
 
@@ -26,16 +27,21 @@ namespace local {
 
 class watcher::impl final
 {
-	fspath     dir_;
-	HANDLE     directory_handle_;
-	OVERLAPPED overlapped_;
-	HANDLE     cancel_event_;
+	fspath                 dir_;
+	HANDLE                 directory_handle_;
+	OVERLAPPED             overlapped_;
+	HANDLE                 cancel_event_;
+	std::set<std::wstring> added_files_;
+	bool                   read_pending_;
 
 public:
 	impl(const fspath& dir)
 	    : dir_{ dir }
 	    , directory_handle_{}
 	    , overlapped_{}
+	    , cancel_event_{}
+	    , added_files_{}
+	    , read_pending_{}
 	{
 		this->directory_handle_ = CreateFileW(dir.c_str(),
 		                                      FILE_LIST_DIRECTORY,
@@ -62,6 +68,8 @@ public:
 		{
 			ZOO_THROW_EXCEPTION(std::system_error{ static_cast<int>(::GetLastError()), std::system_category(), "CreateEvent" });
 		}
+
+		zlog(debug, "watching {}", this->dir_);
 	}
 
 	~impl() noexcept
@@ -75,9 +83,72 @@ public:
 	{
 		auto result = std::vector<direntry>{};
 
+		auto&& add_entry_lamdba = [&](const fspath& path) {
+			try
+			{
+				result.push_back(access::get_direntry(path));
+			}
+			catch (const std::exception& e)
+			{
+				zlog(err, "Getting direntry for {} failed: {}", path, e);
+				// Maybe the file has since been removed
+				// Maybe we don't have read permission
+				// In any case, just ignore the file
+			}
+		};
+
+		auto&& check_added_files_lambda = [&]() {
+			for (auto it = this->added_files_.begin(), end = this->added_files_.end(); it != end;)
+			{
+				const auto& filename = *it;
+				const auto  path     = (this->dir_ / filename).make_preferred();
+				const auto  handle   = CreateFileW(path.c_str(),                 // lpFileName
+                                                GENERIC_READ | GENERIC_WRITE, // dwDesiredAccess
+                                                0,                            // dwShareMode
+                                                NULL,                         // lpSecurityAttributes
+                                                OPEN_EXISTING,                // dwCreationDisposition
+                                                FILE_ATTRIBUTE_NORMAL,        // dwFlagsAndAttributes
+                                                NULL                          // hTemplateFile
+                );
+				if (handle == INVALID_HANDLE_VALUE)
+				{
+					const auto err = GetLastError();
+					if (err == ERROR_SHARING_VIOLATION)
+					{
+						// File still open by other process
+						zlog(trace, "sharing violation for {}", path);
+						++it;
+					}
+					else if (err == ERROR_FILE_NOT_FOUND)
+					{
+						// File was removed
+						zlog(trace, "file {} no longer exists", path);
+						it = this->added_files_.erase(it);
+					}
+					else
+					{
+						zlog(trace, "opening {} failed with error {}", path, err);
+						++it;
+					}
+				}
+				else
+				{
+					zlog(trace, "opening {} succeeded", path);
+					CloseHandle(handle);
+					add_entry_lamdba(path);
+					it = this->added_files_.erase(it);
+				}
+			}
+		};
+
 		char buffer[1024];
 
 		auto&& read_changes_lambda = [&]() {
+			if (this->read_pending_)
+			{
+				return;
+			}
+
 			const auto success = ReadDirectoryChangesW(this->directory_handle_,                                      // hDirectory
 			                                           buffer,                                                       // lpBuffer
 			                                           sizeof(buffer),                                               // nBufferLength
@@ -95,7 +166,7 @@ public:
 				    static_cast<int>(::GetLastError()), std::system_category(), this->dir_.string() + ": ReadDirectoryChangesW" });
 			}
 
-			zlog(debug, "watching {}", this->dir_);
+			this->read_pending_ = true;
 		};
 
 		read_changes_lambda();
@@ -104,13 +175,15 @@ public:
 		{
 			boost::this_thread::interruption_point();
 
-			//const auto wait_result = WaitForSingleObject(this->overlapped_.hEvent, 0);
+			HANDLE     wait_handles[]       = { this->overlapped_.hEvent, this->cancel_event_ };
+			const auto timeout_milliseconds = DWORD{ this->added_files_.empty() ? INFINITE : 50 };
 
-			HANDLE     wait_handles[] = { this->overlapped_.hEvent, this->cancel_event_ };
-			const auto wait_result    = WaitForMultipleObjects(2, wait_handles, FALSE, INFINITE);
+			const auto wait_result = WaitForMultipleObjects(2, wait_handles, FALSE, timeout_milliseconds);
 
 			if (wait_result == WAIT_OBJECT_0)
 			{
+				this->read_pending_ = false;
+
 				auto bytes_returned = DWORD{};
 
 				const auto success = GetOverlappedResult(this->directory_handle_, &this->overlapped_, &bytes_returned, FALSE);
@@ -135,44 +208,34 @@ public:
 
 					const auto name_length = notifyInfo->FileNameLength / sizeof(*notifyInfo->FileName);
 					const auto filename    = std::wstring{ notifyInfo->FileName, name_length };
-					const auto path        = this->dir_ / filename;
+					const auto path        = (this->dir_ / filename).make_preferred();
 
 					switch (notifyInfo->Action)
 					{
 					case FILE_ACTION_ADDED:
 						zlog(trace, "   added: {}", path);
+						this->added_files_.insert(filename);
 						break;
 					case FILE_ACTION_REMOVED:
 						zlog(trace, " removed: {}", path);
+						this->added_files_.erase(filename);
 						break;
 					case FILE_ACTION_MODIFIED:
 						zlog(trace, "modified: {}", path);
+						this->added_files_.insert(filename);
 						break;
 					case FILE_ACTION_RENAMED_OLD_NAME:
 						zlog(trace, "ren from: {}", path);
+						this->added_files_.erase(filename);
 						break;
 					case FILE_ACTION_RENAMED_NEW_NAME:
-						zlog(trace, "  ren to: {}", path);
+						zlog(trace, "ren   to: {}", path);
+						this->added_files_.erase(filename);
+						add_entry_lamdba(path);
 						break;
 					default:
 						zlog(warn, "Unknown action {}", notifyInfo->Action);
 						break;
-					}
-
-					if (notifyInfo->Action == FILE_ACTION_MODIFIED || notifyInfo->Action == FILE_ACTION_ADDED ||
-					    notifyInfo->Action == FILE_ACTION_RENAMED_NEW_NAME)
-					{
-						try
-						{
-							result.push_back(access::get_direntry(path));
-						}
-						catch (const std::exception& e)
-						{
-							zlog(err, "Getting direntry for {} failed: {}", path, e);
-							// Maybe the file has since been removed
-							// Maybe we don't have read permission
-							// In any case, just ignore the file
-						}
 					}
 
 					if (notifyInfo->NextEntryOffset == 0)
@@ -183,6 +246,8 @@ public:
 					notifyInfo =
 					    reinterpret_cast<FILE_NOTIFY_INFORMATION*>(reinterpret_cast<char*>(notifyInfo) + notifyInfo->NextEntryOffset);
 				}
+
+				check_added_files_lambda();
 
 				if (!result.empty())
 				{
@@ -197,7 +262,12 @@ public:
 			}
 			else if (wait_result == WAIT_TIMEOUT)
 			{
-				zlog(warn, "Timeout occurred, should not happen.");
+				check_added_files_lambda();
+
+				if (!result.empty())
+				{
+					break;
+				}
 			}
 			else
 			{
