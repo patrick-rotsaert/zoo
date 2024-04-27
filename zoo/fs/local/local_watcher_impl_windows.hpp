@@ -133,14 +133,46 @@ public:
 				{
 					boost::this_thread::interruption_point();
 
-					zlog(trace, "notifyInfo->Action = {}", notifyInfo->Action);
+					const auto name_length = notifyInfo->FileNameLength / sizeof(*notifyInfo->FileName);
+					const auto filename    = std::wstring{ notifyInfo->FileName, name_length };
+					const auto path        = this->dir_ / filename;
+
+					switch (notifyInfo->Action)
+					{
+					case FILE_ACTION_ADDED:
+						zlog(trace, "   added: {}", path);
+						break;
+					case FILE_ACTION_REMOVED:
+						zlog(trace, " removed: {}", path);
+						break;
+					case FILE_ACTION_MODIFIED:
+						zlog(trace, "modified: {}", path);
+						break;
+					case FILE_ACTION_RENAMED_OLD_NAME:
+						zlog(trace, "ren from: {}", path);
+						break;
+					case FILE_ACTION_RENAMED_NEW_NAME:
+						zlog(trace, "  ren to: {}", path);
+						break;
+					default:
+						zlog(warn, "Unknown action {}", notifyInfo->Action);
+						break;
+					}
 
 					if (notifyInfo->Action == FILE_ACTION_MODIFIED || notifyInfo->Action == FILE_ACTION_ADDED ||
 					    notifyInfo->Action == FILE_ACTION_RENAMED_NEW_NAME)
 					{
-						const auto name_length = notifyInfo->FileNameLength / sizeof(*notifyInfo->FileName);
-						const auto filename    = std::wstring{ notifyInfo->FileName, name_length };
-						result.push_back(access::get_direntry(dir_ / filename));
+						try
+						{
+							result.push_back(access::get_direntry(path));
+						}
+						catch (const std::exception& e)
+						{
+							zlog(err, "Getting direntry for {} failed: {}", path, e);
+							// Maybe the file has since been removed
+							// Maybe we don't have read permission
+							// In any case, just ignore the file
+						}
 					}
 
 					if (notifyInfo->NextEntryOffset == 0)
