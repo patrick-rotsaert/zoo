@@ -44,21 +44,5 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	// // Run the I/O service on the requested number of threads
-	// auto v = std::vector<std::thread>{};
-	// v.reserve(threads - 1);
-	// for (auto i = threads - 1; i > 0; --i)
-	// {
-	// 	v.emplace_back([&ioc] { ioc.run(); });
-	// }
-
-	// // (If we get here, it means we got a SIGINT or SIGTERM)
-
-	// // Block until all the threads exit
-	// for (auto& t : v)
-	// {
-	// 	t.join();
-	// }
-
 	return EXIT_SUCCESS;
 }

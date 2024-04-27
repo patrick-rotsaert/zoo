@@ -64,7 +64,7 @@ public:
 
 	void cancel()
 	{
-		// TODO
+		this->interruptor_->interrupt();
 	}
 
 private:
