@@ -271,7 +271,9 @@ public:
 				{
 					continue;
 				}
-				std::optional<std::string> name;
+
+				auto name = std::optional<std::string>{};
+
 				if (e->mask & (IN_MOVED_TO | IN_CLOSE_WRITE))
 				{
 					name = e->name;
@@ -300,10 +302,21 @@ public:
 						createdFileEventIndex = -1;
 					}
 				}
+
 				if (name)
 				{
-					// FIXME: this throws if the file has since been removed, it shouldn't
-					result.push_back(access::get_direntry(this->dir_ / name.value()));
+					const auto path = this->dir_ / name.value();
+					try
+					{
+						result.push_back(access::get_direntry(path));
+					}
+					catch (const std::exception& e)
+					{
+						zlog(err, "Getting direntry for {} failed: {}", path, e);
+						// Maybe the file has since been removed
+						// Maybe we don't have read permission
+						// In any case, just ignore the file
+					}
 				}
 			}
 		}
@@ -312,7 +325,7 @@ public:
 
 	void cancel()
 	{
-		auto c = char{ 1 };
+		auto c = char{};
 		write(this->cancelpipe_[1], &c, 1);
 	}
 };
