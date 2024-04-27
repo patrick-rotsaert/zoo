@@ -1,5 +1,10 @@
 {
     "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 25,
+        "patch": 0
+    },
     "configurePresets": [
         {
             "name": "core",
@@ -14,6 +19,24 @@
             "cacheVariables": {
                 "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
                 "CMAKE_C_COMPILER_LAUNCHER": "ccache"
+            }
+        },
+        {
+            "name": "windows",
+            "hidden": true,
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "linux",
+            "hidden": true,
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
             }
         },
         {
@@ -52,26 +75,34 @@
             }
         },
         {
+            "name": "vcpkg-x64-linux-shared",
+            "hidden": true,
+            "inherits": [
+                "vcpkg",
+                "shared",
+                "linux"
+            ],
+            "cacheVariables": {
+                "VCPKG_TARGET_TRIPLET": "x64-linux-dynamic"
+            }
+        },
+        {
             "name": "msvc",
             "hidden": true,
+            "inherits": [
+                "windows"
+            ],
             "toolset": "host=x64",
             "architecture": "x64",
             "cacheVariables": {
-                "CMAKE_CXX_COMPILER": "cl.exe",
-                "CMAKE_C_COMPILER": "cl.exe"
-            },
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Windows"
+                "CMAKE_CXX_COMPILER": "cl.exe"
             }
         },
         {
             "name": "gcc",
             "hidden": true,
             "cacheVariables": {
-                "CMAKE_CXX_COMPILER": "g++",
-                "CMAKE_C_COMPILER": "gcc"
+                "CMAKE_CXX_COMPILER": "g++"
             }
         },
         {
@@ -97,9 +128,10 @@
             ]
         },
         {
-            "name": "gcc-shared-debug",
-            "displayName": "GCC Shared Debug",
+            "name": "linux-x64-gcc-shared-debug",
+            "displayName": "Linux x64 GCC Shared Debug",
             "inherits": [
+                "linux",
                 "core",
                 "gcc",
                 "shared",
@@ -107,9 +139,10 @@
             ]
         },
         {
-            "name": "gcc-static-debug",
-            "displayName": "GCC Static Debug",
+            "name": "linux-x64-gcc-static-debug",
+            "displayName": "Linux x64 GCC Static Debug",
             "inherits": [
+                "linux",
                 "core",
                 "gcc",
                 "static",
@@ -117,9 +150,10 @@
             ]
         },
         {
-            "name": "gcc-shared-release",
-            "displayName": "GCC Shared Release",
+            "name": "linux-x64-gcc-shared-release",
+            "displayName": "Linux x64 GCC Shared Release",
             "inherits": [
+                "linux",
                 "core",
                 "gcc",
                 "shared",
@@ -127,9 +161,10 @@
             ]
         },
         {
-            "name": "gcc-static-release",
-            "displayName": "GCC Static Release",
+            "name": "linux-x64-gcc-static-release",
+            "displayName": "Linux x64 GCC Static Release",
             "inherits": [
+                "linux",
                 "core",
                 "gcc",
                 "static",
@@ -137,20 +172,21 @@
             ]
         },
         {
-            "name": "gcc-shared-debug-vcpkg",
-            "displayName": "GCC Shared Debug Vcpkg",
+            "name": "linux-x64-gcc-shared-debug-vcpkg",
+            "displayName": "Linux x64 GCC Shared Debug Vcpkg",
             "inherits": [
+                "linux",
                 "core",
                 "gcc",
-                "shared",
                 "debug",
-                "vcpkg"
+                "vcpkg-x64-linux-shared"
             ]
         },
         {
-            "name": "gcc-static-debug-vcpkg",
-            "displayName": "GCC Static Debug Vcpkg",
+            "name": "linux-x64-gcc-static-debug-vcpkg",
+            "displayName": "Linux x64 GCC Static Debug Vcpkg",
             "inherits": [
+                "linux",
                 "core",
                 "gcc",
                 "static",
@@ -159,20 +195,21 @@
             ]
         },
         {
-            "name": "gcc-shared-release-vcpkg",
-            "displayName": "GCC Shared Release Vcpkg",
+            "name": "linux-x64-gcc-shared-release-vcpkg",
+            "displayName": "Linux x64 GCC Shared Release Vcpkg",
             "inherits": [
+                "linux",
                 "core",
                 "gcc",
-                "shared",
                 "release",
-                "vcpkg"
+                "vcpkg-x64-linux-shared"
             ]
         },
         {
-            "name": "gcc-static-release-vcpkg",
-            "displayName": "GCC Static Release Vcpkg",
+            "name": "linux-x64-gcc-static-release-vcpkg",
+            "displayName": "Linux x64 GCC Static Release Vcpkg",
             "inherits": [
+                "linux",
                 "core",
                 "gcc",
                 "static",
