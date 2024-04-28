@@ -22,9 +22,11 @@ watcher::watcher(const fspath& dir)
 {
 }
 
-watcher::~watcher() noexcept
-{
-}
+watcher::~watcher() noexcept = default;
+
+watcher::watcher(watcher&&) noexcept = default;
+
+watcher& watcher::operator=(watcher&&) noexcept = default;
 
 std::vector<direntry> watcher::watch()
 {

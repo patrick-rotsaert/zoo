@@ -50,18 +50,18 @@ public:
 
 	/// Create a connection that acquires a backend connection from the @a pool.
 	/// Returns std::nullopt immediately if no connection is available.
-	static ZOO_EXPORT std::optional<connection> create(connection_pool& pool);
+	static std::optional<connection> create(connection_pool& pool);
 
 	/// Create a connection that acquires a backend connection from the @a pool with a given @a timeout.
 	/// Returns std::nullopt if no connection is available within the specified timeout.
-	static ZOO_EXPORT std::optional<connection> create(connection_pool& pool, const std::chrono::milliseconds& timeout);
+	static std::optional<connection> create(connection_pool& pool, const std::chrono::milliseconds& timeout);
 
 	virtual ~connection() noexcept; ///FIXME?
 
-	connection(const connection&)            = delete;
-	connection(connection&& src)             = default;
+	connection(const connection&) = delete;
+	connection(connection&& src)  = default;
 	connection& operator=(const connection&) = delete;
-	connection& operator=(connection&&)      = default;
+	connection& operator=(connection&&) = default;
 
 	/// Execute a statement without parameter nor result bindings.
 	void execute(const std::string& query);

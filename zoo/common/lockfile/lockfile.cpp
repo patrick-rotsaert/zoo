@@ -21,9 +21,11 @@ lockfile::lockfile(const std::filesystem::path& path)
 {
 }
 
-lockfile::~lockfile() noexcept
-{
-}
+lockfile::~lockfile() noexcept = default;
+
+lockfile::lockfile(lockfile&&) noexcept = default;
+
+lockfile& lockfile::operator=(lockfile&&) noexcept = default;
 
 } // namespace lockfile
 } // namespace zoo

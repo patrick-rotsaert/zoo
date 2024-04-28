@@ -9,10 +9,16 @@ find_program(CPACK_COMMAND cpack REQUIRED)
 find_program(NINJA_COMMAND ninja REQUIRED)
 
 if(NOT BUILD_DIR)
-	set(BUILD_DIR /tmp/zoo-build)
+	if(WIN32)
+		set(BUILD_DIR $ENV{TEMP}/zoo-build)
+	else()
+		set(BUILD_DIR /tmp/zoo-build)
+	endif()
 endif()
 
 set(SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/..")
+
+set(EXTRA_CMAKE_ARGS)
 
 function(exec)
 	list(APPEND ARGN COMMAND_ERROR_IS_FATAL ANY)
@@ -23,14 +29,22 @@ function(exec)
 endfunction()
 
 function(configure BUILD_DIR BUILD_SHARED_LIBS CMAKE_BUILD_TYPE)
-	exec(
-		COMMAND ${CMAKE_COMMAND}
-			# -Wno-dev
-			-G Ninja
-			-S ${SOURCE_DIR} -B ${BUILD_DIR}
-			-DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS} -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-			-DZOO_BUILD_EXAMPLES:BOOL=NO
+	if(WIN32)
+		set(GENERATOR "Visual Studio 16 2019")
+	else()
+		set(GENERATOR Ninja)
+	endif()
+	set(ARGS
+		# -Wno-dev
+		-G "${GENERATOR}"
+		-S ${SOURCE_DIR} -B ${BUILD_DIR}
+		-DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS} -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+		-DZOO_BUILD_EXAMPLES:BOOL=NO
 	)
+	if(WIN32)
+		list(APPEND ARGS -DCMAKE_TOOLCHAIN_FILE=${SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
+	endif()
+	exec(COMMAND ${CMAKE_COMMAND} ${ARGS})
 endfunction()
 
 configure(${BUILD_DIR}/shared-release YES Release)
