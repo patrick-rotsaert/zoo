@@ -325,8 +325,9 @@ public:
 
 	void cancel()
 	{
-		auto c = char{};
-		write(this->cancelpipe_[1], &c, 1);
+		auto       c      = char{};
+		const auto unused = write(this->cancelpipe_[1], &c, 1);
+		(void)unused;
 	}
 };
 

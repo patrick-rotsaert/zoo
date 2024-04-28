@@ -25,10 +25,11 @@ endfunction()
 function(configure BUILD_DIR BUILD_SHARED_LIBS CMAKE_BUILD_TYPE)
 	exec(
 		COMMAND ${CMAKE_COMMAND}
-			-Wno-dev
+			# -Wno-dev
 			-G Ninja
 			-S ${SOURCE_DIR} -B ${BUILD_DIR}
 			-DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS} -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+			-DZOO_BUILD_EXAMPLES:BOOL=NO
 	)
 endfunction()
 
