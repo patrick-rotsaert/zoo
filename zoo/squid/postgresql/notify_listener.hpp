@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/squid/postgresql/config.h"
 #include "zoo/squid/postgresql/connection.h"
 #include "zoo/squid/postgresql/detail/libpqfwd.h"
 
@@ -22,7 +22,7 @@ namespace zoo {
 namespace squid {
 namespace postgresql {
 
-class ZOO_EXPORT notify_listener final : public std::enable_shared_from_this<notify_listener>
+class ZOO_SQUID_POSTGRESQL_API notify_listener final : public std::enable_shared_from_this<notify_listener>
 {
 	using callback_type     = std::function<void(const std::string& channel, int pid)>;
 	using stream_descriptor = boost::asio::posix::stream_descriptor;

@@ -7,14 +7,14 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/fs/core/config.h"
 #include "zoo/fs/core/fspath.h"
 #include <optional>
 
 namespace zoo {
 namespace fs {
 
-class ZOO_EXPORT destination final
+class ZOO_FS_CORE_API destination final
 {
 public:
 	enum class conflict_policy

@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/fs/local/config.h"
 #include "zoo/fs/core/ifile.h"
 #include "zoo/fs/core/iinterruptor.h"
 #include "zoo/fs/core/fspath.h"
@@ -16,10 +16,10 @@ namespace zoo {
 namespace fs {
 namespace local {
 
-class ZOO_EXPORT file final : public ifile
+class ZOO_FS_LOCAL_API file final : public ifile
 {
-	int                            fd_;
-	fspath                         path_;
+	int                           fd_;
+	fspath                        path_;
 	std::shared_ptr<iinterruptor> interruptor_;
 
 public:

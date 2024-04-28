@@ -7,14 +7,14 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/spider/config.h"
 
 #include <boost/beast/core/file_base.hpp>
 
 namespace zoo {
 namespace spider {
 
-class ZOO_EXPORT ifile_event_listener
+class ZOO_SPIDER_API ifile_event_listener
 {
 public:
 	using file_mode  = boost::beast::file_mode;

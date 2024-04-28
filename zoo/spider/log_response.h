@@ -7,8 +7,8 @@
 
 #pragma once
 
+#include "zoo/spider/config.h"
 #include "zoo/spider/aliases.h"
-#include "zoo/common/api.h"
 
 #include <boost/beast/http/message.hpp>
 #include <boost/beast/http/string_body.hpp>
@@ -17,8 +17,8 @@
 namespace zoo {
 namespace spider {
 
-ZOO_EXPORT http::response<http::string_body>&& log_response(http::response<http::string_body>&& res);
-ZOO_EXPORT http::response<http::empty_body>&& log_response(http::response<http::empty_body>&& res);
+ZOO_SPIDER_API http::response<http::string_body>&& log_response(http::response<http::string_body>&& res);
+ZOO_SPIDER_API http::response<http::empty_body>&& log_response(http::response<http::empty_body>&& res);
 
 } // namespace spider
 } // namespace zoo

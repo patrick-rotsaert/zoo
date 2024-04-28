@@ -7,12 +7,12 @@
 
 #pragma once
 
+#include "zoo/fs/sftp/config.h"
 #include "zoo/fs/sftp/sftp_session.h"
 #include "zoo/fs/sftp/issh_api.h"
 #include "zoo/fs/core/ifile.h"
 #include "zoo/fs/core/iinterruptor.h"
 #include "zoo/fs/core/fspath.h"
-#include "zoo/common/api.h"
 #include <memory>
 #include <cstddef>
 
@@ -20,7 +20,7 @@ namespace zoo {
 namespace fs {
 namespace sftp {
 
-class ZOO_EXPORT file final : public ifile
+class ZOO_FS_SFTP_API file final : public ifile
 {
 	issh_api*                     api_;
 	sftp_file                     fd_;

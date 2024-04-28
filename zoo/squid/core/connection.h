@@ -7,8 +7,8 @@
 
 #pragma once
 
+#include "zoo/squid/core/config.h"
 #include "zoo/squid/core/error.h"
-#include "zoo/common/api.h"
 
 #include <memory>
 #include <string_view>
@@ -18,7 +18,7 @@
 namespace zoo {
 namespace squid {
 
-class ZOO_EXPORT no_connection_available : public error
+class ZOO_SQUID_CORE_API no_connection_available : public error
 {
 public:
 	no_connection_available();
@@ -28,7 +28,7 @@ class ibackend_connection;
 class ibackend_connection_factory;
 class connection_pool;
 
-class ZOO_EXPORT connection
+class ZOO_SQUID_CORE_API connection
 {
 	std::shared_ptr<ibackend_connection> backend_;
 
@@ -58,10 +58,10 @@ public:
 
 	virtual ~connection() noexcept; ///FIXME?
 
-	connection(const connection&) = delete;
-	connection(connection&& src)  = default;
+	connection(const connection&)            = delete;
+	connection(connection&& src)             = default;
 	connection& operator=(const connection&) = delete;
-	connection& operator=(connection&&) = default;
+	connection& operator=(connection&&)      = default;
 
 	/// Execute a statement without parameter nor result bindings.
 	void execute(const std::string& query);

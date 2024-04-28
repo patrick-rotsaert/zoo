@@ -7,9 +7,9 @@
 
 #pragma once
 
+#include "zoo/spider/config.h"
 #include "zoo/spider/ifile_event_listener.h"
 #include "zoo/spider/aliases.h"
-#include "zoo/common/api.h"
 
 #include <boost/beast/core/file.hpp>
 
@@ -19,7 +19,7 @@ namespace zoo {
 namespace spider {
 
 // Wrapper around beast::file, for the purpose of tracking file read progress
-class ZOO_EXPORT tracked_file final
+class ZOO_SPIDER_API tracked_file final
 {
 	beast::file                           file_;
 	std::unique_ptr<ifile_event_listener> event_listener_;
@@ -38,7 +38,7 @@ public:
 	tracked_file(tracked_file&& other)      = default;
 	tracked_file(const tracked_file& other) = delete;
 
-	tracked_file& operator=(tracked_file&& other) = default;
+	tracked_file& operator=(tracked_file&& other)      = default;
 	tracked_file& operator=(const tracked_file& other) = delete;
 
 	native_handle_type native_handle();

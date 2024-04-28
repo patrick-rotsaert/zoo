@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "zoo/squid/sqlite3/config.h"
 #include "zoo/squid/sqlite3/detail/sqlite3fwd.h"
 #include "zoo/squid/core/ibackendstatement.h"
 
@@ -19,7 +20,7 @@ namespace sqlite {
 
 class isqlite_api;
 
-class statement final : public ibackend_statement
+class ZOO_SQUID_SQLITE_API statement final : public ibackend_statement
 {
 	class impl;
 	std::unique_ptr<impl> pimpl_;

@@ -8,14 +8,14 @@
 #pragma once
 
 #include "zoo/fs/sftp/issh_knownhosts.h"
-#include "zoo/common/api.h"
+#include "zoo/fs/sftp/config.h"
 #include <gmock/gmock.h>
 
 namespace zoo {
 namespace fs {
 namespace sftp {
 
-class ZOO_EXPORT mock_ssh_known_hosts : public issh_known_hosts
+class ZOO_FS_SFTP_API mock_ssh_known_hosts : public issh_known_hosts
 {
 public:
 	explicit mock_ssh_known_hosts();

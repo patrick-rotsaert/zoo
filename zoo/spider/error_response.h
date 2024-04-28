@@ -7,16 +7,16 @@
 
 #pragma once
 
+#include "zoo/spider/config.h"
 #include "zoo/spider/aliases.h"
 #include "zoo/spider/message.h"
-#include "zoo/common/api.h"
 
 #include <optional>
 
 namespace zoo {
 namespace spider {
 
-class ZOO_EXPORT error_response_factory final
+class ZOO_SPIDER_API error_response_factory final
 {
 public:
 	static response create(const request& req, http::status status, const std::optional<string_view>& html = std::nullopt);

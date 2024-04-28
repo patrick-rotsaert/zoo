@@ -7,9 +7,9 @@
 
 #pragma once
 
+#include "zoo/spider/config.h"
 #include "zoo/spider/aliases.h"
 #include "zoo/spider/message.h"
-#include "zoo/common/api.h"
 
 #include <boost/beast/http/message.hpp>
 #include <boost/beast/http/empty_body.hpp>
@@ -17,7 +17,7 @@
 namespace zoo {
 namespace spider {
 
-class ZOO_EXPORT empty_response final
+class ZOO_SPIDER_API empty_response final
 {
 	using empty = http::response<http::empty_body>;
 

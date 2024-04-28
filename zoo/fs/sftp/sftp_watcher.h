@@ -7,11 +7,11 @@
 
 #pragma once
 
+#include "zoo/fs/sftp/config.h"
 #include "zoo/fs/core/iaccess.h"
 #include "zoo/fs/core/iwatcher.h"
 #include "zoo/fs/core/iinterruptor.h"
 #include "zoo/fs/core/fspath.h"
-#include "zoo/common/api.h"
 #include <memory>
 #include <cstddef>
 
@@ -19,7 +19,7 @@ namespace zoo {
 namespace fs {
 namespace sftp {
 
-class ZOO_EXPORT watcher final : public iwatcher
+class ZOO_FS_SFTP_API watcher final : public iwatcher
 {
 	class impl;
 	std::unique_ptr<impl> pimpl_;
@@ -34,7 +34,7 @@ public:
 	watcher(watcher&&) noexcept;
 	watcher& operator=(watcher&&) noexcept;
 
-	watcher(const watcher&) = delete;
+	watcher(const watcher&)            = delete;
 	watcher& operator=(const watcher&) = delete;
 
 	std::vector<direntry> watch() override;

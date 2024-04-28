@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/spider/config.h"
 
 #include <boost/json/conversion.hpp>
 
@@ -15,7 +15,7 @@
 
 namespace std::chrono {
 
-void ZOO_EXPORT           tag_invoke(const boost::json::value_from_tag&, boost::json::value& out, const year_month_day& in);
-year_month_day ZOO_EXPORT tag_invoke(const boost::json::value_to_tag<year_month_day>&, const boost::json::value& in);
+void ZOO_SPIDER_API           tag_invoke(const boost::json::value_from_tag&, boost::json::value& out, const year_month_day& in);
+year_month_day ZOO_SPIDER_API tag_invoke(const boost::json::value_to_tag<year_month_day>&, const boost::json::value& in);
 
 } // namespace std::chrono

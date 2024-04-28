@@ -7,18 +7,18 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/fs/core/config.h"
 #include "zoo/fs/core/exceptions.h"
 #include <chrono>
 
 namespace zoo {
 namespace fs {
 
-struct ZOO_EXPORT interrupted_exception : public exception
+struct ZOO_FS_CORE_API interrupted_exception : public exception
 {
 };
 
-class ZOO_EXPORT iinterruptor
+class ZOO_FS_CORE_API iinterruptor
 {
 public:
 	virtual ~iinterruptor() noexcept;

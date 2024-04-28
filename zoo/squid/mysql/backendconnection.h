@@ -7,15 +7,15 @@
 
 #pragma once
 
+#include "zoo/squid/mysql/config.h"
 #include "zoo/squid/mysql/detail/mysqlfwd.h"
 #include "zoo/squid/core/ibackendconnection.h"
-#include "zoo/common/api.h"
 
 namespace zoo {
 namespace squid {
 namespace mysql {
 
-class ZOO_EXPORT backend_connection final : public ibackend_connection
+class ZOO_SQUID_MYSQL_API backend_connection final : public ibackend_connection
 {
 	std::shared_ptr<MYSQL> connection_;
 

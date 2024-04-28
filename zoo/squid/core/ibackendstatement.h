@@ -7,9 +7,9 @@
 
 #pragma once
 
+#include "zoo/squid/core/config.h"
 #include "zoo/squid/core/parameter.h"
 #include "zoo/squid/core/result.h"
-#include "zoo/common/api.h"
 
 #include <map>
 #include <vector>
@@ -19,7 +19,7 @@ namespace zoo {
 namespace squid {
 
 /// Interface for a backend statement
-class ZOO_EXPORT ibackend_statement
+class ZOO_SQUID_CORE_API ibackend_statement
 {
 public:
 	virtual ~ibackend_statement() noexcept;

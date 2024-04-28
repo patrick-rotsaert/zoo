@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/squid/core/config.h"
 
 #include <memory>
 #include <string_view>
@@ -18,7 +18,7 @@ namespace squid {
 class ibackend_statement;
 
 /// Interface for a backend connection
-class ZOO_EXPORT ibackend_connection
+class ZOO_SQUID_CORE_API ibackend_connection
 {
 public:
 	virtual ~ibackend_connection() noexcept;

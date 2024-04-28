@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/fs/core/config.h"
 #include "zoo/common/compat.h"
 #include <boost/system/api_config.hpp>
 #include <set>
@@ -19,7 +19,7 @@
 namespace zoo {
 namespace fs {
 
-class ZOO_EXPORT attributes final
+class ZOO_FS_CORE_API attributes final
 {
 public:
 	enum class filetype
@@ -64,11 +64,11 @@ public:
 	std::optional<std::string>                           owner, group;
 	std::optional<std::chrono::system_clock::time_point> atime, mtime, ctime;
 
-	attributes()                  = default;
-	attributes(const attributes&) = default;
-	attributes(attributes&& src)  = default;
+	attributes()                             = default;
+	attributes(const attributes&)            = default;
+	attributes(attributes&& src)             = default;
 	attributes& operator=(const attributes&) = default;
-	attributes& operator=(attributes&&) = default;
+	attributes& operator=(attributes&&)      = default;
 
 	bool is_dir() const;
 	bool is_reg() const;

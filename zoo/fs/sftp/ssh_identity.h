@@ -7,14 +7,14 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/fs/sftp/config.h"
 #include <string>
 
 namespace zoo {
 namespace fs {
 namespace sftp {
 
-class ZOO_EXPORT ssh_identity final
+class ZOO_FS_SFTP_API ssh_identity final
 {
 public:
 	std::string name;

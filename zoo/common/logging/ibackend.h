@@ -8,7 +8,7 @@
 #pragma once
 
 #include "zoo/common/logging/log_level.h"
-#include "zoo/common/api.h"
+#include "zoo/common/config.h"
 
 #include <boost/assert/source_location.hpp>
 
@@ -18,7 +18,7 @@
 namespace zoo {
 namespace logging {
 
-class ZOO_EXPORT ibackend
+class ZOO_COMMON_API ibackend
 {
 public:
 	ibackend();

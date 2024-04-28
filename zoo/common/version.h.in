@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/common/config.h"
 
 #define ZOO_VERSION_MAJOR ${${PROJECT_NAME}_VERSION_MAJOR}
 #define ZOO_VERSION_MINOR ${${PROJECT_NAME}_VERSION_MINOR}
@@ -24,7 +24,7 @@
 // clang-format on
 namespace zoo {
 
-class ZOO_EXPORT version final
+class ZOO_COMMON_API version final
 {
 	static int number(); // returns ZOO_VERSION_NUMBER
 

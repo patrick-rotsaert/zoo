@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/common/config.h"
 
 #include <filesystem>
 #include <memory>
@@ -15,7 +15,7 @@
 namespace zoo {
 namespace lockfile {
 
-class ZOO_EXPORT lockfile final
+class ZOO_COMMON_API lockfile final
 {
 	class impl;
 	std::unique_ptr<impl> pimpl_;
@@ -27,7 +27,7 @@ public:
 	lockfile(lockfile&&) noexcept;
 	lockfile& operator=(lockfile&&) noexcept;
 
-	lockfile(const lockfile&) = delete;
+	lockfile(const lockfile&)            = delete;
 	lockfile& operator=(const lockfile&) = delete;
 };
 

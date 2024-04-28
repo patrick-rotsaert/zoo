@@ -15,7 +15,7 @@
 namespace zoo {
 namespace logging {
 
-ZOO_EXPORT std::unique_ptr<ibackend> logging::backend = std::make_unique<spdlog_backend>();
+ZOO_COMMON_API std::unique_ptr<ibackend> logging::backend = std::make_unique<spdlog_backend>();
 
 void logging::set_backend(std::unique_ptr<ibackend>&& backend)
 {

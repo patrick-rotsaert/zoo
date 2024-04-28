@@ -7,13 +7,13 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/fs/core/config.h"
 #include "zoo/fs/core/fspath.h"
 
 namespace zoo {
 namespace fs {
 
-class ZOO_EXPORT source final
+class ZOO_FS_CORE_API source final
 {
 public:
 	fspath orig_path;

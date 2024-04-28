@@ -13,7 +13,7 @@
 namespace zoo {
 namespace fs {
 
-class ZOO_EXPORT mock_file : public ifile
+class ZOO_FS_CORE_API mock_file : public ifile
 {
 public:
 	explicit mock_file();

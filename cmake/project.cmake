@@ -45,6 +45,13 @@ function(add_project_library TARGET)
 	)
 	cmake_parse_arguments(P "${OPTIONS}" "${ONE_VALUE_ARGS}" "${MULTI_VALUE_ARGS}" ${ARGN})
 
+	string(TOUPPER ${TARGET} TARGET_UC)
+	configure_file(${PROJECT_SOURCE_DIR}/zoo/common/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h @ONLY)
+
+	if(ZOO_INSTALL)
+		install_project_header(${CMAKE_CURRENT_BINARY_DIR}/config.h ${PROJECT_BINARY_DIR})
+	endif()
+
 	# Set the target output name
 	set(TARGET_OUTPUT_NAME zoo_${TARGET})
 

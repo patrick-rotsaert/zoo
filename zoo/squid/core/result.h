@@ -7,9 +7,9 @@
 
 #pragma once
 
+#include "zoo/squid/core/config.h"
 #include "zoo/squid/core/types.h"
 #include "zoo/common/misc/is_optional.hpp"
-#include "zoo/common/api.h"
 
 #include <boost/date_time/gregorian/greg_date.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
@@ -25,7 +25,7 @@ namespace zoo {
 namespace squid {
 
 /// This class holds a pointer to a bound result column.
-class ZOO_EXPORT result final
+class ZOO_SQUID_CORE_API result final
 {
 public:
 	using non_nullable_type = std::variant< //

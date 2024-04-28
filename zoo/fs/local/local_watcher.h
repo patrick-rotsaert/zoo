@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/fs/local/config.h"
 #include "zoo/fs/core/iwatcher.h"
 #include "zoo/fs/core/fspath.h"
 #include <memory>
@@ -16,7 +16,7 @@ namespace zoo {
 namespace fs {
 namespace local {
 
-class ZOO_EXPORT watcher final : public iwatcher
+class ZOO_FS_LOCAL_API watcher final : public iwatcher
 {
 private:
 	class impl;
@@ -29,7 +29,7 @@ public:
 	watcher(watcher&&) noexcept;
 	watcher& operator=(watcher&&) noexcept;
 
-	watcher(const watcher&) = delete;
+	watcher(const watcher&)            = delete;
 	watcher& operator=(const watcher&) = delete;
 
 	std::vector<direntry> watch() override;

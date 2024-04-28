@@ -24,15 +24,3 @@
     #define ZOO_API_LOCAL
   #endif
 #endif
-
-#ifdef ZOO_SHARED // compiled as a shared library
-  #ifdef ZOO_SHARED_EXPORTS // defined if we are building the shared library
-    #define ZOO_EXPORT ZOO_API_EXPORT
-  #else
-    #define ZOO_EXPORT ZOO_API_IMPORT
-  #endif // ZOO_SHARED_EXPORTS
-  #define ZOO_LOCAL ZOO_API_LOCAL
-#else // compiled as a static library
-  #define ZOO_EXPORT
-  #define ZOO_LOCAL
-#endif // ZOO_SHARED

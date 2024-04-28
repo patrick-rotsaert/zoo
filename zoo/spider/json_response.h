@@ -7,9 +7,9 @@
 
 #pragma once
 
+#include "zoo/spider/config.h"
 #include "zoo/spider/aliases.h"
 #include "zoo/spider/message.h"
-#include "zoo/common/api.h"
 
 #include <boost/json.hpp>
 
@@ -24,7 +24,7 @@ namespace spider {
 template<typename T>
 concept ConvertibleToBoostJson = boost::json::is_described_class<T>::value;
 
-class ZOO_EXPORT json_response final
+class ZOO_SPIDER_API json_response final
 {
 	static response create_impl(const request& req, http::status status, std::string&& json);
 	static response create_impl(http::status status, std::string&& json);

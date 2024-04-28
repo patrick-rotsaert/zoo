@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/fs/local/config.h"
 #include "zoo/fs/core/iaccess.h"
 #include "zoo/fs/core/iinterruptor.h"
 #include <optional>
@@ -16,7 +16,7 @@ namespace zoo {
 namespace fs {
 namespace local {
 
-class ZOO_EXPORT access final : public iaccess
+class ZOO_FS_LOCAL_API access final : public iaccess
 {
 	std::shared_ptr<iinterruptor> interruptor_;
 

@@ -86,14 +86,8 @@ configure_file(
 	${CMAKE_CURRENT_BINARY_DIR}/version.h
 )
 
-configure_file(
-	config.h.in
-	${CMAKE_CURRENT_BINARY_DIR}/config.h
-)
-
 if(ZOO_INSTALL)
 	install_project_header(${CMAKE_CURRENT_BINARY_DIR}/version.h ${PROJECT_BINARY_DIR})
-	install_project_header(${CMAKE_CURRENT_BINARY_DIR}/config.h ${PROJECT_BINARY_DIR})
 endif()
 
 if(ZOO_BUILD_EXAMPLES)

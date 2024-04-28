@@ -7,9 +7,9 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
-#include "zoo/common/compat.h"
+#include "zoo/fs/core/config.h"
 #include "zoo/fs/core/fspath.h"
+#include "zoo/common/compat.h"
 #include <boost/system/api_config.hpp>
 #include <vector>
 #include <memory>
@@ -28,7 +28,7 @@ class attributes;
 class ifile;
 class iwatcher;
 
-class ZOO_EXPORT iaccess
+class ZOO_FS_CORE_API iaccess
 {
 public:
 	virtual ~iaccess() noexcept;

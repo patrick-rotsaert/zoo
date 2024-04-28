@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/fs/core/config.h"
 #include "zoo/fs/core/iaccess.h"
 #include "zoo/fs/core/fspath.h"
 #include "zoo/fs/core/source.h"
@@ -16,7 +16,7 @@
 namespace zoo {
 namespace fs {
 
-ZOO_LOCAL fspath make_dest_path(iaccess& source_access, const source& source, iaccess& dest_access, const destination& dest);
+ZOO_FS_CORE_LOCAL fspath make_dest_path(iaccess& source_access, const source& source, iaccess& dest_access, const destination& dest);
 
 } // namespace fs
 } // namespace zoo

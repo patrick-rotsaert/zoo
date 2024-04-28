@@ -7,12 +7,12 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/common/config.h"
 
 #include <string>
 
 namespace zoo {
 
-std::string ZOO_EXPORT demangle(const char* name);
+std::string ZOO_COMMON_API demangle(const char* name);
 
 } // namespace zoo

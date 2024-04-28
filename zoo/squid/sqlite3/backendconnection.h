@@ -7,9 +7,9 @@
 
 #pragma once
 
+#include "zoo/squid/sqlite3/config.h"
 #include "zoo/squid/sqlite3/detail/sqlite3fwd.h"
 #include "zoo/squid/core/ibackendconnection.h"
-#include "zoo/common/api.h"
 
 namespace zoo {
 namespace squid {
@@ -17,7 +17,7 @@ namespace sqlite {
 
 class isqlite_api;
 
-class ZOO_EXPORT backend_connection final : public ibackend_connection
+class ZOO_SQUID_SQLITE_API backend_connection final : public ibackend_connection
 {
 	isqlite_api*             api_;
 	std::shared_ptr<sqlite3> connection_;

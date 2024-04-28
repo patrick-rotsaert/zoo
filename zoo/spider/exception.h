@@ -7,8 +7,8 @@
 
 #pragma once
 
+#include "zoo/spider/config.h"
 #include "zoo/spider/aliases.h"
-#include "zoo/common/api.h"
 
 #include <boost/exception/all.hpp>
 #include <boost/exception/exception.hpp>
@@ -22,7 +22,7 @@ using ex_mesg   = boost::error_info<struct ex_mesg_, std::string>;
 using ex_code   = boost::error_info<struct ex_code_, int>;
 using ex_status = boost::error_info<struct ex_status_, http::status>;
 
-struct ZOO_EXPORT exception_base : virtual boost::exception, virtual std::exception
+struct ZOO_SPIDER_API exception_base : virtual boost::exception, virtual std::exception
 {
 	using mesg   = ex_mesg;
 	using code   = ex_code;

@@ -7,9 +7,9 @@
 
 #pragma once
 
+#include "zoo/squid/mysql/config.h"
 #include "zoo/squid/mysql/detail/mysqlfwd.h"
 #include "zoo/squid/core/error.h"
-#include "zoo/common/api.h"
 
 #include <optional>
 #include <string>
@@ -18,7 +18,7 @@ namespace zoo {
 namespace squid {
 namespace mysql {
 
-class ZOO_EXPORT error : public squid::error
+class ZOO_SQUID_MYSQL_API error : public squid::error
 {
 	std::optional<unsigned int> ec_;
 

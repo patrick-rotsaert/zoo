@@ -7,8 +7,8 @@
 
 #pragma once
 
+#include "zoo/squid/mysql/config.h"
 #include "zoo/squid/core/connection.h"
-#include "zoo/common/api.h"
 
 namespace zoo {
 namespace squid {
@@ -18,7 +18,7 @@ class backend_connection;
 
 // Convenience class to create a connection to an SQLite3 backend
 // This class should be used if access to the native connection handle (MYSQL) is needed.
-class ZOO_EXPORT connection final : public squid::connection
+class ZOO_SQUID_MYSQL_API connection final : public squid::connection
 {
 	std::shared_ptr<backend_connection> backend_;
 

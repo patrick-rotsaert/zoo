@@ -7,8 +7,8 @@
 
 #pragma once
 
+#include "zoo/squid/core/config.h"
 #include "zoo/squid/core/basicstatement.h"
-#include "zoo/common/api.h"
 
 #include <string_view>
 
@@ -19,7 +19,7 @@ class connection;
 
 /// This statement class is intended for bulk operations, i.e. prepare the statement
 /// once and execute it many times with different parameter bindings.
-class ZOO_EXPORT prepared_statement final : public basic_statement
+class ZOO_SQUID_CORE_API prepared_statement final : public basic_statement
 {
 	std::unique_ptr<ibackend_statement> create_statement(std::shared_ptr<ibackend_connection> connection, std::string_view query) override;
 

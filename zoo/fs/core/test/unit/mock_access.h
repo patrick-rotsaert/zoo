@@ -16,7 +16,7 @@
 namespace zoo {
 namespace fs {
 
-class ZOO_EXPORT mock_access : public iaccess
+class ZOO_FS_CORE_API mock_access : public iaccess
 {
 public:
 	explicit mock_access();

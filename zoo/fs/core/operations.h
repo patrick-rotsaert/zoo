@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/fs/core/config.h"
 #include "zoo/fs/core/iaccess.h"
 #include "zoo/fs/core/fspath.h"
 #include "zoo/fs/core/source.h"
@@ -19,14 +19,14 @@ namespace zoo {
 namespace fs {
 
 // TODO: add documentation
-ZOO_EXPORT void move_file(iaccess& access, source& source, const destination& dest);
+ZOO_FS_CORE_API void move_file(iaccess& access, source& source, const destination& dest);
 
 // TODO: add documentation
-ZOO_EXPORT fspath copy_file(iaccess&                                       source_access,
-                            const source&                                   source,
-                            iaccess&                                       dest_access,
-                            const destination&                              dest,
-                            std::function<void(std::uint64_t bytes_copied)> on_progress = nullptr);
+ZOO_FS_CORE_API fspath copy_file(iaccess&                                        source_access,
+                                 const source&                                   source,
+                                 iaccess&                                        dest_access,
+                                 const destination&                              dest,
+                                 std::function<void(std::uint64_t bytes_copied)> on_progress = nullptr);
 
 } // namespace fs
 } // namespace zoo

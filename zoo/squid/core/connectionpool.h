@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/squid/core/config.h"
 
 #include <memory>
 #include <string_view>
@@ -19,7 +19,7 @@ namespace squid {
 class ibackend_connection;
 class ibackend_connection_factory;
 
-class ZOO_EXPORT connection_pool final
+class ZOO_SQUID_CORE_API connection_pool final
 {
 	class impl;
 	std::unique_ptr<impl> pimpl_;
