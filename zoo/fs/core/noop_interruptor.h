@@ -7,12 +7,13 @@
 
 #pragma once
 
+#include "zoo/fs/core/config.h"
 #include "zoo/fs/core/iinterruptor.h"
 
 namespace zoo {
 namespace fs {
 
-class noop_interruptor final : public iinterruptor
+class ZOO_FS_CORE_API noop_interruptor final : public iinterruptor
 {
 	void interrupt() override;
 	bool is_interrupted() override;

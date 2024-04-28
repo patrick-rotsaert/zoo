@@ -140,7 +140,7 @@ function(add_project_library TARGET)
 		if(BUILD_SHARED_LIBS)
 			target_compile_definitions(${TARGET}
 				PUBLIC ZOO_SHARED
-				PRIVATE ZOO_SHARED_EXPORTS
+				PRIVATE ZOO_${TARGET_UC}_EXPORTS
 			)
 		endif()
 
