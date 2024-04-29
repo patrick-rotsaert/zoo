@@ -1,5 +1,8 @@
-# zoo
-TO DO...
+# libzoo
+
+{TO DO}:
+- Intro description
+- Short description of and links to sub projects
 
 # Building
 
@@ -7,6 +10,10 @@ Requirements:
 - C++20 compiler
 - CMake >= 3.25 if using [CMakePresets.json](CMakePresets.json)
 - CMake >= 3.19 otherwise
+
+## Windows
+
+{TO DO}
 
 ## Linux
 
@@ -97,3 +104,7 @@ cmake --preset linux-x64-gcc-static-release-vcpkg
 ```
 
 All dependencies will be downloaded and built by vcpkg.
+
+# Distribution
+
+{TO DO}
