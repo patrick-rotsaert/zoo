@@ -31,6 +31,7 @@ function(add_project_executable TARGET)
 	add_executable(${TARGET} ${ARGN})
 	
 	if (WIN32)
+		target_compile_definitions(${TARGET} PRIVATE "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:$<BUILD_INTERFACE:_WIN32_WINNT=0x0601>>")
 		add_custom_command(
 			TARGET ${TARGET} POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_RUNTIME_DLLS:${TARGET}> $<TARGET_FILE_DIR:${TARGET}>
@@ -141,9 +142,7 @@ function(add_project_library TARGET)
 		target_compile_options(${TARGET} PRIVATE $<$<CONFIG:RelWithDebInfo>:$<$<CXX_COMPILER_ID:GNU>:-O2;-ggdb3>>)
 
 		# Windows
-		target_compile_definitions(${TARGET} PRIVATE
-			"$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:$<BUILD_INTERFACE:_WIN32_WINNT=0x0601>>"
-		)
+		target_compile_definitions(${TARGET} PRIVATE "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:$<BUILD_INTERFACE:_WIN32_WINNT=0x0601>>")
 
 		# Set compiler definitions
 		if(P_PRIVATE_DEFINITIONS)

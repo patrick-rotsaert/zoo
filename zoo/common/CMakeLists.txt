@@ -65,22 +65,6 @@ add_project_library(common
 		common
 )
 
-#
-# Build time logging levels
-
-# Values are as in log_level.h
-set(LOGGING_LEVELS trace debug info warn err critical off)
-
-if(ZOO_DEBUG_BUILD)
-	set(DEFAULT_LOGGING_LEVEL trace)
-else()
-	set(DEFAULT_LOGGING_LEVEL warn)
-endif()
-
-# Logging verbosity of the library
-set(ZOO_LOGGING_LEVEL ${DEFAULT_LOGGING_LEVEL} CACHE STRING "Logging verbosity of the ${PROJECT_NAME} library")
-set_property(CACHE ZOO_LOGGING_LEVEL PROPERTY STRINGS ${LOGGING_LEVELS})
-
 configure_file(
 	version.h.in
 	${CMAKE_CURRENT_BINARY_DIR}/version.h

@@ -24,6 +24,16 @@ option(ZOO_SQUID_WITH_POSTGRESQL "Include Squid PostgreSQL backend" ON)
 option(ZOO_SQUID_WITH_MYSQL "Include Squid MySQL backend" ON)
 option(ZOO_SQUID_WITH_SQLITE3 "Include Squid SQLite3 backend" ON)
 
+# Logging verbosity of the library
+set(LOGGING_LEVELS trace debug info warn err critical off) # Values are as in zoo/common/logging/log_level.h
+if(ZOO_DEBUG_BUILD)
+	set(DEFAULT_LOGGING_LEVEL trace)
+else()
+	set(DEFAULT_LOGGING_LEVEL warn)
+endif()
+set(ZOO_LOGGING_LEVEL ${DEFAULT_LOGGING_LEVEL} CACHE STRING "Logging verbosity of the ${PROJECT_NAME} library")
+set_property(CACHE ZOO_LOGGING_LEVEL PROPERTY STRINGS ${LOGGING_LEVELS})
+
 if(ZOO_CPACK)
 	set(ZOO_INSTALL ON)
 endif()

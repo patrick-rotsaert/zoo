@@ -8,15 +8,15 @@
 find_program(CPACK_COMMAND cpack REQUIRED)
 find_program(NINJA_COMMAND ninja REQUIRED)
 
+set(SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/..")
+
 if(NOT BUILD_DIR)
 	if(WIN32)
-		set(BUILD_DIR $ENV{TEMP}/zoo-build)
+		set(BUILD_DIR ${SOURCE_DIR}/out/dist)
 	else()
 		set(BUILD_DIR /tmp/zoo-build)
 	endif()
 endif()
-
-set(SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/..")
 
 set(EXTRA_CMAKE_ARGS)
 
@@ -29,6 +29,9 @@ function(exec)
 endfunction()
 
 function(configure BUILD_DIR BUILD_SHARED_LIBS CMAKE_BUILD_TYPE)
+	message(STATUS "-----------")
+	message(STATUS "Configuring shared=${BUILD_SHARED_LIBS} type=${CMAKE_BUILD_TYPE}")
+	message(STATUS "-----------")
 	if(WIN32)
 		set(GENERATOR "Visual Studio 16 2019")
 	else()
@@ -53,6 +56,9 @@ configure(${BUILD_DIR}/static-release NO  Release)
 configure(${BUILD_DIR}/static-debug   NO  Debug)
 
 function(build BUILD_DIR)
+	message(STATUS "--------")
+	message(STATUS "Building ${BUILD_DIR}")
+	message(STATUS "--------")
 	exec(COMMAND ${CMAKE_COMMAND} --build ${BUILD_DIR})
 endfunction()
 
