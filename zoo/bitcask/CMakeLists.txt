@@ -22,6 +22,7 @@ add_project_library(bitcask
 		file.cpp
 		file.h
 		hton.h
+	# TODO: unit tests
 	PUBLIC_HEADERS
 		bitcask.h
 	PUBLIC_LIBRARIES
@@ -30,3 +31,7 @@ add_project_library(bitcask
 	FIND_PACKAGE_COMPONENT
 		bitcask
 )
+
+if(ZOO_BUILD_EXAMPLES)
+	add_subdirectory(examples)
+endif()
