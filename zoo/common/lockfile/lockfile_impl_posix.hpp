@@ -25,6 +25,7 @@ namespace lockfile {
 
 namespace detail {
 
+// FIXME: deduplicate
 class file_mutex_map_singleton final
 {
 	std::map<std::filesystem::path, std::unique_ptr<std::mutex>> map_{};
@@ -53,6 +54,7 @@ public:
 	}
 };
 
+// FIXME: deduplicate
 class in_process_lock final
 {
 	std::mutex& mutex_;

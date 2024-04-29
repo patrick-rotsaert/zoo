@@ -6,7 +6,6 @@
 #
 
 find_program(CPACK_COMMAND cpack REQUIRED)
-find_program(NINJA_COMMAND ninja REQUIRED)
 
 set(SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/..")
 
