@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/fs/local/config.h"
 #include "zoo/fs/core/direntry.h"
 #include "zoo/fs/core/fspath.h"
 #include <boost/filesystem/directory.hpp>
@@ -16,7 +16,7 @@ namespace zoo {
 namespace fs {
 namespace local {
 
-ZOO_LOCAL direntry make_direntry(const boost::filesystem::directory_entry& e);
+ZOO_FS_LOCAL_LOCAL direntry make_direntry(const boost::filesystem::directory_entry& e);
 
 }
 } // namespace fs

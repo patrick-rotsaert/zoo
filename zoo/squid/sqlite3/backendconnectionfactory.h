@@ -7,8 +7,8 @@
 
 #pragma once
 
+#include "zoo/squid/sqlite3/config.h"
 #include "zoo/squid/core/ibackendconnectionfactory.h"
-#include "zoo/common/api.h"
 
 namespace zoo {
 namespace squid {
@@ -16,7 +16,7 @@ namespace sqlite {
 
 class isqlite_api;
 
-class ZOO_EXPORT backend_connection_factory final : public ibackend_connection_factory
+class ZOO_SQUID_SQLITE_API backend_connection_factory final : public ibackend_connection_factory
 {
 	isqlite_api* api_;
 

@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/fs/sftp/config.h"
 #include "zoo/fs/core/attributes.h"
 #include <libssh/sftp.h>
 
@@ -15,7 +15,7 @@ namespace zoo {
 namespace fs {
 namespace sftp {
 
-ZOO_LOCAL attributes make_attributes(const sftp_attributes in);
+ZOO_FS_SFTP_LOCAL attributes make_attributes(const sftp_attributes in);
 
 } // namespace sftp
 } // namespace fs

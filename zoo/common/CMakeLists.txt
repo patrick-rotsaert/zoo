@@ -5,12 +5,15 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 #
 
-cmake_minimum_required(VERSION 3.19)
-
 set(EXTRA_PUBLIC_LIBRARIES)
 
 if(ZOO_THREAD_SAFE)
 	list(APPEND EXTRA_PUBLIC_LIBRARIES Threads::Threads)
+endif()
+
+if(WIN32)
+	# for boost::uuid
+	list(APPEND EXTRA_PUBLIC_LIBRARIES bcrypt)
 endif()
 
 add_project_library(common
@@ -18,6 +21,7 @@ add_project_library(common
 		conversion/conversion.cpp
 		lockfile/lockfile.cpp
 		lockfile/lockfile_impl_posix.hpp
+		lockfile/lockfile_impl_windows.hpp
 		logging/ibackend.cpp
 		logging/spdlog_backend.cpp
 		logging/logging.cpp
@@ -30,6 +34,7 @@ add_project_library(common
 		config.h.in
 	PUBLIC_HEADERS
 		api.h
+		compat.h
 		conversion/conversion.h
 		lockfile/lockfile.h
 		logging/ibackend.h
@@ -52,6 +57,7 @@ add_project_library(common
 	PUBLIC_LIBRARIES
 		fmt::fmt
 		spdlog::spdlog
+		Boost::boost
 		${EXTRA_PUBLIC_LIBRARIES}
 	PUBLIC_INCLUDE_DIRS
 		${PROJECT_BINARY_DIR} # for configured headers, see below
@@ -59,35 +65,13 @@ add_project_library(common
 		common
 )
 
-#
-# Build time logging levels
-
-# Values are as in log_level.h
-set(LOGGING_LEVELS trace debug info warn err critical off)
-
-if(ZOO_DEBUG_BUILD)
-	set(DEFAULT_LOGGING_LEVEL trace)
-else()
-	set(DEFAULT_LOGGING_LEVEL warn)
-endif()
-
-# Logging verbosity of the library
-set(ZOO_LOGGING_LEVEL ${DEFAULT_LOGGING_LEVEL} CACHE STRING "Logging verbosity of the ${PROJECT_NAME} library")
-set_property(CACHE ZOO_LOGGING_LEVEL PROPERTY STRINGS ${LOGGING_LEVELS})
-
 configure_file(
 	version.h.in
 	${CMAKE_CURRENT_BINARY_DIR}/version.h
 )
 
-configure_file(
-	config.h.in
-	${CMAKE_CURRENT_BINARY_DIR}/config.h
-)
-
 if(ZOO_INSTALL)
 	install_project_header(${CMAKE_CURRENT_BINARY_DIR}/version.h ${PROJECT_BINARY_DIR})
-	install_project_header(${CMAKE_CURRENT_BINARY_DIR}/config.h ${PROJECT_BINARY_DIR})
 endif()
 
 if(ZOO_BUILD_EXAMPLES)

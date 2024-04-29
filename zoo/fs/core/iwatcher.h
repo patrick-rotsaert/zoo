@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/fs/core/config.h"
 #include "zoo/fs/core/direntry.h"
 #include <vector>
 #include <memory>
@@ -15,12 +15,13 @@
 namespace zoo {
 namespace fs {
 
-class ZOO_EXPORT iwatcher
+class ZOO_FS_CORE_API iwatcher
 {
 public:
 	virtual ~iwatcher() noexcept;
 
-	virtual std::vector<direntry> watch() = 0;
+	virtual std::vector<direntry> watch()  = 0;
+	virtual void                  cancel() = 0;
 };
 
 } // namespace fs

@@ -95,7 +95,7 @@ class session::impl final
 
 	static void connect_status_callback(void* userdata, float status)
 	{
-		//zlog(trace,"connect status {}", status);
+		//ZOO_LOG(trace,"connect status {}", status);
 		(void)status;
 
 		auto self = reinterpret_cast<impl*>(userdata);
@@ -122,7 +122,7 @@ class session::impl final
 		this->api_->ssh_set_callbacks(ssh.get(), &cb);
 
 		// CONNECT
-		zlog(debug, "connect host={}, port={}", this->opts_.host, this->opts_.port);
+		ZOO_LOG(debug, "connect host={}, port={}", this->opts_.host, this->opts_.port);
 
 		this->api_->ssh_options_set(ssh.get(), SSH_OPTIONS_HOST, this->opts_.host.c_str());
 
@@ -139,7 +139,7 @@ class session::impl final
 		this->interruptor_->throw_if_interrupted();
 
 		// VERIFY HOST KEY
-		zlog(debug, "verify host key");
+		ZOO_LOG(debug, "verify host key");
 
 		{
 			const auto pubkey = ssh_server_pubkey{ this->api_, ssh.get() };
@@ -148,10 +148,10 @@ class session::impl final
 			switch (this->known_hosts_->verify(this->opts_.host, hash.hash()))
 			{
 			case issh_known_hosts::result::KNOWN:
-				zlog(debug, "host is known");
+				ZOO_LOG(debug, "host is known");
 				break;
 			case issh_known_hosts::result::UNKNOWN:
-				zlog(debug, "host is unknown");
+				ZOO_LOG(debug, "host is unknown");
 				if (this->opts_.allow_unknown_host_key)
 				{
 					this->known_hosts_->persist(this->opts_.host, hash.hash());
@@ -164,7 +164,7 @@ class session::impl final
 				}
 				break;
 			case issh_known_hosts::result::CHANGED:
-				zlog(warn, "host key changed");
+				ZOO_LOG(warn, "host key changed");
 				if (this->opts_.allow_changed_host_key)
 				{
 					this->known_hosts_->persist(this->opts_.host, hash.hash());
@@ -182,7 +182,7 @@ class session::impl final
 		this->interruptor_->throw_if_interrupted();
 
 		// AUTHENTICATE
-		zlog(debug, "authenticate user {}", this->opts_.user);
+		ZOO_LOG(debug, "authenticate user {}", this->opts_.user);
 
 		{
 			// NOTE: ssh_userauth_list requires the function ssh_userauth_none() to be called before the methods are available.
@@ -198,16 +198,16 @@ class session::impl final
 			{
 				this->interruptor_->throw_if_interrupted();
 
-				zlog(trace, "attempting NONE authentication");
+				ZOO_LOG(trace, "attempting NONE authentication");
 				const auto rc = this->api_->ssh_userauth_none(ssh.get(), this->opts_.user.c_str());
 				if (rc == SSH_AUTH_SUCCESS)
 				{
-					zlog(info, "NONE authentication successful");
+					ZOO_LOG(info, "NONE authentication successful");
 					authenticated = true;
 				}
 				else
 				{
-					zlog(err, "NONE authentication failed: {}", this->api_->ssh_get_error(ssh.get()));
+					ZOO_LOG(err, "NONE authentication failed: {}", this->api_->ssh_get_error(ssh.get()));
 				}
 			}
 
@@ -217,7 +217,7 @@ class session::impl final
 				{
 					this->interruptor_->throw_if_interrupted();
 
-					zlog(debug, "attempting public key authentication with identity '{}'", identity->name);
+					ZOO_LOG(debug, "attempting public key authentication with identity '{}'", identity->name);
 					const auto pkey   = ssh_private_key{ this->api_, identity->pkey };
 					const auto pubkey = ssh_public_key{ this->api_, pkey };
 					auto       rc     = this->api_->ssh_userauth_try_publickey(ssh.get(), nullptr, pubkey.key().get());
@@ -226,7 +226,7 @@ class session::impl final
 						rc = this->api_->ssh_userauth_publickey(ssh.get(), this->opts_.user.c_str(), pkey.key().get());
 						if (rc == SSH_AUTH_SUCCESS)
 						{
-							zlog(info, "public key authentication successful with identity '{}'", identity->name);
+							ZOO_LOG(info, "public key authentication successful with identity '{}'", identity->name);
 							authenticated = true;
 							break;
 						}
@@ -237,12 +237,12 @@ class session::impl final
 						else
 						{
 							// do not throw, this error is probably not fatal and another auth method might still succeed
-							zlog(err, "Public key authentication failed: {}", this->api_->ssh_get_error(ssh.get()));
+							ZOO_LOG(err, "Public key authentication failed: {}", this->api_->ssh_get_error(ssh.get()));
 						}
 					}
 					else if (rc == SSH_AUTH_DENIED)
 					{
-						zlog(debug, "server refused public key");
+						ZOO_LOG(debug, "server refused public key");
 					}
 					else if (rc == SSH_AUTH_ERROR)
 					{
@@ -251,7 +251,7 @@ class session::impl final
 					else
 					{
 						// do not throw, this error is probably not fatal and another auth method might still succeed
-						zlog(err, "Public key authentication failed: {}", this->api_->ssh_get_error(ssh.get()));
+						ZOO_LOG(err, "Public key authentication failed: {}", this->api_->ssh_get_error(ssh.get()));
 					}
 				}
 			}
@@ -260,16 +260,16 @@ class session::impl final
 			{
 				this->interruptor_->throw_if_interrupted();
 
-				zlog(trace, "attempting password authentication");
+				ZOO_LOG(trace, "attempting password authentication");
 				const auto rc = this->api_->ssh_userauth_password(ssh.get(), this->opts_.user.c_str(), this->opts_.password->c_str());
 				if (rc == SSH_AUTH_SUCCESS)
 				{
-					zlog(info, "password authentication successful");
+					ZOO_LOG(info, "password authentication successful");
 					authenticated = true;
 				}
 				else
 				{
-					zlog(err, "Password authentication failed: {}", this->api_->ssh_get_error(ssh.get()));
+					ZOO_LOG(err, "Password authentication failed: {}", this->api_->ssh_get_error(ssh.get()));
 				}
 			}
 
@@ -289,7 +289,7 @@ class session::impl final
 		auto ssh = this->ssh();
 
 		// SFTP session
-		zlog(debug, "create sftp session");
+		ZOO_LOG(debug, "create sftp session");
 
 		const auto sftp = sftp_session_ptr{ this->api_->sftp_new(ssh), [this](auto s) {
 			                                   if (s)

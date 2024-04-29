@@ -7,12 +7,12 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/common/config.h"
 
 #include <string>
 
 namespace zoo {
 
-std::string ZOO_EXPORT quoted_c(std::string_view data);
+std::string ZOO_COMMON_API quoted_c(std::string_view data);
 
 } // namespace zoo

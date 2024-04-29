@@ -7,9 +7,9 @@
 
 #pragma once
 
+#include "zoo/spider/config.h"
 #include "zoo/spider/irequest_handler.h"
 #include "zoo/spider/aliases.h"
-#include "zoo/common/api.h"
 
 #include <string_view>
 #include <cstdint>
@@ -19,7 +19,7 @@ namespace zoo {
 namespace spider {
 
 // Accepts incoming connections and launches the sessions
-class ZOO_EXPORT listener final
+class ZOO_SPIDER_API listener final
 {
 public:
 	// Start accepting incoming connections

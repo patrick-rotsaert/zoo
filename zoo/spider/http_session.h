@@ -7,9 +7,9 @@
 
 #pragma once
 
+#include "zoo/spider/config.h"
 #include "zoo/spider/irequest_handler.h"
 #include "zoo/spider/aliases.h"
-#include "zoo/common/api.h"
 
 #include <boost/asio/ip/tcp.hpp>
 
@@ -19,7 +19,7 @@ namespace zoo {
 namespace spider {
 
 // Handles an HTTP server connection
-class ZOO_EXPORT http_session final : public std::enable_shared_from_this<http_session>
+class ZOO_SPIDER_API http_session final : public std::enable_shared_from_this<http_session>
 {
 	static constexpr std::size_t queue_limit = 8; // max number of queued responses
 

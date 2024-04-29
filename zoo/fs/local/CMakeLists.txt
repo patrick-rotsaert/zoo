@@ -10,6 +10,8 @@ add_project_library(fs_local
 		local_access.cpp
 		local_watcher.cpp
 		local_watcher.h
+		local_watcher_impl_posix.hpp
+		local_watcher_impl_windows.hpp
 		local_file.cpp
 		local_file.h
 		make_attributes.cpp
@@ -37,3 +39,7 @@ add_project_library(fs_local
 	FIND_PACKAGE_COMPONENT
 		fs
 )
+
+if(ZOO_BUILD_EXAMPLES)
+	add_subdirectory(examples)
+endif()

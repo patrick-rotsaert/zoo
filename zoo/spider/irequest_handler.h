@@ -7,14 +7,14 @@
 
 #pragma once
 
+#include "zoo/spider/config.h"
 #include "zoo/spider/aliases.h"
 #include "zoo/spider/message.h"
-#include "zoo/common/api.h"
 
 namespace zoo {
 namespace spider {
 
-class ZOO_EXPORT irequest_handler
+class ZOO_SPIDER_API irequest_handler
 {
 public:
 	irequest_handler();

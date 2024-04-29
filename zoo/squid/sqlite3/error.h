@@ -7,9 +7,9 @@
 
 #pragma once
 
+#include "zoo/squid/sqlite3/config.h"
 #include "zoo/squid/sqlite3/detail/sqlite3fwd.h"
 #include "zoo/squid/core/error.h"
-#include "zoo/common/api.h"
 
 #include <optional>
 #include <string>
@@ -20,7 +20,7 @@ namespace sqlite {
 
 class isqlite_api;
 
-class ZOO_EXPORT error : public squid::error
+class ZOO_SQUID_SQLITE_API error : public squid::error
 {
 	std::optional<int> ec_;
 

@@ -7,13 +7,13 @@
 
 #pragma once
 
+#include "zoo/spider/config.h"
 #include "zoo/spider/ifile_event_listener.h"
-#include "zoo/common/api.h"
 
 namespace zoo {
 namespace spider {
 
-class ZOO_EXPORT noop_file_event_listener : public ifile_event_listener
+class ZOO_SPIDER_API noop_file_event_listener : public ifile_event_listener
 {
 public:
 	noop_file_event_listener();

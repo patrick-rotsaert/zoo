@@ -7,14 +7,14 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/squid/core/config.h"
 
 namespace zoo {
 namespace squid {
 
 class connection;
 
-class ZOO_EXPORT transaction final
+class ZOO_SQUID_CORE_API transaction final
 {
 	connection& connection_;
 	bool        finished_;

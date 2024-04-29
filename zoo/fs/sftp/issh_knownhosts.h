@@ -7,14 +7,14 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/fs/sftp/config.h"
 #include <string>
 
 namespace zoo {
 namespace fs {
 namespace sftp {
 
-class ZOO_EXPORT issh_known_hosts
+class ZOO_FS_SFTP_API issh_known_hosts
 {
 public:
 	enum class result

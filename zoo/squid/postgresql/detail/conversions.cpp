@@ -35,6 +35,22 @@ byte_string::value_type hex_char_to_nibble(char c)
 	}
 }
 
+template<class It>
+void binary_to_hex_string_internal(It begin, It end, std::string& out)
+{
+	constexpr auto hex = "0123456789ABCDEF";
+
+	out.resize(2 + 2 * std::distance(begin, end));
+	auto p = out.data();
+	*p++   = '\\';
+	*p++   = 'x';
+	for (auto it = begin; it < end; ++it)
+	{
+		*p++ = hex[*it >> 4];
+		*p++ = hex[*it & 15];
+	}
+}
+
 } // namespace
 
 void hex_string_to_binary(std::string_view in, byte_string& out)
@@ -68,17 +84,7 @@ byte_string hex_string_to_binary(std::string_view in)
 
 void binary_to_hex_string(const unsigned char* begin, const unsigned char* end, std::string& out)
 {
-	constexpr auto hex = "0123456789ABCDEF";
-
-	out.resize(2 + 2 * std::distance(begin, end));
-	auto p = out.data();
-	*p++   = '\\';
-	*p++   = 'x';
-	for (auto it = begin; it < end; ++it)
-	{
-		*p++ = hex[*it >> 4];
-		*p++ = hex[*it & 15];
-	}
+	return binary_to_hex_string_internal(begin, end, out);
 }
 
 std::string binary_to_hex_string(const unsigned char* begin, const unsigned char* end)
@@ -90,7 +96,7 @@ std::string binary_to_hex_string(const unsigned char* begin, const unsigned char
 
 void binary_to_hex_string(byte_string_view in, std::string& out)
 {
-	binary_to_hex_string(&(*in.begin()), &(*in.end()), out);
+	binary_to_hex_string_internal(in.begin(), in.end(), out);
 }
 
 std::string binary_to_hex_string(byte_string_view in)

@@ -40,8 +40,9 @@ fspath make_dest_path(iaccess& source_access, const source& source, iaccess& des
 		const auto mtime = source_access.stat(source.current_path).mtime;
 		if (mtime)
 		{
-			const auto tm = dest.expand_time_placeholders.value() == destination::time_expansion::LOCAL ? fmt::localtime(mtime.value())
-			                                                                                            : fmt::gmtime(mtime.value());
+			const auto tm = dest.expand_time_placeholders.value() == destination::time_expansion::LOCAL
+			                    ? fmt::localtime(std::chrono::system_clock::to_time_t(mtime.value()))
+			                    : fmt::gmtime(std::chrono::system_clock::to_time_t(mtime.value()));
 			new_path      = fmt::format(fmt::runtime(new_path.string()), tm);
 		}
 		else

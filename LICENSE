@@ -21,3 +21,14 @@ SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
 FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
+
+~~~
+
+Dependency licenses:
+- The Boost license: idem
+- The fmtlib license: https://github.com/fmtlib/fmt/blob/master/LICENSE
+- The spdlog license: https://github.com/gabime/spdlog/blob/master/LICENSE
+- The PostgreSQL (libpq) license: https://github.com/supabase/postgres/blob/develop/LICENSE
+- The MySQL license (libmysqlclient): https://github.com/mysql/mysql-server/blob/trunk/LICENSE
+- The SQLite license: https://github.com/sqlite/sqlite/blob/master/LICENSE.md
+- The Google Test/Mock license: https://github.com/google/googletest/blob/main/LICENSE

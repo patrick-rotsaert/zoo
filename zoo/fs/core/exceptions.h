@@ -8,8 +8,8 @@
 #pragma once
 
 #include "zoo/fs/core/fspath.h"
+#include "zoo/fs/core/config.h"
 #include "zoo/common/misc/throw_exception.h"
-#include "zoo/common/api.h"
 
 #include <boost/exception/exception.hpp>
 #include <boost/exception/error_info.hpp>
@@ -42,7 +42,7 @@ namespace fs {
 #define EXPAND(name, type) using name = boost::error_info<struct name##_, type>;
 FS_ERROR_INFO_TAGS(EXPAND)
 
-class ZOO_EXPORT exception : public std::exception, public boost::exception
+class ZOO_FS_CORE_API exception : public std::exception, public boost::exception
 {
 public:
 	using mesg = error_mesg;
@@ -55,15 +55,15 @@ public:
 	const char* what() const noexcept override;
 };
 
-struct should_not_happen_exception : public exception
+struct ZOO_FS_CORE_API should_not_happen_exception : public exception
 {
 };
 
-struct invalid_argument_exception : public exception
+struct ZOO_FS_CORE_API invalid_argument_exception : public exception
 {
 };
 
-class system_exception : public exception
+class ZOO_FS_CORE_API system_exception : public exception
 {
 public:
 	system_exception();

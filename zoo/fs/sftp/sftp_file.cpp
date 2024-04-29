@@ -24,14 +24,14 @@ file::file(issh_api* api, sftp_file fd, const fspath& path, std::shared_ptr<sess
 
 file::~file() noexcept
 {
-	zlog(trace, "sftp_close fd={}", fmt::ptr(this->fd_));
+	ZOO_LOG(trace, "sftp_close fd={}", fmt::ptr(this->fd_));
 	this->api_->sftp_close(this->fd_);
 }
 
 std::size_t file::read(void* buf, std::size_t count)
 {
 	this->interruptor_->throw_if_interrupted();
-	zlog(trace, "sftp_read fd={} count={}", fmt::ptr(this->fd_), count);
+	ZOO_LOG(trace, "sftp_read fd={} count={}", fmt::ptr(this->fd_), count);
 	const auto rc = this->api_->sftp_read(this->fd_, buf, count);
 	if (rc < 0)
 	{
@@ -43,7 +43,7 @@ std::size_t file::read(void* buf, std::size_t count)
 std::size_t file::write(const void* buf, std::size_t count)
 {
 	this->interruptor_->throw_if_interrupted();
-	zlog(trace, "sftp_write fd={} count={}", fmt::ptr(this->fd_), count);
+	ZOO_LOG(trace, "sftp_write fd={} count={}", fmt::ptr(this->fd_), count);
 	const auto rc = this->api_->sftp_write(this->fd_, buf, count);
 	if (rc < 0)
 	{

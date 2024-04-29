@@ -7,6 +7,16 @@
 
 include_guard(GLOBAL)
 
+include(${PROJECT_SOURCE_DIR}/cmake/options.cmake)
+
 if(ZOO_SQUID_WITH_SQLITE3)
-	find_package(SQLite3 REQUIRED)
+	# If this project is included as a subdirectory, the MySQL::MySQL target may already be defined.
+	if(NOT TARGET SQLite::SQLite3)
+		project_find_package(unofficial-sqlite3 CONFIG QUIET)
+		if(unofficial-sqlite3_FOUND)
+			add_library(SQLite::SQLite3 ALIAS unofficial::sqlite3::sqlite3)
+		else()
+			project_find_package(SQLite3 REQUIRED)
+		endif()
+	endif()
 endif()

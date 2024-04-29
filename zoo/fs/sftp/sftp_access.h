@@ -7,12 +7,12 @@
 
 #pragma once
 
+#include "zoo/fs/sftp/config.h"
 #include "zoo/fs/sftp/sftp_options.h"
 #include "zoo/fs/sftp/issh_knownhosts.h"
 #include "zoo/fs/sftp/issh_identity_factory.h"
 #include "zoo/fs/core/iaccess.h"
 #include "zoo/fs/core/iinterruptor.h"
-#include "zoo/common/api.h"
 #include <optional>
 #include <memory>
 
@@ -22,7 +22,7 @@ namespace sftp {
 
 class issh_api;
 
-class ZOO_EXPORT access final : public iaccess
+class ZOO_FS_SFTP_API access final : public iaccess
 {
 	class impl;
 	std::shared_ptr<impl> pimpl_;
@@ -58,7 +58,7 @@ public:
 	void                      mkdir(const fspath& path, bool parents) override;
 	void                      rename(const fspath& oldpath, const fspath& newpath) override;
 	std::unique_ptr<ifile>    open(const fspath& path, int flags, mode_t mode) override;
-	std::shared_ptr<iwatcher> create_watcher(const fspath& dir, int cancelfd) override;
+	std::shared_ptr<iwatcher> create_watcher(const fspath& dir) override;
 };
 
 } // namespace sftp

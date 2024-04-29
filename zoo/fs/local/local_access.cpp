@@ -14,23 +14,14 @@
 #include "zoo/fs/core/exceptions.h"
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/formatters.hpp"
+#include "zoo/common/compat.h"
 #include <boost/filesystem/operations.hpp>
 #include <boost/scoped_array.hpp>
 #include <optional>
 #include <chrono>
 
 //#define BOOST_STACKTRACE_USE_BACKTRACE
-#include <boost/stacktrace.hpp>
-
-#ifdef BOOST_WINDOWS_API
-#include <io.h>
-#endif
-
-#ifdef BOOST_WINDOWS_API
-#define c_open(pathname, flags, mode) ::_open(pathname, flags, mode)
-#else
-#define c_open(pathname, flags, mode) ::open(pathname, flags, mode)
-#endif
+//#include <boost/stacktrace.hpp>
 
 #define THROW_PATH_OP_ERROR(path, opname) ZOO_THROW_EXCEPTION(system_exception{} << error_path{ path } << error_opname{ opname })
 
@@ -41,8 +32,8 @@ namespace local {
 access::access(std::shared_ptr<iinterruptor> interruptor)
     : interruptor_{ interruptor }
 {
-	//zlog(trace,"local access\n{}", boost::stacktrace::stacktrace());
-	zlog(trace, "local access");
+	//ZOO_LOG(trace,"local access\n{}", boost::stacktrace::stacktrace());
+	ZOO_LOG(trace, "local access");
 }
 
 bool access::is_remote() const
@@ -65,7 +56,7 @@ std::vector<direntry> access::ls(const fspath& dir)
 bool access::exists(const fspath& path)
 {
 	this->interruptor_->throw_if_interrupted();
-	zlog(trace, "exists path={}", path);
+	ZOO_LOG(trace, "exists path={}", path);
 	return boost::filesystem::exists(path);
 }
 
@@ -73,7 +64,7 @@ std::optional<attributes> access::try_stat(const fspath& path)
 {
 	this->interruptor_->throw_if_interrupted();
 
-	zlog(trace, "try_stat path={}", path);
+	ZOO_LOG(trace, "try_stat path={}", path);
 	auto       ec = boost::system::error_code{};
 	const auto st = boost::filesystem::directory_entry{ path }.status(ec);
 	if (ec == boost::system::errc::no_such_file_or_directory)
@@ -92,7 +83,7 @@ attributes access::stat(const fspath& path)
 {
 	this->interruptor_->throw_if_interrupted();
 
-	zlog(trace, "stat path={}", path);
+	ZOO_LOG(trace, "stat path={}", path);
 	auto       ec = boost::system::error_code{};
 	const auto st = boost::filesystem::directory_entry{ path }.status(ec);
 	if (ec)
@@ -107,7 +98,7 @@ std::optional<attributes> access::try_lstat(const fspath& path)
 {
 	this->interruptor_->throw_if_interrupted();
 
-	zlog(trace, "lstat path={}", path);
+	ZOO_LOG(trace, "lstat path={}", path);
 	auto       ec = boost::system::error_code{};
 	const auto st = boost::filesystem::directory_entry{ path }.symlink_status(ec);
 	if (ec == boost::system::errc::no_such_file_or_directory)
@@ -126,7 +117,7 @@ attributes access::lstat(const fspath& path)
 {
 	this->interruptor_->throw_if_interrupted();
 
-	zlog(trace, "lstat path={}", path);
+	ZOO_LOG(trace, "lstat path={}", path);
 	auto       ec = boost::system::error_code{};
 	const auto st = boost::filesystem::directory_entry{ path }.symlink_status(ec);
 	if (ec)
@@ -141,7 +132,7 @@ void access::remove(const fspath& path)
 {
 	this->interruptor_->throw_if_interrupted();
 
-	zlog(trace, "remove path={}", path);
+	ZOO_LOG(trace, "remove path={}", path);
 	auto ec = boost::system::error_code{};
 	boost::filesystem::remove(path, ec);
 	if (ec)
@@ -156,7 +147,7 @@ void access::mkdir(const fspath& path, bool parents)
 
 	if (parents)
 	{
-		zlog(trace, "create_directories path={}", path);
+		ZOO_LOG(trace, "create_directories path={}", path);
 		auto ec = boost::system::error_code{};
 		boost::filesystem::create_directories(path, ec);
 		if (ec.failed())
@@ -166,7 +157,7 @@ void access::mkdir(const fspath& path, bool parents)
 	}
 	else
 	{
-		zlog(trace, "create_directory path={}", path);
+		ZOO_LOG(trace, "create_directory path={}", path);
 		auto ec = boost::system::error_code{};
 		boost::filesystem::create_directory(path, ec);
 		if (ec.failed())
@@ -180,7 +171,7 @@ void access::rename(const fspath& oldpath, const fspath& newpath)
 {
 	this->interruptor_->throw_if_interrupted();
 
-	zlog(trace, "rename oldpath={} newpath={}", oldpath, newpath);
+	ZOO_LOG(trace, "rename oldpath={} newpath={}", oldpath, newpath);
 	auto ec = boost::system::error_code{};
 	boost::filesystem::rename(oldpath, newpath, ec);
 	if (ec.failed())
@@ -194,9 +185,9 @@ std::unique_ptr<ifile> access::open(const fspath& path, int flags, mode_t mode)
 {
 	this->interruptor_->throw_if_interrupted();
 
-	zlog(trace, "open path={} flags={:o} mode={:o}", path, flags, mode);
+	ZOO_LOG(trace, "open path={} flags={:o} mode={:o}", path, flags, mode);
 	const auto fd = c_open(path.string().c_str(), flags, mode);
-	zlog(trace, "fd {}", fd);
+	ZOO_LOG(trace, "fd {}", fd);
 	if (fd == -1)
 	{
 		THROW_PATH_OP_ERROR(path, "open");
@@ -207,9 +198,9 @@ std::unique_ptr<ifile> access::open(const fspath& path, int flags, mode_t mode)
 	}
 }
 
-std::shared_ptr<iwatcher> access::create_watcher(const fspath& dir, int cancelfd)
+std::shared_ptr<iwatcher> access::create_watcher(const fspath& dir)
 {
-	return std::make_shared<watcher>(dir, cancelfd);
+	return std::make_shared<watcher>(dir);
 }
 
 direntry access::get_direntry(const fspath& path)

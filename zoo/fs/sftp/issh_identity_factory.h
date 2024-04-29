@@ -7,8 +7,8 @@
 
 #pragma once
 
+#include "zoo/fs/sftp/config.h"
 #include "zoo/fs/sftp/ssh_identity.h"
-#include "zoo/common/api.h"
 #include <memory>
 #include <vector>
 
@@ -16,7 +16,7 @@ namespace zoo {
 namespace fs {
 namespace sftp {
 
-class ZOO_EXPORT issh_identity_factory
+class ZOO_FS_SFTP_API issh_identity_factory
 {
 public:
 	virtual ~issh_identity_factory() noexcept;

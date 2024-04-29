@@ -26,6 +26,10 @@
 
 #include <fcntl.h>
 
+#if defined(_MSC_VER)
+#pragma warning(disable : 4458)
+#endif
+
 namespace zoo {
 namespace bitcask {
 
@@ -301,8 +305,8 @@ public:
 		auto header = record_header{};
 
 		header.version  = version;
-		header.ksz      = key.length();
-		header.value_sz = value.length();
+		header.ksz      = static_cast<ksz_type>(key.length());
+		header.value_sz = static_cast<value_sz_type>(value.length());
 		header.init_crc();
 
 		if (!key.empty())
@@ -345,7 +349,7 @@ public:
 		auto header = record_header{};
 
 		header.version  = version;
-		header.ksz      = key.length();
+		header.ksz      = static_cast<ksz_type>(key.length());
 		header.value_sz = deleted_value_sz;
 		header.init_crc();
 

@@ -5,8 +5,6 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 #
 
-cmake_minimum_required(VERSION 3.19)
-
 add_project_library(squid_demo_common
 	SOURCES
 		demo_common.cpp

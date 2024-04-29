@@ -103,9 +103,11 @@ request_router::request_router()
 {
 }
 
-request_router::~request_router() noexcept
-{
-}
+request_router::~request_router() noexcept = default;
+
+request_router::request_router(request_router&&) = default;
+
+request_router& request_router::operator=(request_router&&) = default;
 
 message_generator request_router::route_request(request&& req, url_view&& url, string_view path)
 {

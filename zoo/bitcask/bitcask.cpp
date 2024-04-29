@@ -129,7 +129,7 @@ void bitcask::merge()
 	return this->pimpl_->merge();
 }
 
-void bitcask::clear(const std::filesystem::__cxx11::path& directory)
+void bitcask::clear(const std::filesystem::path& directory)
 {
 	impl::clear(directory);
 }

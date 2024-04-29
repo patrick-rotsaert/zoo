@@ -7,12 +7,12 @@
 
 #pragma once
 
+#include "zoo/fs/sftp/config.h"
 #include "zoo/fs/sftp/sftp_options.h"
 #include "zoo/fs/sftp/issh_api.h"
 #include "zoo/fs/sftp/issh_knownhosts.h"
 #include "zoo/fs/sftp/issh_identity_factory.h"
 #include "zoo/fs/core/iinterruptor.h"
-#include "zoo/common/api.h"
 #include <memory>
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
@@ -21,7 +21,7 @@ namespace zoo {
 namespace fs {
 namespace sftp {
 
-class ZOO_EXPORT session final
+class ZOO_FS_SFTP_API session final
 {
 	class impl;
 	std::unique_ptr<impl> pimpl_;

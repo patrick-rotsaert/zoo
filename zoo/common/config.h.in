@@ -8,9 +8,26 @@
 // clang-format off
 #pragma once
 
+#include <zoo/common/api.h>
+
 // Options
 #cmakedefine ZOO_THREAD_SAFE
 
 // Logging verbosity of the library
-// Values are as in zoo/logging/log_level.h
-#define ZOO_LOGGING_LEVEL @ZOO_LOGGING_LEVEL@
+// Values are as in zoo/common/logging/log_level.h
+#if !defined(ZOO_LOGGING_LEVEL)
+# define ZOO_LOGGING_LEVEL @ZOO_LOGGING_LEVEL@
+#endif
+
+// Linkage
+#ifdef ZOO_SHARED // compiled as a shared library
+  #ifdef ZOO_@TARGET_UC@_EXPORTS // defined if we are building the shared library
+    #define ZOO_@TARGET_UC@_API ZOO_API_EXPORT
+  #else
+    #define ZOO_@TARGET_UC@_API ZOO_API_IMPORT
+  #endif // ZOO_@TARGET_UC@_EXPORTS
+  #define ZOO_@TARGET_UC@_LOCAL ZOO_API_LOCAL
+#else // compiled as a static library
+  #define ZOO_@TARGET_UC@_API
+  #define ZOO_@TARGET_UC@_LOCAL
+#endif // ZOO_SHARED

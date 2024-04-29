@@ -109,13 +109,11 @@ TEST(MakeDestPathTests, test_dest_exists_and_is_not_dir_but_name_ends_with_path_
 	auto       source_access = nice_mock_access{};
 	auto       dest_access   = nice_mock_access{};
 	const auto src           = source{ "/foo/bar" };
-	const auto dst           = destination{
-        fmt::format("/path/to/destination{}", fspath::preferred_separator), std::nullopt, false, destination::conflict_policy::OVERWRITE
-	};
-	auto&& make_attributes_lambda = [](attributes::filetype type) {
-		auto a = attributes{};
-		a.type = type;
-		return a;
+	const auto dst           = destination{ "/path/to/destination/", std::nullopt, false, destination::conflict_policy::OVERWRITE };
+	auto&&     make_attributes_lambda = [](attributes::filetype type) {
+        auto a = attributes{};
+        a.type = type;
+        return a;
 	};
 	// "/path/to/destination" exists and is a file
 	EXPECT_CALL(dest_access, try_stat(testing::Eq(dst.path))).WillOnce(testing::Return(make_attributes_lambda(attributes::filetype::FILE)));

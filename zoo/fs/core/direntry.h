@@ -9,14 +9,14 @@
 
 #include "zoo/fs/core/attributes.h"
 #include "zoo/fs/core/fspath.h"
-#include "zoo/common/api.h"
+#include "zoo/fs/core/config.h"
 #include <string>
 #include <optional>
 
 namespace zoo {
 namespace fs {
 
-class ZOO_EXPORT direntry final
+class ZOO_FS_CORE_API direntry final
 {
 public:
 	std::string           name;

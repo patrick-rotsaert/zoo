@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/squid/core/config.h"
 
 #include <memory>
 #include <string_view>
@@ -19,7 +19,7 @@ namespace squid {
 class ibackend_connection;
 class ibackend_connection_factory;
 
-class ZOO_EXPORT connection_pool final
+class ZOO_SQUID_CORE_API connection_pool final
 {
 	class impl;
 	std::unique_ptr<impl> pimpl_;
@@ -30,10 +30,10 @@ public:
 	connection_pool(const ibackend_connection_factory& factory, std::string_view connection_info, std::size_t count);
 	~connection_pool() noexcept;
 
-	connection_pool(connection_pool&&)            = default;
-	connection_pool& operator=(connection_pool&&) = default;
+	connection_pool(connection_pool&&);
+	connection_pool& operator=(connection_pool&&);
 
-	connection_pool(const connection_pool&)            = delete;
+	connection_pool(const connection_pool&) = delete;
 	connection_pool& operator=(const connection_pool&) = delete;
 
 	/// Acquire a backend connection

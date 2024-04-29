@@ -8,14 +8,14 @@
 #pragma once
 
 #include "zoo/fs/sftp/issh_identity_factory.h"
-#include "zoo/common/api.h"
+#include "zoo/fs/sftp/config.h"
 #include <gmock/gmock.h>
 
 namespace zoo {
 namespace fs {
 namespace sftp {
 
-class ZOO_EXPORT mock_ssh_identity_factory : public issh_identity_factory
+class ZOO_FS_SFTP_API mock_ssh_identity_factory : public issh_identity_factory
 {
 public:
 	explicit mock_ssh_identity_factory();

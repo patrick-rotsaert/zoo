@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/common/config.h"
 #include "zoo/common/misc/throw_exception.h"
 
 #include <boost/date_time/gregorian/greg_date.hpp>
@@ -64,53 +64,53 @@ inline T string_to_number(std::string_view in)
 // Remark: The time_point resolution is intentionally limited to microseconds
 // to avoid different behaviour depending on the platform.
 
-void ZOO_EXPORT       string_to_time_point(std::string_view in, time_point& out);
-time_point ZOO_EXPORT string_to_time_point(std::string_view in);
+void ZOO_COMMON_API       string_to_time_point(std::string_view in, time_point& out);
+time_point ZOO_COMMON_API string_to_time_point(std::string_view in);
 
-void ZOO_EXPORT string_to_date(std::string_view in, date& out);
-date ZOO_EXPORT string_to_date(std::string_view in);
+void ZOO_COMMON_API string_to_date(std::string_view in, date& out);
+date ZOO_COMMON_API string_to_date(std::string_view in);
 
-void ZOO_EXPORT        string_to_time_of_day(std::string_view in, time_of_day& out);
-time_of_day ZOO_EXPORT string_to_time_of_day(std::string_view in);
+void ZOO_COMMON_API        string_to_time_of_day(std::string_view in, time_of_day& out);
+time_of_day ZOO_COMMON_API string_to_time_of_day(std::string_view in);
 
-void ZOO_EXPORT        time_point_to_string(const time_point& in, std::string& out, const char date_time_separator);
-std::string ZOO_EXPORT time_point_to_string(const time_point& in, const char date_time_separator);
+void ZOO_COMMON_API        time_point_to_string(const time_point& in, std::string& out, const char date_time_separator);
+std::string ZOO_COMMON_API time_point_to_string(const time_point& in, const char date_time_separator);
 
-void ZOO_EXPORT        time_point_to_iso8601(const time_point& in, std::string& out);
-std::string ZOO_EXPORT time_point_to_iso8601(const time_point& in);
+void ZOO_COMMON_API        time_point_to_iso8601(const time_point& in, std::string& out);
+std::string ZOO_COMMON_API time_point_to_iso8601(const time_point& in);
 
-void ZOO_EXPORT        time_point_to_sql(const time_point& in, std::string& out);
-std::string ZOO_EXPORT time_point_to_sql(const time_point& in);
+void ZOO_COMMON_API        time_point_to_sql(const time_point& in, std::string& out);
+std::string ZOO_COMMON_API time_point_to_sql(const time_point& in);
 
-void ZOO_EXPORT        date_to_string(const date& in, std::string& out);
-std::string ZOO_EXPORT date_to_string(const date& in);
+void ZOO_COMMON_API        date_to_string(const date& in, std::string& out);
+std::string ZOO_COMMON_API date_to_string(const date& in);
 
-void ZOO_EXPORT        time_of_day_to_string(const time_of_day& in, std::string& out);
-std::string ZOO_EXPORT time_of_day_to_string(const time_of_day& in);
+void ZOO_COMMON_API        time_of_day_to_string(const time_of_day& in, std::string& out);
+std::string ZOO_COMMON_API time_of_day_to_string(const time_of_day& in);
 
-void ZOO_EXPORT                     string_to_boost_ptime(std::string_view in, boost::posix_time::ptime& out);
-boost::posix_time::ptime ZOO_EXPORT string_to_boost_ptime(std::string_view in);
+void ZOO_COMMON_API                     string_to_boost_ptime(std::string_view in, boost::posix_time::ptime& out);
+boost::posix_time::ptime ZOO_COMMON_API string_to_boost_ptime(std::string_view in);
 
-void ZOO_EXPORT        boost_ptime_to_string(const boost::posix_time::ptime& in, std::string& out, const char date_time_separator);
-std::string ZOO_EXPORT boost_ptime_to_string(const boost::posix_time::ptime& in, const char date_time_separator);
+void ZOO_COMMON_API        boost_ptime_to_string(const boost::posix_time::ptime& in, std::string& out, const char date_time_separator);
+std::string ZOO_COMMON_API boost_ptime_to_string(const boost::posix_time::ptime& in, const char date_time_separator);
 
-void ZOO_EXPORT        boost_ptime_to_iso8601(const boost::posix_time::ptime& in, std::string& out);
-std::string ZOO_EXPORT boost_ptime_to_iso8601(const boost::posix_time::ptime& in);
+void ZOO_COMMON_API        boost_ptime_to_iso8601(const boost::posix_time::ptime& in, std::string& out);
+std::string ZOO_COMMON_API boost_ptime_to_iso8601(const boost::posix_time::ptime& in);
 
-void ZOO_EXPORT        boost_ptime_to_sql(const boost::posix_time::ptime& in, std::string& out);
-std::string ZOO_EXPORT boost_ptime_to_sql(const boost::posix_time::ptime& in);
+void ZOO_COMMON_API        boost_ptime_to_sql(const boost::posix_time::ptime& in, std::string& out);
+std::string ZOO_COMMON_API boost_ptime_to_sql(const boost::posix_time::ptime& in);
 
-void ZOO_EXPORT                   string_to_boost_date(std::string_view in, boost::gregorian::date& out);
-boost::gregorian::date ZOO_EXPORT string_to_boost_date(std::string_view in);
+void ZOO_COMMON_API                   string_to_boost_date(std::string_view in, boost::gregorian::date& out);
+boost::gregorian::date ZOO_COMMON_API string_to_boost_date(std::string_view in);
 
-void ZOO_EXPORT        boost_date_to_string(const boost::gregorian::date& in, std::string& out);
-std::string ZOO_EXPORT boost_date_to_string(const boost::gregorian::date& in);
+void ZOO_COMMON_API        boost_date_to_string(const boost::gregorian::date& in, std::string& out);
+std::string ZOO_COMMON_API boost_date_to_string(const boost::gregorian::date& in);
 
-void ZOO_EXPORT                             string_to_boost_time_duration(std::string_view in, boost::posix_time::time_duration& out);
-boost::posix_time::time_duration ZOO_EXPORT string_to_boost_time_duration(std::string_view in);
+void ZOO_COMMON_API                             string_to_boost_time_duration(std::string_view in, boost::posix_time::time_duration& out);
+boost::posix_time::time_duration ZOO_COMMON_API string_to_boost_time_duration(std::string_view in);
 
-void ZOO_EXPORT        boost_time_duration_to_string(const boost::posix_time::time_duration& in, std::string& out);
-std::string ZOO_EXPORT boost_time_duration_to_string(const boost::posix_time::time_duration& in);
+void ZOO_COMMON_API        boost_time_duration_to_string(const boost::posix_time::time_duration& in, std::string& out);
+std::string ZOO_COMMON_API boost_time_duration_to_string(const boost::posix_time::time_duration& in);
 
 } // namespace conversion
 } // namespace zoo

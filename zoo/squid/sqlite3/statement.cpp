@@ -179,15 +179,17 @@ public:
 	}
 };
 
-statement::~statement() noexcept
-{
-}
-
 statement::statement(isqlite_api& api, std::shared_ptr<sqlite3> connection, std::string_view query, bool reuse_statement)
     : ibackend_statement{}
     , pimpl_{ std::make_unique<impl>(api, connection, query, reuse_statement) }
 {
 }
+
+statement::~statement() noexcept = default;
+
+statement::statement(statement&&) = default;
+
+statement& statement::operator=(statement&&) = default;
 
 void statement::execute(const std::map<std::string, parameter>& parameters, const std::vector<result>& results)
 {

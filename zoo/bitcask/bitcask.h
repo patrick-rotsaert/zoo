@@ -8,7 +8,7 @@
 #pragma once
 
 #include "zoo/bitcask/basictypes.h"
-#include "zoo/common/api.h"
+#include "zoo/bitcask/config.h"
 
 #include <filesystem>
 #include <memory>
@@ -18,7 +18,7 @@
 namespace zoo {
 namespace bitcask {
 
-class ZOO_EXPORT bitcask final
+class ZOO_BITCASK_API bitcask final
 {
 	class impl;
 	std::unique_ptr<impl> pimpl_;
@@ -57,4 +57,4 @@ public:
 };
 
 } // namespace bitcask
-}
+} // namespace zoo

@@ -474,7 +474,7 @@ TEST_F(QueryResultsTests, TestFetchLongDouble)
 	this->bind_result(res);
 
 	this->make_query_results(api, this->results).fetch();
-	EXPECT_DOUBLE_EQ(res, 42.0);
+	EXPECT_DOUBLE_EQ(static_cast<double>(res), 42.0);
 }
 
 TEST_F(QueryResultsTests, TestFetchString)

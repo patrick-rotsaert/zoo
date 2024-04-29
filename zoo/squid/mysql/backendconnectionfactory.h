@@ -7,14 +7,14 @@
 
 #pragma once
 
+#include "zoo/squid/mysql/config.h"
 #include "zoo/squid/core/ibackendconnectionfactory.h"
-#include "zoo/common/api.h"
 
 namespace zoo {
 namespace squid {
 namespace mysql {
 
-class ZOO_EXPORT backend_connection_factory final : public ibackend_connection_factory
+class ZOO_SQUID_MYSQL_API backend_connection_factory final : public ibackend_connection_factory
 {
 	std::shared_ptr<ibackend_connection> create_backend_connection(std::string_view connection_info) const override;
 

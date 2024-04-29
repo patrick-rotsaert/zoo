@@ -263,7 +263,7 @@ query_results::query_results(std::shared_ptr<PGresult> pgresult, const std::map<
 	std::map<std::string_view, size_t> map{};
 	for (size_t index = 0; index < this->field_count_; ++index)
 	{
-		const auto column_name = PQfname(pgresult.get(), index);
+		const auto column_name = PQfname(pgresult.get(), static_cast<int>(index));
 		if (column_name == nullptr)
 		{
 			ZOO_THROW_EXCEPTION(error{ "PQfname returned a nullptr" });
@@ -283,7 +283,7 @@ query_results::query_results(std::shared_ptr<PGresult> pgresult, const std::map<
 		const auto index       = it->second;
 		const auto column_name = it->first;
 
-		this->columns_.push_back(std::make_unique<column>(result.second, column_name, index));
+		this->columns_.push_back(std::make_unique<column>(result.second, column_name, static_cast<int>(index)));
 	}
 }
 
@@ -298,7 +298,7 @@ size_t query_results::field_count() const
 
 std::string query_results::field_name(std::size_t index) const
 {
-	const auto name = PQfname(this->pgresult_.get(), index);
+	const auto name = PQfname(this->pgresult_.get(), static_cast<int>(index));
 	if (name == nullptr)
 	{
 		ZOO_THROW_EXCEPTION(error{ "PQfname returned a null pointer" });

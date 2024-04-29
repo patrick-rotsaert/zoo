@@ -7,8 +7,8 @@
 
 #pragma once
 
+#include "zoo/squid/core/config.h"
 #include "zoo/squid/core/error.h"
-#include "zoo/common/api.h"
 
 #include <memory>
 #include <string_view>
@@ -18,7 +18,7 @@
 namespace zoo {
 namespace squid {
 
-class ZOO_EXPORT no_connection_available : public error
+class ZOO_SQUID_CORE_API no_connection_available : public error
 {
 public:
 	no_connection_available();
@@ -28,7 +28,7 @@ class ibackend_connection;
 class ibackend_connection_factory;
 class connection_pool;
 
-class ZOO_EXPORT connection
+class ZOO_SQUID_CORE_API connection
 {
 	std::shared_ptr<ibackend_connection> backend_;
 
@@ -50,11 +50,11 @@ public:
 
 	/// Create a connection that acquires a backend connection from the @a pool.
 	/// Returns std::nullopt immediately if no connection is available.
-	static ZOO_EXPORT std::optional<connection> create(connection_pool& pool);
+	static std::optional<connection> create(connection_pool& pool);
 
 	/// Create a connection that acquires a backend connection from the @a pool with a given @a timeout.
 	/// Returns std::nullopt if no connection is available within the specified timeout.
-	static ZOO_EXPORT std::optional<connection> create(connection_pool& pool, const std::chrono::milliseconds& timeout);
+	static std::optional<connection> create(connection_pool& pool, const std::chrono::milliseconds& timeout);
 
 	virtual ~connection() noexcept; ///FIXME?
 

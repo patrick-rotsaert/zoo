@@ -8,7 +8,7 @@
 #pragma once
 
 #include "zoo/fs/sftp/issh_api.h"
-#include "zoo/common/api.h"
+#include "zoo/fs/sftp/config.h"
 #include <gmock/gmock.h>
 #include <array>
 #include <string>
@@ -17,7 +17,7 @@ namespace zoo {
 namespace fs {
 namespace sftp {
 
-class ZOO_EXPORT mock_ssh_api : public issh_api
+class ZOO_FS_SFTP_API mock_ssh_api : public issh_api
 {
 public:
 	static ssh_session                   test_ssh_session;

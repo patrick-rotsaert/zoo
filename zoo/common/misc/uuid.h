@@ -7,12 +7,12 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/common/config.h"
 #include <boost/uuid/uuid.hpp>
 
 namespace zoo {
 
-class ZOO_EXPORT uuid final
+class ZOO_COMMON_API uuid final
 {
 public:
 	static boost::uuids::uuid generate();

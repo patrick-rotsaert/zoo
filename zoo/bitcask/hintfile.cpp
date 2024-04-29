@@ -16,6 +16,10 @@
 #include <functional>
 #include <cstring>
 
+#if defined(_MSC_VER)
+#pragma warning(disable : 4458)
+#endif
+
 namespace zoo {
 namespace bitcask {
 
@@ -210,7 +214,7 @@ public:
 		auto header = record_header{};
 
 		header.version   = rec.version;
-		header.ksz       = rec.key.length();
+		header.ksz       = static_cast<ksz_type>(rec.key.length());
 		header.value_sz  = rec.value_sz;
 		header.value_pos = rec.value_pos;
 		header.init_crc();

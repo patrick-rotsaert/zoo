@@ -7,9 +7,9 @@
 
 #pragma once
 
+#include "zoo/fs/sftp/config.h"
 #include "zoo/fs/sftp/sftp_session.h"
 #include "zoo/fs/core/exceptions.h"
-#include "zoo/common/api.h"
 #include <string>
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
@@ -20,14 +20,14 @@ namespace sftp {
 
 class issh_api;
 
-struct ZOO_EXPORT ssh_exception : public exception
+struct ZOO_FS_SFTP_API ssh_exception : public exception
 {
 	using ssh_error_code = boost::error_info<struct ssh_error_code_, int>;
 	using exception::exception;
 	explicit ssh_exception(issh_api* api, ssh_session session);
 };
 
-struct ZOO_EXPORT ssh_host_key_exception : public ssh_exception
+struct ZOO_FS_SFTP_API ssh_host_key_exception : public ssh_exception
 {
 	using ssh_exception::ssh_exception;
 
@@ -35,7 +35,7 @@ struct ZOO_EXPORT ssh_host_key_exception : public ssh_exception
 	using ssh_host_pubkey_hash = boost::error_info<struct ssh_host_pubkey_hash_, std::string>;
 };
 
-struct ZOO_EXPORT ssh_host_key_unknown : public ssh_host_key_exception
+struct ZOO_FS_SFTP_API ssh_host_key_unknown : public ssh_host_key_exception
 {
 	using ssh_host_key_exception::ssh_host_key_exception;
 
@@ -43,7 +43,7 @@ struct ZOO_EXPORT ssh_host_key_unknown : public ssh_host_key_exception
 	using ssh_host_key_exception::ssh_host_pubkey_hash;
 };
 
-struct ZOO_EXPORT ssh_host_key_changed : public ssh_host_key_exception
+struct ZOO_FS_SFTP_API ssh_host_key_changed : public ssh_host_key_exception
 {
 	using ssh_host_key_exception::ssh_host_key_exception;
 
@@ -51,12 +51,12 @@ struct ZOO_EXPORT ssh_host_key_changed : public ssh_host_key_exception
 	using ssh_host_key_exception::ssh_host_pubkey_hash;
 };
 
-struct ZOO_EXPORT ssh_auth_exception : public ssh_exception
+struct ZOO_FS_SFTP_API ssh_auth_exception : public ssh_exception
 {
 	using ssh_exception::ssh_exception;
 };
 
-struct ZOO_EXPORT sftp_exception : public ssh_exception
+struct ZOO_FS_SFTP_API sftp_exception : public ssh_exception
 {
 	using sftp_error_code      = boost::error_info<struct sftp_error_code_, int>;
 	using sftp_error_code_name = boost::error_info<struct sftp_error_code_name_, const char*>;

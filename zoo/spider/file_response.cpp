@@ -90,7 +90,7 @@ create_impl(const request& req, const boost::filesystem::path& doc_root, beast::
 
 	auto ec = beast::error_code{};
 
-	file.open(file_path.c_str(), beast::file_mode::scan, ec);
+	file.open(file_path.string().c_str(), beast::file_mode::scan, ec);
 
 	if (ec)
 	{
@@ -149,7 +149,7 @@ response_wrapper create_impl(const boost::filesystem::path& doc_root, beast::str
 
 	auto ec = beast::error_code{};
 
-	file.open(file_path.c_str(), beast::file_mode::scan, ec);
+	file.open(file_path.string().c_str(), beast::file_mode::scan, ec);
 
 	if (ec)
 	{

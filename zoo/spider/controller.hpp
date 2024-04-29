@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include "zoo/spider/config.h"
 #include "zoo/spider/request_router.h"
 #include "zoo/spider/error_response.h"
 #include "zoo/spider/response_wrapper.hpp"
@@ -23,7 +24,6 @@
 #include "zoo/common/misc/formatters.hpp"
 #include "zoo/common/misc/demangled_type_name.hpp"
 #include "zoo/common/conversion/conversion.h"
-#include "zoo/common/api.h"
 
 #include <boost/beast/core/string.hpp>
 #include <boost/throw_exception.hpp>
@@ -70,7 +70,7 @@ struct url_parameter final
 {
 };
 
-class ZOO_EXPORT controller
+class ZOO_SPIDER_API controller
 {
 public:
 	struct p final
@@ -83,7 +83,7 @@ public:
 		using url     = url_parameter;
 	};
 
-	class exception_handler_base
+	class ZOO_SPIDER_API exception_handler_base
 	{
 	public:
 		virtual ~exception_handler_base();
@@ -108,7 +108,7 @@ private:
 		const svmatch&     match;
 	};
 
-	class argument_error : public exception_base
+	class ZOO_SPIDER_API argument_error : public exception_base
 	{
 	public:
 		explicit argument_error(const std::string& m);

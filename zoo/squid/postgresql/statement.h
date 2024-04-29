@@ -7,9 +7,9 @@
 
 #pragma once
 
+#include "zoo/squid/postgresql/config.h"
 #include "zoo/squid/postgresql/detail/libpqfwd.h"
 #include "zoo/squid/core/ibackendstatement.h"
-#include "zoo/common/api.h"
 
 #include <memory>
 
@@ -17,7 +17,7 @@ namespace zoo {
 namespace squid {
 namespace postgresql {
 
-class ZOO_EXPORT statement final : public ibackend_statement
+class ZOO_SQUID_POSTGRESQL_API statement final : public ibackend_statement
 {
 	class impl;
 	std::unique_ptr<impl> pimpl_;
@@ -26,10 +26,10 @@ public:
 	statement(std::shared_ptr<PGconn> connection, std::string_view query, bool reuse_statement);
 	~statement() noexcept;
 
-	statement(statement&&)            = default;
-	statement& operator=(statement&&) = default;
+	statement(statement&&);
+	statement& operator=(statement&&);
 
-	statement(const statement&)            = delete;
+	statement(const statement&) = delete;
 	statement& operator=(const statement&) = delete;
 
 	void execute(const std::map<std::string, parameter>& parameters, const std::vector<result>& results) override;

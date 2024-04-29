@@ -27,6 +27,19 @@ endfunction()
 set(zoo_FIND_PACKAGE_COMPONENTS "" CACHE STRING "" FORCE)
 mark_as_advanced(zoo_FIND_PACKAGE_COMPONENTS)
 
+function(add_project_executable TARGET)
+	add_executable(${TARGET} ${ARGN})
+	
+	if (WIN32)
+		target_compile_definitions(${TARGET} PRIVATE "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:$<BUILD_INTERFACE:_WIN32_WINNT=0x0601>>")
+		add_custom_command(
+			TARGET ${TARGET} POST_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_RUNTIME_DLLS:${TARGET}> $<TARGET_FILE_DIR:${TARGET}>
+			COMMAND_EXPAND_LISTS
+		)
+	endif()
+endfunction()
+
 function(add_project_library TARGET)
 	set(OPTIONS SKIP_INSTALL)
 	set(ONE_VALUE_ARGS FIND_PACKAGE_COMPONENT)
@@ -40,8 +53,17 @@ function(add_project_library TARGET)
 		PUBLIC_INCLUDE_DIRS
 		PRIVATE_LIBRARIES
 		PUBLIC_LIBRARIES
+		MSVC_PRIVATE_COMPILER_OPTIONS
+		MSVC_PUBLIC_COMPILER_OPTIONS
 	)
 	cmake_parse_arguments(P "${OPTIONS}" "${ONE_VALUE_ARGS}" "${MULTI_VALUE_ARGS}" ${ARGN})
+
+	string(TOUPPER ${TARGET} TARGET_UC)
+	configure_file(${PROJECT_SOURCE_DIR}/zoo/common/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h @ONLY)
+
+	if(ZOO_INSTALL)
+		install_project_header(${CMAKE_CURRENT_BINARY_DIR}/config.h ${PROJECT_BINARY_DIR})
+	endif()
 
 	# Set the target output name
 	set(TARGET_OUTPUT_NAME zoo_${TARGET})
@@ -65,18 +87,19 @@ function(add_project_library TARGET)
 		add_library(${TARGET} $<TARGET_OBJECTS:${TARGET}_objects>)
 		list(APPEND COMPILE_TARGETS ${TARGET})
 
-		add_executable(${TARGET}_unit_test ${P_UNIT_TEST_SOURCES} $<TARGET_OBJECTS:${TARGET}_objects>)
+		add_project_executable(${TARGET}_unit_test ${P_UNIT_TEST_SOURCES} $<TARGET_OBJECTS:${TARGET}_objects>)
 
 		if (P_MOCK_SOURCES)
 			target_sources(${TARGET}_unit_test PRIVATE ${P_MOCK_SOURCES})
-			target_link_libraries(${TARGET}_unit_test PRIVATE gmock)
+			target_link_libraries(${TARGET}_unit_test PRIVATE GTest::gmock GTest::gmock_main)
 		endif()
 
 		list(APPEND COMPILE_TARGETS ${TARGET}_unit_test)
 
-		target_link_libraries(${TARGET}_unit_test PRIVATE gtest_main)
+		target_link_libraries(${TARGET}_unit_test PRIVATE GTest::gtest GTest::gtest_main)
+		
 		list(APPEND LINK_TARGETS ${TARGET}_unit_test)
-
+		
 		gtest_discover_tests(${TARGET}_unit_test)
 
 		run_unit_test_on_build(${TARGET}_unit_test)
@@ -118,6 +141,9 @@ function(add_project_library TARGET)
 		target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Debug>:$<$<CXX_COMPILER_ID:GNU>:-O0;-ggdb3>>)
 		target_compile_options(${TARGET} PRIVATE $<$<CONFIG:RelWithDebInfo>:$<$<CXX_COMPILER_ID:GNU>:-O2;-ggdb3>>)
 
+		# Windows
+		target_compile_definitions(${TARGET} PRIVATE "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:$<BUILD_INTERFACE:_WIN32_WINNT=0x0601>>")
+
 		# Set compiler definitions
 		if(P_PRIVATE_DEFINITIONS)
 			target_compile_definitions(${TARGET} PRIVATE ${P_PRIVATE_DEFINITIONS})
@@ -126,7 +152,7 @@ function(add_project_library TARGET)
 		if(BUILD_SHARED_LIBS)
 			target_compile_definitions(${TARGET}
 				PUBLIC ZOO_SHARED
-				PRIVATE ZOO_SHARED_EXPORTS
+				PRIVATE ZOO_${TARGET_UC}_EXPORTS
 			)
 		endif()
 
@@ -155,6 +181,18 @@ function(add_project_library TARGET)
 		endif()
 		if(P_PRIVATE_LIBRARIES)
 			target_link_libraries(${TARGET} PRIVATE ${P_PRIVATE_LIBRARIES})
+		endif()
+
+		# MSVC compiler options
+		if(P_MSVC_PRIVATE_COMPILER_OPTIONS)
+			target_compile_options(${TARGET} PRIVATE
+				"$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:$<BUILD_INTERFACE:${P_MSVC_PRIVATE_COMPILER_OPTIONS}>>"
+			)
+		endif()
+		if(P_MSVC_PUBLIC_COMPILER_OPTIONS)
+			target_compile_options(${TARGET} PUBLIC
+				"$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:$<BUILD_INTERFACE:${P_MSVC_PUBLIC_COMPILER_OPTIONS}>>"
+			)
 		endif()
 	endforeach()
 

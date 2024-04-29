@@ -7,15 +7,15 @@
 
 #pragma once
 
+#include "zoo/squid/postgresql/config.h"
 #include "zoo/squid/postgresql/detail/libpqfwd.h"
 #include "zoo/squid/core/ibackendconnection.h"
-#include "zoo/common/api.h"
 
 namespace zoo {
 namespace squid {
 namespace postgresql {
 
-class ZOO_EXPORT backend_connection final : public ibackend_connection
+class ZOO_SQUID_POSTGRESQL_API backend_connection final : public ibackend_connection
 {
 	std::shared_ptr<PGconn> connection_;
 

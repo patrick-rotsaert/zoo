@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/fs/local/config.h"
 #include "zoo/fs/core/attributes.h"
 #include "zoo/fs/core/fspath.h"
 #include <boost/filesystem/file_status.hpp>
@@ -16,8 +16,8 @@ namespace zoo {
 namespace fs {
 namespace local {
 
-ZOO_LOCAL attributes::filetype make_filetype(boost::filesystem::file_type type);
-ZOO_LOCAL attributes           make_attributes(const fspath& path, const boost::filesystem::file_status& st);
+ZOO_FS_LOCAL_LOCAL attributes::filetype make_filetype(boost::filesystem::file_type type);
+ZOO_FS_LOCAL_LOCAL attributes           make_attributes(const fspath& path, const boost::filesystem::file_status& st);
 
 } // namespace local
 } // namespace fs

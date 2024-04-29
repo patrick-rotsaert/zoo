@@ -8,10 +8,14 @@
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/logging/spdlog_backend.h"
 
+#if defined(_MSC_VER)
+#pragma warning(disable : 4458)
+#endif
+
 namespace zoo {
 namespace logging {
 
-std::unique_ptr<ibackend> logging::backend = std::make_unique<spdlog_backend>();
+ZOO_COMMON_API std::unique_ptr<ibackend> logging::backend = std::make_unique<spdlog_backend>();
 
 void logging::set_backend(std::unique_ptr<ibackend>&& backend)
 {

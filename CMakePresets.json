@@ -1,0 +1,221 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 25,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "core",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "installDir": "${sourceDir}/out/install/${presetName}"
+        },
+        {
+            "name": "ccache",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+                "CMAKE_C_COMPILER_LAUNCHER": "ccache"
+            }
+        },
+        {
+            "name": "windows",
+            "hidden": true,
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "linux",
+            "hidden": true,
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
+            "name": "vcpkg",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+            }
+        },
+        {
+            "name": "debug",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "release",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "shared",
+            "hidden": true,
+            "cacheVariables": {
+                "BUILD_SHARED_LIBS": "True"
+            }
+        },
+        {
+            "name": "static",
+            "hidden": true,
+            "cacheVariables": {
+                "BUILD_SHARED_LIBS": "False"
+            }
+        },
+        {
+            "name": "vcpkg-x64-linux-shared",
+            "hidden": true,
+            "inherits": [
+                "vcpkg",
+                "shared",
+                "linux"
+            ],
+            "cacheVariables": {
+                "VCPKG_TARGET_TRIPLET": "x64-linux-dynamic"
+            }
+        },
+        {
+            "name": "msvc",
+            "hidden": true,
+            "inherits": [
+                "windows"
+            ],
+            "toolset": "host=x64",
+            "architecture": "x64",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "cl.exe"
+            }
+        },
+        {
+            "name": "gcc",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "g++"
+            }
+        },
+        {
+            "name": "msvc-debug",
+            "displayName": "MSVC - Debug",
+            "generator": "Visual Studio 16 2019",
+            "inherits": [
+                "core",
+                "debug",
+                "msvc",
+                "vcpkg"
+            ]
+        },
+        {
+            "name": "msvc-release",
+            "displayName": "MSVC - Release",
+            "generator": "Visual Studio 16 2019",
+            "inherits": [
+                "core",
+                "release",
+                "msvc",
+                "vcpkg"
+            ]
+        },
+        {
+            "name": "linux-x64-gcc-shared-debug",
+            "displayName": "Linux x64 GCC Shared Debug",
+            "inherits": [
+                "linux",
+                "core",
+                "gcc",
+                "shared",
+                "debug"
+            ]
+        },
+        {
+            "name": "linux-x64-gcc-static-debug",
+            "displayName": "Linux x64 GCC Static Debug",
+            "inherits": [
+                "linux",
+                "core",
+                "gcc",
+                "static",
+                "debug"
+            ]
+        },
+        {
+            "name": "linux-x64-gcc-shared-release",
+            "displayName": "Linux x64 GCC Shared Release",
+            "inherits": [
+                "linux",
+                "core",
+                "gcc",
+                "shared",
+                "release"
+            ]
+        },
+        {
+            "name": "linux-x64-gcc-static-release",
+            "displayName": "Linux x64 GCC Static Release",
+            "inherits": [
+                "linux",
+                "core",
+                "gcc",
+                "static",
+                "release"
+            ]
+        },
+        {
+            "name": "linux-x64-gcc-shared-debug-vcpkg",
+            "displayName": "Linux x64 GCC Shared Debug Vcpkg",
+            "inherits": [
+                "linux",
+                "core",
+                "gcc",
+                "debug",
+                "vcpkg-x64-linux-shared"
+            ]
+        },
+        {
+            "name": "linux-x64-gcc-static-debug-vcpkg",
+            "displayName": "Linux x64 GCC Static Debug Vcpkg",
+            "inherits": [
+                "linux",
+                "core",
+                "gcc",
+                "static",
+                "debug",
+                "vcpkg"
+            ]
+        },
+        {
+            "name": "linux-x64-gcc-shared-release-vcpkg",
+            "displayName": "Linux x64 GCC Shared Release Vcpkg",
+            "inherits": [
+                "linux",
+                "core",
+                "gcc",
+                "release",
+                "vcpkg-x64-linux-shared"
+            ]
+        },
+        {
+            "name": "linux-x64-gcc-static-release-vcpkg",
+            "displayName": "Linux x64 GCC Static Release Vcpkg",
+            "inherits": [
+                "linux",
+                "core",
+                "gcc",
+                "static",
+                "release",
+                "vcpkg"
+            ]
+        }
+    ]
+}

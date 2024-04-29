@@ -40,7 +40,7 @@ namespace {
 //	auto                      rc = getpwuid_r(uid, &pwd, buf.get(), bufsize, &ppwd);
 //	if (rc || ppwd == nullptr || ppwd->pw_name == nullptr)
 //	{
-//		zlog(err,"getpwuid_r({}) failed: {}", uid, rc);
+//		ZOO_LOG(err,"getpwuid_r({}) failed: {}", uid, rc);
 //		return std::nullopt;
 //	}
 //	else
@@ -61,7 +61,7 @@ namespace {
 //	auto                      rc = getgrgid_r(gid, &grp, buf.get(), bufsize, &pgrp);
 //	if (rc || pgrp == nullptr || pgrp->gr_name == nullptr)
 //	{
-//		zlog(err,"getgrgid_r({}) failed: {}", gid, rc);
+//		ZOO_LOG(err,"getgrgid_r({}) failed: {}", gid, rc);
 //		return std::nullopt;
 //	}
 //	else

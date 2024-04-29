@@ -7,11 +7,11 @@
 
 #pragma once
 
+#include "zoo/squid/core/config.h"
 #include "zoo/squid/core/types.h"
 #include "zoo/squid/core/error.h"
 #include "zoo/common/misc/is_optional.hpp"
 #include "zoo/common/misc/is_scoped_enum.hpp"
-#include "zoo/common/api.h"
 
 #include <boost/date_time/gregorian/greg_date.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
@@ -27,7 +27,7 @@ namespace zoo {
 namespace squid {
 
 /// This class holds a bound query parameter or a reference to it.
-class ZOO_EXPORT parameter final
+class ZOO_SQUID_CORE_API parameter final
 {
 public:
 	using value_type = std::variant< //

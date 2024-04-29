@@ -46,6 +46,8 @@ add_project_library(spider
 		tag_invoke/time_point.h
 		tag_invoke/date.h
 		tag_invoke/time_duration.h
+	MSVC_PRIVATE_COMPILER_OPTIONS
+		/wd4702 # for boost\beast\core\impl\buffers_cat.hpp(186): warning C4702: unreachable code
 	PUBLIC_LIBRARIES
 		zoo::common
 		Boost::system

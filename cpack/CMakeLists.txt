@@ -5,13 +5,15 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 #
 
-cmake_minimum_required(VERSION 3.19)
-
 include(InstallRequiredSystemLibraries)
 
 set(CPACK_PACKAGE_NAME "lib${PROJECT_NAME}")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "ZOO - C++ library collection")
 set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
+# set(CPACK_RESOURCE_FILE_WELCOME ${CMAKE_CURRENT_LIST_DIR}/welcome.txt)
+# set(CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_CURRENT_LIST_DIR}/description.txt)
+# set(CPACK_RESOURCE_FILE_README ${CMAKE_CURRENT_LIST_DIR}/readme.txt)
+set(CPACK_VERBATIM_VARIABLES YES)
 
 set(GIT_URL)
 find_program(GIT git)
@@ -28,6 +30,25 @@ else()
 	set(CPACK_PACKAGE_VENDOR "Patrick Rotsaert")
 endif()
 set(CPACK_PACKAGE_CONTACT "${CPACK_PACKAGE_VENDOR}")
+
+
+# NSIS generator
+set(CPACK_NSIS_DISPLAY_NAME ${CMAKE_PROJECT_NAME})
+set(CPACK_NSIS_PACKAGE_NAME ${CPACK_PACKAGE_NAME})
+set(CPACK_NSIS_MANIFEST_DPI_AWARE true)
+set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL YES)
+# set(CPACK_NSIS_MUI_ICON ${CMAKE_CURRENT_LIST_DIR}/nsis\\\\icon.ico)
+# set(CPACK_NSIS_INSTALLED_ICON_NAME ${CMAKE_CURRENT_LIST_DIR}/nsis\\\\icon.ico)
+# set(CPACK_NSIS_MUI_UNIICON ${CMAKE_CURRENT_LIST_DIR}/nsis\\\\uninstall_icon.ico)
+# set(CPACK_NSIS_MUI_HEADERIMAGE ${CMAKE_CURRENT_LIST_DIR}/nsis\\\\nsis_header.bmp)
+# set(CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP ${CMAKE_CURRENT_LIST_DIR}/nsis\\\\nsis_install_welcome.bmp)
+# set(CPACK_NSIS_MUI_UNWELCOMEFINISHPAGE_BITMAP ${CMAKE_CURRENT_LIST_DIR}/nsis\\\\nsis_uninstall_welcome.bmp)
+# Define how to install and uninstall start menu entries on Windows
+# set(CPACK_NSIS_CREATE_ICONS_EXTRA
+#   "CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${CMAKE_PROJECT_NAME}.lnk' '$INSTDIR\\\\bin\\\\App.exe'")
+# set(CPACK_NSIS_DELETE_ICONS_EXTRA
+#   "Delete '$SMPROGRAMS\\\\$START_MENU\\\\${CMAKE_PROJECT_NAME}.lnk'")
+
 
 set(CPACK_COMPONENTS_ALL ${COMPONENT_RUNTIME} ${COMPONENT_DEVELOPMENT})
 
@@ -79,6 +100,8 @@ if(UNIX)
 			# The development package depends on the runtime + other dev packages
 			set(DEVELOPMENT_PACKAGE_DEPENDS
 				${CPACK_DEBIAN_${COMPONENT_RUNTIME_UC}_PACKAGE_NAME}
+				# FIXME: this depends if vcpkg is used or not
+				# Perhaps it's better not to set this in the DEB file
 				libfmt-dev
 				libspdlog-dev
 				libboost-dev
@@ -103,8 +126,7 @@ if(UNIX)
 		# TODO: other distros
 	endif()
 elseif(WIN32)
-	list(APPEND CPACK_GENERATOR ZIP)
-	# TODO: NSIS, WIX (?)
+	list(APPEND CPACK_GENERATOR ZIP NSIS)
 endif()
 
 include(CPack)

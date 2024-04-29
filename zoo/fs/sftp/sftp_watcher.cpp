@@ -30,22 +30,22 @@ public:
 	    , interruptor_{ interruptor }
 	    , files_{ list_files() }
 	{
-		zlog(debug, "watching {}", this->dir_);
-		zlog(trace, "initial file count = {}", this->files_.size());
+		ZOO_LOG(debug, "watching {}", this->dir_);
+		ZOO_LOG(trace, "initial file count = {}", this->files_.size());
 	}
 
 	std::vector<direntry> watch()
 	{
 		std::vector<direntry> result;
 
-		zlog(trace, "wait for interruption during {} ms", this->scan_interval_ms_);
+		ZOO_LOG(trace, "wait for interruption during {} ms", this->scan_interval_ms_);
 		if (this->interruptor_->wait_for_interruption(std::chrono::milliseconds{ this->scan_interval_ms_ }))
 		{
 			ZOO_THROW_EXCEPTION(interrupted_exception{});
 		}
 
 		auto files = this->list_files();
-		zlog(trace, "current file count = {}, previous file count = {}", files.size(), this->files_.size());
+		ZOO_LOG(trace, "current file count = {}, previous file count = {}", files.size(), this->files_.size());
 
 		for (const auto& pair : files)
 		{
@@ -60,6 +60,11 @@ public:
 		this->files_.swap(files);
 
 		return result;
+	}
+
+	void cancel()
+	{
+		this->interruptor_->interrupt();
 	}
 
 private:
@@ -89,13 +94,20 @@ watcher::watcher(const fspath&                 dir,
 {
 }
 
-watcher::~watcher() noexcept
-{
-}
+watcher::~watcher() noexcept = default;
+
+watcher::watcher(watcher&&) noexcept = default;
+
+watcher& watcher::operator=(watcher&&) noexcept = default;
 
 std::vector<direntry> watcher::watch()
 {
 	return this->pimpl_->watch();
+}
+
+void watcher::cancel()
+{
+	return this->pimpl_->cancel();
 }
 
 } // namespace sftp

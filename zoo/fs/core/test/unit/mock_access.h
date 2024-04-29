@@ -16,7 +16,7 @@
 namespace zoo {
 namespace fs {
 
-class ZOO_EXPORT mock_access : public iaccess
+class ZOO_FS_CORE_API mock_access : public iaccess
 {
 public:
 	explicit mock_access();
@@ -33,7 +33,7 @@ public:
 	MOCK_METHOD(void, mkdir, (const fspath& path, bool parents), (override));
 	MOCK_METHOD(void, rename, (const fspath& oldpath, const fspath& newpath), (override));
 	MOCK_METHOD(std::unique_ptr<ifile>, open, (const fspath& path, int flags, mode_t mode), (override));
-	MOCK_METHOD(std::shared_ptr<iwatcher>, create_watcher, (const fspath& dir, int cancelfd), (override));
+	MOCK_METHOD(std::shared_ptr<iwatcher>, create_watcher, (const fspath& dir), (override));
 };
 
 // This regex search and replace patterns can help to convert declarations into MOCK_METHOD macro calls

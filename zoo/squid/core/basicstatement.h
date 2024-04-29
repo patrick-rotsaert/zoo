@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "zoo/squid/core/config.h"
 #include "zoo/squid/core/parameter.h"
 #include "zoo/squid/core/result.h"
 #include "zoo/squid/core/error.h"
@@ -15,7 +16,6 @@
 #include "zoo/squid/core/detail/resultbinder.h"
 #include "zoo/squid/core/detail/type_traits.h"
 
-#include "zoo/common/misc/always_false.hpp"
 #include "zoo/common/api.h"
 
 #include "zoo/squid/core/detail/bind_oarchive.h"
@@ -29,6 +29,11 @@
 #include <optional>
 #include <sstream>
 
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4702)
+#endif
+
 namespace zoo {
 namespace squid {
 
@@ -37,7 +42,7 @@ class ibackend_statement;
 
 /// Base class for statement and prepared_statement
 /// Not intended to be instantiated directly.
-class ZOO_EXPORT basic_statement
+class ZOO_SQUID_CORE_API basic_statement
 {
 	std::map<std::string, parameter>     parameters_;    /// bound query parameters
 	std::vector<result>                  results_;       /// bound row results, by sequence
@@ -259,3 +264,7 @@ public:
 
 } // namespace squid
 } // namespace zoo
+
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif

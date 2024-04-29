@@ -46,9 +46,9 @@ public:
 	    , session_{ session }
 	    , path_{ path }
 	{
-		zlog(trace, "sftp_opendir path={}", path);
+		ZOO_LOG(trace, "sftp_opendir path={}", path);
 		this->dir_ = this->api_->sftp_opendir(session->sftp(), path.string().c_str());
-		zlog(trace, "dir {}", fmt::ptr(this->dir_));
+		ZOO_LOG(trace, "dir {}", fmt::ptr(this->dir_));
 
 		if (!this->dir_)
 		{
@@ -58,13 +58,13 @@ public:
 
 	~directory_reader() noexcept
 	{
-		zlog(trace, "sftp_closedir {}", fmt::ptr(this->dir_));
+		ZOO_LOG(trace, "sftp_closedir {}", fmt::ptr(this->dir_));
 		this->api_->sftp_closedir(this->dir_);
 	}
 
 	std::optional<direntry> read()
 	{
-		zlog(trace, "sftp_readdir {}", fmt::ptr(this->dir_));
+		ZOO_LOG(trace, "sftp_readdir {}", fmt::ptr(this->dir_));
 		const auto attrib = this->api_->sftp_readdir(this->session_->sftp(), this->dir_);
 		if (attrib)
 		{
@@ -113,13 +113,13 @@ public:
 	    , session_{ std::make_shared<session>(api, opts, known_hosts, ssh_identity_factory, interruptor, lazy) }
 	    , watcher_scan_interval_ms_{ opts.watcher_scan_interval_ms }
 	{
-		zlog(trace, "sftp access: host={}, port={}, user={}", opts.host, opts.port, opts.user);
+		ZOO_LOG(trace, "sftp access: host={}, port={}, user={}", opts.host, opts.port, opts.user);
 	}
 
-	impl(impl&&)            = delete;
+	impl(impl&&)  = delete;
 	impl& operator=(impl&&) = delete;
 
-	impl(const impl&)            = delete;
+	impl(const impl&) = delete;
 	impl& operator=(const impl&) = delete;
 
 	bool is_remote() const override
@@ -145,7 +145,7 @@ public:
 	{
 		this->interruptor_->throw_if_interrupted();
 
-		zlog(trace, "sftp_stat path={}", path);
+		ZOO_LOG(trace, "sftp_stat path={}", path);
 		const auto attrib = this->api_->sftp_stat(this->session_->sftp(), path.string().c_str());
 		if (attrib)
 		{
@@ -170,7 +170,7 @@ public:
 	{
 		this->interruptor_->throw_if_interrupted();
 
-		zlog(trace, "sftp_stat path={}", path);
+		ZOO_LOG(trace, "sftp_stat path={}", path);
 		const auto attrib = this->api_->sftp_stat(this->session_->sftp(), path.string().c_str());
 		if (attrib)
 		{
@@ -200,7 +200,7 @@ public:
 	{
 		this->interruptor_->throw_if_interrupted();
 
-		zlog(trace, "sftp_stat path={}", path);
+		ZOO_LOG(trace, "sftp_stat path={}", path);
 		const auto attrib = this->api_->sftp_stat(this->session_->sftp(), path.string().c_str());
 		if (attrib)
 		{
@@ -222,7 +222,7 @@ public:
 	{
 		this->interruptor_->throw_if_interrupted();
 
-		zlog(trace, "sftp_lstat path={}", path);
+		ZOO_LOG(trace, "sftp_lstat path={}", path);
 		const auto attrib = this->api_->sftp_lstat(this->session_->sftp(), path.string().c_str());
 		if (attrib)
 		{
@@ -252,7 +252,7 @@ public:
 	{
 		this->interruptor_->throw_if_interrupted();
 
-		zlog(trace, "sftp_lstat path={}", path);
+		ZOO_LOG(trace, "sftp_lstat path={}", path);
 		const auto attrib = this->api_->sftp_lstat(this->session_->sftp(), path.string().c_str());
 		if (attrib)
 		{
@@ -274,7 +274,7 @@ public:
 	{
 		this->interruptor_->throw_if_interrupted();
 
-		zlog(trace, "sftp_unlink path={}", path);
+		ZOO_LOG(trace, "sftp_unlink path={}", path);
 		if (this->api_->sftp_unlink(this->session_->sftp(), path.string().c_str()) < 0)
 		{
 			ZOO_THROW_EXCEPTION(sftp_exception(this->api_, this->session_) << error_opname{ "sftp_unlink" } << error_path{ path });
@@ -285,7 +285,7 @@ public:
 	{
 		this->interruptor_->throw_if_interrupted();
 
-		zlog(trace, "sftp_mkdir path={}", path);
+		ZOO_LOG(trace, "sftp_mkdir path={}", path);
 		if (this->api_->sftp_mkdir(this->session_->sftp(), path.string().c_str(), 0777) < 0)
 		{
 			if (parents && path.has_parent_path() && this->api_->sftp_get_error(this->session_->sftp()) == SSH_FX_NO_SUCH_FILE)
@@ -302,7 +302,7 @@ public:
 	{
 		this->interruptor_->throw_if_interrupted();
 
-		zlog(trace, "sftp_rename oldpath={} newpath={}", oldpath, newpath);
+		ZOO_LOG(trace, "sftp_rename oldpath={} newpath={}", oldpath, newpath);
 		if (this->api_->sftp_rename(this->session_->sftp(), oldpath.string().c_str(), newpath.string().c_str()) < 0)
 		{
 			ZOO_THROW_EXCEPTION(sftp_exception(this->api_, this->session_)
@@ -314,9 +314,9 @@ public:
 	{
 		this->interruptor_->throw_if_interrupted();
 
-		zlog(trace, "sftp_open path={} flags={:o} mode={:o}", path, flags, mode);
+		ZOO_LOG(trace, "sftp_open path={} flags={:o} mode={:o}", path, flags, mode);
 		const auto fd = this->api_->sftp_open(this->session_->sftp(), path.string().c_str(), flags, mode);
-		zlog(trace, "fd {}", static_cast<void*>(fd));
+		ZOO_LOG(trace, "fd {}", static_cast<void*>(fd));
 		if (fd == nullptr)
 		{
 			ZOO_THROW_EXCEPTION(sftp_exception(this->api_, this->session_) << error_opname{ "sftp_open" } << error_path{ path });
@@ -327,9 +327,8 @@ public:
 		}
 	}
 
-	std::shared_ptr<iwatcher> create_watcher(const fspath& dir, int cancelfd) override
+	std::shared_ptr<iwatcher> create_watcher(const fspath& dir) override
 	{
-		(void)cancelfd;
 		return std::make_shared<watcher>(dir, this->watcher_scan_interval_ms_, this->shared_from_this(), this->interruptor_);
 	}
 };
@@ -414,9 +413,9 @@ std::unique_ptr<ifile> access::open(const fspath& path, int flags, mode_t mode)
 	return this->pimpl_->open(path, flags, mode);
 }
 
-std::shared_ptr<iwatcher> access::create_watcher(const fspath& dir, int cancelfd)
+std::shared_ptr<iwatcher> access::create_watcher(const fspath& dir)
 {
-	return this->pimpl_->create_watcher(dir, cancelfd);
+	return this->pimpl_->create_watcher(dir);
 }
 
 } // namespace sftp

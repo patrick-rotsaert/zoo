@@ -12,6 +12,10 @@
 #include "zoo/fs/core/ifile.h"
 #include <gtest/gtest.h>
 
+#if defined(_MSC_VER)
+#pragma warning(disable : 4459)
+#endif
+
 namespace zoo {
 namespace fs {
 namespace sftp {
@@ -335,14 +339,14 @@ TEST_F(SftpAccessTests, test_create_watcher)
 		    .WillOnce(testing::ReturnNull());
 		EXPECT_CALL(this->nice_ssh_api, sftp_dir_eof(mock_ssh_api::test_sftp_dir)).Times(1).WillOnce(testing::Return(1));
 		EXPECT_CALL(this->nice_ssh_api, sftp_closedir(mock_ssh_api::test_sftp_dir)).Times(1);
-		EXPECT_NO_THROW(a.create_watcher(p, 0));
+		EXPECT_NO_THROW(a.create_watcher(p));
 	}
 	{
 		auto sq = testing::InSequence{};
 		EXPECT_CALL(this->nice_ssh_api, sftp_opendir(mock_ssh_api::test_sftp_session, testing::StrEq(p)))
 		    .Times(1)
 		    .WillOnce(testing::ReturnNull());
-		EXPECT_ANY_THROW(a.create_watcher(p, 0));
+		EXPECT_ANY_THROW(a.create_watcher(p));
 	}
 }
 

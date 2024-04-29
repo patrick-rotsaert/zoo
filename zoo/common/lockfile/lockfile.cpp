@@ -8,7 +8,7 @@
 #include "zoo/common/lockfile/lockfile.h"
 
 #if defined(_WIN32)
-#error not implemented
+#include "zoo/common/lockfile/lockfile_impl_windows.hpp"
 #else
 #include "zoo/common/lockfile/lockfile_impl_posix.hpp"
 #endif
@@ -21,9 +21,11 @@ lockfile::lockfile(const std::filesystem::path& path)
 {
 }
 
-lockfile::~lockfile() noexcept
-{
-}
+lockfile::~lockfile() noexcept = default;
+
+lockfile::lockfile(lockfile&&) noexcept = default;
+
+lockfile& lockfile::operator=(lockfile&&) noexcept = default;
 
 } // namespace lockfile
 } // namespace zoo

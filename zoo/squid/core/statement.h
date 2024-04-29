@@ -7,8 +7,8 @@
 
 #pragma once
 
+#include "zoo/squid/core/config.h"
 #include "zoo/squid/core/basicstatement.h"
-#include "zoo/common/api.h"
 
 #include <string_view>
 
@@ -23,7 +23,7 @@ class connection;
 /// So, even though this statement can be executed multiple times, note that
 /// the backend may need to plan the query each time.
 /// For bulk operations, the prepared_statement class is better suited.
-class ZOO_EXPORT statement final : public basic_statement
+class ZOO_SQUID_CORE_API statement final : public basic_statement
 {
 	std::unique_ptr<ibackend_statement> create_statement(std::shared_ptr<ibackend_connection> connection, std::string_view query) override;
 

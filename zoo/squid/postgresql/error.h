@@ -7,9 +7,9 @@
 
 #pragma once
 
+#include "zoo/squid/postgresql/config.h"
 #include "zoo/squid/postgresql/detail/libpqfwd.h"
 #include "zoo/squid/core/error.h"
-#include "zoo/common/api.h"
 
 #include <optional>
 #include <string>
@@ -18,7 +18,7 @@ namespace zoo {
 namespace squid {
 namespace postgresql {
 
-class ZOO_EXPORT error : public squid::error
+class ZOO_SQUID_POSTGRESQL_API error : public squid::error
 {
 	std::optional<std::string> sql_state_;
 

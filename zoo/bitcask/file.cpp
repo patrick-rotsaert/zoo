@@ -9,33 +9,12 @@
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/formatters.hpp"
 #include "zoo/common/misc/throw_exception.h"
+#include "zoo/common/compat.h"
 
 #include <fmt/format.h>
 
 #include <system_error>
 #include <cassert>
-
-#ifdef _MSC_VER
-#include <fcntl.h>
-#include <io.h>
-#else
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#endif
-
-#ifdef _MSC_VER
-#define c_open(pathname, flags, mode) ::_open(pathname, flags, mode)
-#define c_close(fd) ::_close(fd)
-#define c_read(fd, buf, count) ::_read(fd, buf, static_cast<unsigned int>(count))
-#define c_write(fd, buf, count) ::_write(fd, buf, static_cast<unsigned int>(count))
-#else
-#define c_open(pathname, flags, mode) ::open(pathname, flags, mode)
-#define c_close(fd) ::close(fd)
-#define c_read(fd, buf, count) ::read(fd, buf, count)
-#define c_write(fd, buf, count) ::write(fd, buf, count)
-#endif
 
 namespace zoo {
 namespace bitcask {
@@ -188,7 +167,7 @@ public:
 	off64_t locked_seek(const lock_type&, off64_t offset, int whence) const
 	{
 		ZOO_LOG(trace, "seek fd={} offset={} whence={}", this->fd_, offset, whence);
-		const auto rc = lseek64(this->fd_, offset, whence);
+		const auto rc = c_lseek64(this->fd_, offset, whence);
 		if (rc == static_cast<off64_t>(-1))
 		{
 			ZOO_THROW_EXCEPTION(std::system_error{ std::error_code{ errno, std::system_category() }, this->path_.string() + ": seek" });

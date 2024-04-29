@@ -28,6 +28,10 @@ TEST_F(MakeDirentryTests, test_make_direntry_from_file)
 	EXPECT_FALSE(e.symlink_target.has_value());
 }
 
+// Symlinks do not work on windows
+// `boost::filesystem::create_symlink: A required privilege is not held by the client`
+// Disabling these tests on windows for now
+#if !defined(_WIN32)
 TEST_F(MakeDirentryTests, test_make_direntry_from_symlink)
 {
 	const auto p   = this->work_dir() / "somefile";
@@ -52,6 +56,7 @@ TEST_F(MakeDirentryTests, test_make_direntry_from_dead_symlink)
 	EXPECT_TRUE(e.symlink_target.has_value());
 	EXPECT_EQ(e.symlink_target.value(), p);
 }
+#endif
 
 } // namespace local
 } // namespace fs

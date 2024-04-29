@@ -17,7 +17,8 @@ namespace {
 
 std::chrono::system_clock::time_point convert_file_time(uint64_t sec, uint32_t nsec)
 {
-	return std::chrono::system_clock::from_time_t(static_cast<std::time_t>(sec)) + std::chrono::nanoseconds{ nsec };
+	return std::chrono::system_clock::from_time_t(static_cast<std::time_t>(sec)) +
+	       std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::nanoseconds{ nsec });
 }
 
 std::chrono::system_clock::time_point convert_file_time(uint32_t sec)

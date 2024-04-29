@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/squid/core/config.h"
 
 #include <stdexcept>
 #include <string>
@@ -16,7 +16,7 @@ namespace zoo {
 namespace squid {
 
 /// Exception class
-class ZOO_EXPORT error : public std::runtime_error
+class ZOO_SQUID_CORE_API error : public std::runtime_error
 {
 public:
 	explicit error(const std::string& message);

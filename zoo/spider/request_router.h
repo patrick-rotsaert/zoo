@@ -7,9 +7,9 @@
 
 #pragma once
 
+#include "zoo/spider/config.h"
 #include "zoo/spider/irequest_handler.h"
 #include "zoo/spider/aliases.h"
-#include "zoo/common/api.h"
 
 #include <boost/beast/http/message_generator.hpp>
 #include <boost/url/url_view.hpp>
@@ -31,7 +31,7 @@ namespace spider {
 template<typename T>
 concept ConvertibleFromBoostJson = boost::json::is_described_class<T>::value;
 
-class ZOO_EXPORT request_router final : public irequest_handler
+class ZOO_SPIDER_API request_router final : public irequest_handler
 {
 	class impl;
 	std::unique_ptr<impl> pimpl_;
@@ -50,10 +50,10 @@ public:
 	request_router();
 	~request_router() noexcept override;
 
-	request_router(request_router&&)            = default;
-	request_router& operator=(request_router&&) = default;
+	request_router(request_router&&);
+	request_router& operator=(request_router&&);
 
-	request_router(const request_router&)            = delete;
+	request_router(const request_router&) = delete;
 	request_router& operator=(const request_router&) = delete;
 
 	void add_route(std::set<verb>&& methods, boost::regex&& pattern, request_handler&& handler);

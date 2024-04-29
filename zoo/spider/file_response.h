@@ -7,18 +7,18 @@
 
 #pragma once
 
+#include "zoo/spider/config.h"
 #include "zoo/spider/ifile_event_listener.h"
 #include "zoo/spider/aliases.h"
 #include "zoo/spider/message.h"
 #include "zoo/spider/response_wrapper.hpp"
-#include "zoo/common/api.h"
 
 #include <memory>
 
 namespace zoo {
 namespace spider {
 
-class ZOO_EXPORT file_response final
+class ZOO_SPIDER_API file_response final
 {
 	using response = http::response<http::basic_file_body<tracked_file>>;
 

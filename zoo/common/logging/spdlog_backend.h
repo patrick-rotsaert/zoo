@@ -8,12 +8,12 @@
 #pragma once
 
 #include "zoo/common/logging/ibackend.h"
-#include "zoo/common/api.h"
+#include "zoo/common/config.h"
 
 namespace zoo {
 namespace logging {
 
-class ZOO_EXPORT spdlog_backend final : public ibackend
+class ZOO_COMMON_API spdlog_backend final : public ibackend
 {
 public:
 	spdlog_backend();

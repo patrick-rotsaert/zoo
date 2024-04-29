@@ -101,6 +101,7 @@ public:
 
 		if (fcntl(this->fd_, F_SETLK, &fl) == -1)
 		{
+			close(this->fd_);
 			ZOO_THROW_EXCEPTION(
 			    (std::system_error{ std::error_code{ errno, std::system_category() }, path.string() + ": fcntl(F_SETLK)" }));
 		}

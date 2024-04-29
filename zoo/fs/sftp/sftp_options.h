@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "zoo/common/api.h"
+#include "zoo/fs/sftp/config.h"
 #include <string>
 #include <optional>
 #include <cstddef>
@@ -16,7 +16,7 @@ namespace zoo {
 namespace fs {
 namespace sftp {
 
-struct ZOO_EXPORT options final
+struct ZOO_FS_SFTP_API options final
 {
 	std::string                  host;
 	std::optional<std::uint16_t> port = std::nullopt;

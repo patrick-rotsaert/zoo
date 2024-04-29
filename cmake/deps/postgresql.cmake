@@ -7,6 +7,11 @@
 
 include_guard(GLOBAL)
 
+include(${PROJECT_SOURCE_DIR}/cmake/options.cmake)
+
 if(ZOO_SQUID_WITH_POSTGRESQL)
-	find_package(PostgreSQL REQUIRED)
+	# If this project is included as a subdirectory, the PostgreSQL::PostgreSQL target may already be defined.
+	if(NOT TARGET PostgreSQL::PostgreSQL)
+		project_find_package(PostgreSQL REQUIRED)
+	endif()
 endif()
