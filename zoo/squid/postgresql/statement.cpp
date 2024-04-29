@@ -244,9 +244,11 @@ statement::statement(std::shared_ptr<PGconn> connection, std::string_view query,
 {
 }
 
-statement::~statement() noexcept
-{
-}
+statement::~statement() noexcept = default;
+
+statement::statement(statement&&) = default;
+
+statement& statement::operator=(statement&&) = default;
 
 void statement::execute(const std::map<std::string, parameter>& parameters, const std::vector<result>& results)
 {

@@ -6,7 +6,7 @@
 #
 
 set(TARGET fs_local_example_watcher)
-add_executable(${TARGET} example_watcher.cpp)
+add_project_executable(${TARGET} example_watcher.cpp)
 
 target_compile_features(${TARGET} PRIVATE cxx_std_20)
 target_link_libraries(${TARGET} PRIVATE zoo::fs_local)

@@ -30,10 +30,10 @@ public:
 
 	statement(isqlite_api& api, std::shared_ptr<sqlite3> connection, std::string_view query, bool reuse_statement);
 
-	statement(statement&&)            = default;
-	statement& operator=(statement&&) = default;
+	statement(statement&&);
+	statement& operator=(statement&&);
 
-	statement(const statement&)            = delete;
+	statement(const statement&) = delete;
 	statement& operator=(const statement&) = delete;
 
 	void execute(const std::map<std::string, parameter>& parameters, const std::vector<result>& results) override;

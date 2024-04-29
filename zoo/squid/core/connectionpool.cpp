@@ -150,9 +150,11 @@ connection_pool::connection_pool(const ibackend_connection_factory& factory, std
 {
 }
 
-connection_pool::~connection_pool() noexcept
-{
-}
+connection_pool::~connection_pool() noexcept = default;
+
+connection_pool::connection_pool(connection_pool&&) = default;
+
+connection_pool& connection_pool::operator=(connection_pool&&) = default;
 
 std::shared_ptr<ibackend_connection> connection_pool::acquire()
 {

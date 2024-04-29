@@ -27,6 +27,18 @@ endfunction()
 set(zoo_FIND_PACKAGE_COMPONENTS "" CACHE STRING "" FORCE)
 mark_as_advanced(zoo_FIND_PACKAGE_COMPONENTS)
 
+function(add_project_executable TARGET)
+	add_executable(${TARGET} ${ARGN})
+	
+	if (WIN32)
+		add_custom_command(
+			TARGET ${TARGET} POST_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_RUNTIME_DLLS:${TARGET}> $<TARGET_FILE_DIR:${TARGET}>
+			COMMAND_EXPAND_LISTS
+		)
+	endif()
+endfunction()
+
 function(add_project_library TARGET)
 	set(OPTIONS SKIP_INSTALL)
 	set(ONE_VALUE_ARGS FIND_PACKAGE_COMPONENT)
@@ -74,7 +86,7 @@ function(add_project_library TARGET)
 		add_library(${TARGET} $<TARGET_OBJECTS:${TARGET}_objects>)
 		list(APPEND COMPILE_TARGETS ${TARGET})
 
-		add_executable(${TARGET}_unit_test ${P_UNIT_TEST_SOURCES} $<TARGET_OBJECTS:${TARGET}_objects>)
+		add_project_executable(${TARGET}_unit_test ${P_UNIT_TEST_SOURCES} $<TARGET_OBJECTS:${TARGET}_objects>)
 
 		if (P_MOCK_SOURCES)
 			target_sources(${TARGET}_unit_test PRIVATE ${P_MOCK_SOURCES})
@@ -84,8 +96,9 @@ function(add_project_library TARGET)
 		list(APPEND COMPILE_TARGETS ${TARGET}_unit_test)
 
 		target_link_libraries(${TARGET}_unit_test PRIVATE GTest::gtest GTest::gtest_main)
+		
 		list(APPEND LINK_TARGETS ${TARGET}_unit_test)
-
+		
 		gtest_discover_tests(${TARGET}_unit_test)
 
 		run_unit_test_on_build(${TARGET}_unit_test)

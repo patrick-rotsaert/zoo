@@ -6,7 +6,7 @@
 #
 
 set(TARGET example_logging)
-add_executable(${TARGET} main.cpp example_backend.cpp example_backend.h)
+add_project_executable(${TARGET} main.cpp example_backend.cpp example_backend.h)
 
 target_compile_features(${TARGET} PRIVATE cxx_std_20)
 target_link_libraries(${TARGET} PRIVATE zoo::common)

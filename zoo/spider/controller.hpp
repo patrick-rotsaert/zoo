@@ -83,7 +83,7 @@ public:
 		using url     = url_parameter;
 	};
 
-	class exception_handler_base
+	class ZOO_SPIDER_API exception_handler_base
 	{
 	public:
 		virtual ~exception_handler_base();
@@ -108,7 +108,7 @@ private:
 		const svmatch&     match;
 	};
 
-	class argument_error : public exception_base
+	class ZOO_SPIDER_API argument_error : public exception_base
 	{
 	public:
 		explicit argument_error(const std::string& m);

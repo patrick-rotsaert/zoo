@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "zoo/squid/demo/demo_common/config.h"
 #include "zoo/squid/core/connection.h"
 #include "zoo/common/api.h"
 
@@ -21,14 +22,14 @@ enum class Backend
 	MYSQL
 };
 
-void ZOO_EXPORT demo_bindings(connection& connection);
-void ZOO_EXPORT demo_field_info(connection& connection);
-void ZOO_EXPORT demo_result_by_name(connection& connection);
-void ZOO_EXPORT demo_query_stream(connection& connection);
-void ZOO_EXPORT demo_bind_struct(connection& connection);
-void ZOO_EXPORT demo_table_ops(connection& connection, Backend backend);
+void ZOO_SQUID_DEMO_COMMON_API demo_bindings(connection& connection);
+void ZOO_SQUID_DEMO_COMMON_API demo_field_info(connection& connection);
+void ZOO_SQUID_DEMO_COMMON_API demo_result_by_name(connection& connection);
+void ZOO_SQUID_DEMO_COMMON_API demo_query_stream(connection& connection);
+void ZOO_SQUID_DEMO_COMMON_API demo_bind_struct(connection& connection);
+void ZOO_SQUID_DEMO_COMMON_API demo_table_ops(connection& connection, Backend backend);
 
-void ZOO_EXPORT demo_all(connection& connection, Backend backend);
+void ZOO_SQUID_DEMO_COMMON_API demo_all(connection& connection, Backend backend);
 
 } // namespace demo
 } // namespace squid
