@@ -5,18 +5,6 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 #
 
-if((DEFINED CMAKE_TOOLCHAIN_FILE) AND (CMAKE_TOOLCHAIN_FILE MATCHES "/vcpkg\\.cmake$") AND BUILD_SHARED_LIBS)
-	message(AUTHOR_WARNING "The package built by CPack will probably be unusable "
-	                       "because shared libraries built by vcpkg will not be included."
-						   "\n"
-						   "I did not yet find a way to make vcpkg add install rules for "
-						   "the shared libraries. Without install rules, CPack will not include them."
-						   "\n"
-						   "When using vcpkg, set BUILD_SHARED_LIBS=OFF. "
-						   "To build a package, it is recommended to use the ${CMAKE_SOURCE_DIR}/dist.sh script."
-						   )
-endif()
-
 include(CMakePackageConfigHelpers)
 
 if(NOT DEFINED zoo_INSTALL_CMAKEDIR)
@@ -27,6 +15,12 @@ if(BUILD_SHARED_LIBS)
 	set(LINKAGE shared)
 else()
 	set(LINKAGE static)
+endif()
+
+if(zoo_BUILT_WITH_VCPKG_DEPS)
+	install(RUNTIME_DEPENDENCY_SET zoo-runtime-deps
+		POST_EXCLUDE_REGEXES "^/lib/"
+	)
 endif()
 
 foreach(comp ${zoo_FIND_PACKAGE_COMPONENTS})

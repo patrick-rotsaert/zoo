@@ -10,6 +10,11 @@
 set THISDIR=%~dp0
 set THISDIR=%THISDIR:~0,-1%
 
+:: TODO: support command line options to:
+::  - specify the build directory
+::  - specify the generator
+::  - specify the compiler
+
 :: Check number of arguments
 set argC=0
 for %%x in (%*) do set /A argC+=1

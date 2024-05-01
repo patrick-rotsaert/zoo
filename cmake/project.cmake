@@ -29,7 +29,7 @@ mark_as_advanced(zoo_FIND_PACKAGE_COMPONENTS)
 
 function(add_project_executable TARGET)
 	add_executable(${TARGET} ${ARGN})
-	
+
 	if (WIN32)
 		target_compile_definitions(${TARGET} PRIVATE "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:$<BUILD_INTERFACE:_WIN32_WINNT=0x0601>>")
 		add_custom_command(
@@ -97,9 +97,9 @@ function(add_project_library TARGET)
 		list(APPEND COMPILE_TARGETS ${TARGET}_unit_test)
 
 		target_link_libraries(${TARGET}_unit_test PRIVATE GTest::gtest GTest::gtest_main)
-		
+
 		list(APPEND LINK_TARGETS ${TARGET}_unit_test)
-		
+
 		gtest_discover_tests(${TARGET}_unit_test)
 
 		run_unit_test_on_build(${TARGET}_unit_test)
@@ -217,9 +217,15 @@ function(add_project_library TARGET)
 		list(REMOVE_DUPLICATES tmp)
 		set(zoo_FIND_PACKAGE_COMPONENTS ${tmp} CACHE STRING "" FORCE)
 
+		set(zoo_RUNTIME_DEPENDENCY_SET_ARGS)
+		if(zoo_BUILT_WITH_VCPKG_DEPS)
+			list(APPEND zoo_RUNTIME_DEPENDENCY_SET_ARGS RUNTIME_DEPENDENCY_SET zoo-runtime-deps)
+		endif()
+
 		# Install the library
 		install(TARGETS ${TARGET}
 			EXPORT zoo_${P_FIND_PACKAGE_COMPONENT}_targets
+			${zoo_RUNTIME_DEPENDENCY_SET_ARGS}
 			RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 			        COMPONENT ${COMPONENT_RUNTIME}
 			LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -227,7 +233,7 @@ function(add_project_library TARGET)
 			        NAMELINK_COMPONENT ${COMPONENT_DEVELOPMENT}
 			ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 			        COMPONENT ${COMPONENT_DEVELOPMENT}
-		)
+			)
 
 		# Install public header files
 		foreach(HEADER ${P_PUBLIC_HEADERS})
