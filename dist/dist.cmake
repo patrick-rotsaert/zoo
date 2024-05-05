@@ -29,6 +29,14 @@ if(NOT GENERATOR)
 	endif()
 endif()
 
+if(NOT DEFINED VCPKG)
+	if(WIN32)
+		set(VCPKG ON)
+	else()
+		set(VCPKG OFF)
+	endif()
+endif()
+
 function(exec)
 	list(APPEND ARGN COMMAND_ERROR_IS_FATAL ANY)
 	if(DEFINED COMMAND_ECHO)
@@ -42,14 +50,16 @@ function(configure BUILD_DIR BUILD_SHARED_LIBS CMAKE_BUILD_TYPE)
 	message(STATUS "Configuring shared=${BUILD_SHARED_LIBS} type=${CMAKE_BUILD_TYPE}")
 	message(STATUS "-----------")
 	set(ARGS
-		# -Wno-dev
 		-G "${GENERATOR}"
 		-S ${SOURCE_DIR} -B ${BUILD_DIR}
 		-DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS} -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
 		-DZOO_BUILD_EXAMPLES:BOOL=NO
 		-DZOO_RUN_UNIT_TESTS_ON_BUILD:BOOL=NO
 	)
-	if(WIN32)
+	if(DEFINED CXX)
+		list(APPEND ARGS -DCMAKE_CXX_COMPILER=${CXX})
+	endif()
+	if(VCPKG)
 		list(APPEND ARGS -DCMAKE_TOOLCHAIN_FILE=${SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
 	endif()
 	exec(COMMAND ${CMAKE_COMMAND} ${ARGS})
