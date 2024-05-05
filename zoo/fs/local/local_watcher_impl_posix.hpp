@@ -75,6 +75,11 @@ bool have_read_and_write_permission(const direntry& entry)
 }
 #endif // RFU
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunneeded-internal-declaration"
+#endif
+
 std::string describe_flags(uint32_t mask)
 {
 	auto flags = std::vector<std::string>{};
@@ -112,6 +117,10 @@ std::string describe_flags(uint32_t mask)
 
 	return boost::algorithm::join(flags, "|");
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 } // namespace
 
