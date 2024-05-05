@@ -47,6 +47,7 @@ function(configure BUILD_DIR BUILD_SHARED_LIBS CMAKE_BUILD_TYPE)
 		-S ${SOURCE_DIR} -B ${BUILD_DIR}
 		-DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS} -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
 		-DZOO_BUILD_EXAMPLES:BOOL=NO
+		-DZOO_RUN_UNIT_TESTS_ON_BUILD:BOOL=NO
 	)
 	if(WIN32)
 		list(APPEND ARGS -DCMAKE_TOOLCHAIN_FILE=${SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
@@ -63,11 +64,14 @@ function(build BUILD_DIR CONFIG)
 	message(STATUS "--------")
 	message(STATUS "Building ${BUILD_DIR}")
 	message(STATUS "--------")
-	set(ARGS --build ${BUILD_DIR})
+	set(BUILD_ARGS --build ${BUILD_DIR})
+	set(TEST_ARGS --test-dir ${BUILD_DIR})
 	if(GENERATOR MATCHES "^Visual Studio")
-		list(APPEND ARGS --config ${CONFIG})
+		list(APPEND BUILD_ARGS --config ${CONFIG})
+		list(APPEND TEST_ARGS --build-config ${CONFIG})
 	endif()
-	exec(COMMAND ${CMAKE_COMMAND} ${ARGS})
+	exec(COMMAND ${CMAKE_COMMAND} ${BUILD_ARGS})
+	exec(COMMAND ${CMAKE_CTEST_COMMAND} ${TEST_ARGS})
 endfunction()
 
 build(${BUILD_DIR}/shared-release Release)

@@ -8,6 +8,10 @@
 include(InstallRequiredSystemLibraries)
 
 set(CPACK_PACKAGE_NAME "lib${PROJECT_NAME}")
+if(zoo_BUILT_WITH_VCPKG_DEPS)
+	set(CPACK_PACKAGE_NAME ${CPACK_PACKAGE_NAME}-vcpkg)
+endif()
+
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "ZOO - C++ library collection")
 set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
 # set(CPACK_RESOURCE_FILE_WELCOME ${CMAKE_CURRENT_LIST_DIR}/welcome.txt)
@@ -49,6 +53,22 @@ set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL YES)
 # set(CPACK_NSIS_DELETE_ICONS_EXTRA
 #   "Delete '$SMPROGRAMS\\\\$START_MENU\\\\${CMAKE_PROJECT_NAME}.lnk'")
 
+
+# TODO: embed the VC redist in the NSIS installer
+# From https://cmake.org/pipermail/cmake/2012-January/048540.html
+## With your cmake: embed the installers in your project, install them in a tmp dir
+## ....
+##   install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/redistributable/win64/vcredist_2005_sp1_x64.exe
+##           DESTINATION tmp)
+## Now, add the following specific NSIS commands:
+##       list(APPEND CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
+##                ExecWait '$INSTDIR\\\\tmp\\\\vcredist_2005_sp1_x64.exe'
+##                ")
+## For a msi installer:
+##     list(APPEND CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
+##              ExecWait 'msiexec /i $INSTDIR\\\\tmp\\\\mpich2-1.2.1p1-win.msi'
+##              ")
+# See https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170 for the downloads
 
 set(CPACK_COMPONENTS_ALL ${COMPONENT_RUNTIME} ${COMPONENT_DEVELOPMENT})
 
@@ -100,16 +120,19 @@ if(UNIX)
 			# The development package depends on the runtime + other dev packages
 			set(DEVELOPMENT_PACKAGE_DEPENDS
 				${CPACK_DEBIAN_${COMPONENT_RUNTIME_UC}_PACKAGE_NAME}
-				# FIXME: this depends if vcpkg is used or not
-				# Perhaps it's better not to set this in the DEB file
-				libfmt-dev
-				libspdlog-dev
-				libboost-dev
-				libpq-dev
-				libmysqlclient-dev
-				libsqlite3-dev
-				libssh-dev
 			)
+
+			if (NOT zoo_BUILT_WITH_VCPKG_DEPS)
+				list(APPEND DEVELOPMENT_PACKAGE_DEPENDS
+					libfmt-dev
+					libspdlog-dev
+					libboost-dev
+					libpq-dev
+					libmysqlclient-dev
+					libsqlite3-dev
+					libssh-dev
+				)
+			endif()
 
 			string(JOIN ", " CPACK_DEBIAN_${COMPONENT_DEVELOPMENT_UC}_PACKAGE_DEPENDS ${DEVELOPMENT_PACKAGE_DEPENDS})
 

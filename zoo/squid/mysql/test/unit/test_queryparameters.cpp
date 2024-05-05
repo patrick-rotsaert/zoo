@@ -52,7 +52,7 @@ TEST(MysqlQueryparametersTest, NoStatementParamsAndNoQueryParams)
 	EXPECT_TRUE(qp.binds().empty());
 }
 
-TEST(y, MoreQueryParamsThanStatementParamsMustBeAllowed)
+TEST(MysqlQueryparametersTest, MoreQueryParamsThanStatementParamsMustBeAllowed)
 {
 	mysql_query                      q{ "" };
 	std::map<std::string, parameter> p{};

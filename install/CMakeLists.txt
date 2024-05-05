@@ -19,8 +19,18 @@ endif()
 
 if(zoo_BUILT_WITH_VCPKG_DEPS)
 	install(RUNTIME_DEPENDENCY_SET zoo-runtime-deps
-		POST_EXCLUDE_REGEXES "^/lib/"
-	)
+		COMPONENT ${COMPONENT_RUNTIME}
+		NAMELINK_COMPONENT ${COMPONENT_DEVELOPMENT}
+		PRE_EXCLUDE_REGEXES
+			[[api-ms-win-.*]]
+			[[ext-ms-.*]]
+			[[^hvsifiletrust]]
+			[[^pdmutilities]]
+		POST_EXCLUDE_REGEXES
+			[[^[A-Za-z]:[\/][Ww][Ii][Nn][Dd][Oo][Ww][Ss][\/].*]] # Windows system dlls
+			[[^/lib/]] # Linux system libs
+			[[^/usr/]] # Linux system libs
+		)
 endif()
 
 foreach(comp ${zoo_FIND_PACKAGE_COMPONENTS})
