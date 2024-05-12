@@ -193,7 +193,7 @@ public:
 		return *this;
 	}
 
-	/// Bind the next row result column(s) to the given @a first, rest...
+	/// Bind the next row result column(s) to the given @a first, @a rest...
 	/// This can be used for either named (bindable structs) or unnamed references, but not both.
 	/// Bindable structs must be Boost serializable or must have a public method template<class Binder> void bind(Binder& b):
 	///   assuming the struct has 2 members foo and bar, then this method should call b.bind("foo", foo); and

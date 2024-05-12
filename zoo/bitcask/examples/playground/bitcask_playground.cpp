@@ -169,10 +169,10 @@ struct test_operation_executor
 		ct_iterate.report("iterate");
 	}
 
-	test_operation_executor(test_operation_executor&&) = delete;
+	test_operation_executor(test_operation_executor&&)            = delete;
 	test_operation_executor& operator=(test_operation_executor&&) = delete;
 
-	test_operation_executor(const test_operation_executor&) = delete;
+	test_operation_executor(const test_operation_executor&)            = delete;
 	test_operation_executor& operator=(const test_operation_executor&) = delete;
 
 	void operator()(test_operation op, std::string_view key, std::string_view value)

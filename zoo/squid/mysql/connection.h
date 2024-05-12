@@ -16,7 +16,7 @@ namespace mysql {
 
 class backend_connection;
 
-// Convenience class to create a connection to an SQLite3 backend
+// Convenience class to create a connection to an MySQL backend
 // This class should be used if access to the native connection handle (MYSQL) is needed.
 class ZOO_SQUID_MYSQL_API connection final : public squid::connection
 {

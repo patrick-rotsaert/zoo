@@ -16,6 +16,8 @@ namespace sqlite {
 class sqlite_api final : public isqlite_api
 {
 public:
+	static sqlite_api API;
+
 	sqlite_api();
 	~sqlite_api() override;
 

@@ -18,3 +18,7 @@ if(ZOO_SQUID_WITH_SQLITE3)
 endif()
 
 add_subdirectory(demo_common)
+
+if(ZOO_SQUID_WITH_POSTGRESQL AND ZOO_SQUID_WITH_MYSQL AND ZOO_SQUID_WITH_SQLITE3)
+	add_subdirectory(quickstart)
+endif()

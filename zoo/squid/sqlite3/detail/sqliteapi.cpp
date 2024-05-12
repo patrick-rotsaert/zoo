@@ -13,6 +13,8 @@ namespace zoo {
 namespace squid {
 namespace sqlite {
 
+sqlite_api sqlite_api::API{};
+
 sqlite_api::sqlite_api()
 {
 }

@@ -15,14 +15,8 @@ namespace zoo {
 namespace squid {
 namespace sqlite {
 
-namespace {
-
-sqlite_api g_api;
-
-}
-
 connection::connection(std::string_view connection_info)
-    : connection{ g_api, connection_info }
+    : connection{ sqlite_api::API, connection_info }
 {
 }
 

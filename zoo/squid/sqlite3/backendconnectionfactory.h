@@ -21,6 +21,7 @@ class ZOO_SQUID_SQLITE_API backend_connection_factory final : public ibackend_co
 	isqlite_api* api_;
 
 public:
+	explicit backend_connection_factory();
 	explicit backend_connection_factory(isqlite_api& api);
 
 	backend_connection_factory(const backend_connection_factory&)            = delete;
