@@ -339,11 +339,11 @@ Future planned:
 
 ## TODO list
 
-- [-] Write unit tests.
+- [ ] Write unit tests.
    - [ ] PostgreSQL
    - [ ] MySQL
    - [x] SQLite
-- [ ] Write quick start.
+- [x] Write quick start.
 - [x] Add support for binding Boost.DateTime types.
 - [ ] Add support for binding Howard Hinnant date types.
 - [ ] Add support for binding Boost descibe'd structs.
