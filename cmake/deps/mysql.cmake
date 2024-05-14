@@ -8,6 +8,7 @@
 include_guard(GLOBAL)
 
 include(${PROJECT_SOURCE_DIR}/cmake/options.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/vars.cmake)
 
 if(ZOO_SQUID_WITH_MYSQL)
 	# If this project is included as a subdirectory, the MySQL::MySQL target may already be defined.
@@ -18,6 +19,11 @@ if(ZOO_SQUID_WITH_MYSQL)
 		else()
 			list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/modules)
 			project_find_package(MySQL MODULE REQUIRED)
+			install(
+				FILES ${CMAKE_CURRENT_LIST_DIR}/modules/FindMySQL.cmake
+				DESTINATION ${zoo_INSTALL_CMAKEDIR}/../modules
+				COMPONENT ${COMPONENT_DEVELOPMENT}
+			)
 		endif()
 	endif()
 endif()

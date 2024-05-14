@@ -38,3 +38,7 @@ if((DEFINED CMAKE_TOOLCHAIN_FILE) AND (CMAKE_TOOLCHAIN_FILE MATCHES "vcpkg\\.cma
 else()
 	set(zoo_BUILT_WITH_VCPKG_DEPS OFF)
 endif()
+
+if(NOT DEFINED zoo_INSTALL_CMAKEDIR)
+	set(zoo_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/zoo" CACHE STRING "Path to installed zoo CMake files")
+endif()

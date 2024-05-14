@@ -7,10 +7,6 @@
 
 include(CMakePackageConfigHelpers)
 
-if(NOT DEFINED zoo_INSTALL_CMAKEDIR)
-	set(zoo_INSTALL_CMAKEDIR "${CMAKE_INSTALL_LIBDIR}/cmake/zoo" CACHE STRING "Path to installed zoo CMake files")
-endif()
-
 if(BUILD_SHARED_LIBS)
 	set(LINKAGE shared)
 else()
