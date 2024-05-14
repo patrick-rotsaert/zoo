@@ -22,9 +22,11 @@ add_project_library(bitcask
 		file.cpp
 		file.h
 		hton.h
+		apilinktest.cpp
 	# TODO: unit tests
 	PUBLIC_HEADERS
 		bitcask.h
+		apilinktest.h
 	PUBLIC_LIBRARIES
 		zoo::common
 		fmt::fmt

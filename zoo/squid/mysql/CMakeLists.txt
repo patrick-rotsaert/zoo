@@ -20,12 +20,14 @@ add_project_library(squid_mysql
 		detail/queryresults.h
 		detail/conversions.cpp
 		detail/conversions.h
+		apilinktest.cpp
 	PUBLIC_HEADERS
 		error.h
 		statement.h
 		backendconnection.h
 		backendconnectionfactory.h
 		connection.h
+		apilinktest.h
 	UNIT_TEST_SOURCES
 		test/unit/test_conversions.cpp
 		test/unit/test_query.cpp

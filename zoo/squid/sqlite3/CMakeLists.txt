@@ -21,6 +21,7 @@ add_project_library(squid_sqlite
 		detail/isqliteapi.h
 		detail/sqliteapi.cpp
 		detail/sqliteapi.h
+		apilinktest.cpp
 	UNIT_TEST_SOURCES
 		test/unit/test_error.cpp
 		test/unit/test_backendconnection.cpp
@@ -37,6 +38,7 @@ add_project_library(squid_sqlite
 		backendconnection.h
 		backendconnectionfactory.h
 		connection.h
+		apilinktest.h
 	PUBLIC_LIBRARIES
 		SQLite::SQLite3
 		zoo::squid_core

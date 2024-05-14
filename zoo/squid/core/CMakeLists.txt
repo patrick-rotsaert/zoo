@@ -19,6 +19,7 @@ add_project_library(squid_core
 		statement.cpp
 		preparedstatement.cpp
 		transaction.cpp
+		apilinktest.cpp
 	PUBLIC_HEADERS
 		parameter.h
 		result.h
@@ -38,6 +39,7 @@ add_project_library(squid_core
 		detail/type_traits.h
 		detail/bind_oarchive.h
 		detail/bind_iarchive.h
+		apilinktest.h
 	UNIT_TEST_SOURCES
 		test/unit/test_parameter.cpp
 		test/unit/test_result.cpp

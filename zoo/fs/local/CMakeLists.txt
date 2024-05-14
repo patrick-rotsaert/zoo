@@ -18,8 +18,10 @@ add_project_library(fs_local
 		make_attributes.h
 		make_direntry.cpp
 		make_direntry.h
+		apilinktest.cpp
 	PUBLIC_HEADERS
 		local_access.h
+		apilinktest.h
 	UNIT_TEST_SOURCES
 		test/unit/test_local_access.cpp
 		test/unit/test_make_attributes.cpp

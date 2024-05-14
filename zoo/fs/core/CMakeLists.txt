@@ -19,6 +19,7 @@ add_project_library(fs_core
 		make_dest_path.h
 		exceptions.cpp
 		noop_interruptor.cpp
+		apilinktest.cpp
 	PUBLIC_HEADERS
 		iaccess.h
 		iinterruptor.h
@@ -32,6 +33,7 @@ add_project_library(fs_core
 		operations.h
 		exceptions.h
 		noop_interruptor.h
+		apilinktest.h
 	UNIT_TEST_SOURCES
 		test/unit/test_attributes.cpp
 		test/unit/test_destination.cpp

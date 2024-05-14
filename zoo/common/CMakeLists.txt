@@ -32,6 +32,7 @@ add_project_library(common
 		version.cpp
 		version.h.in
 		config.h.in
+		apilinktest.cpp
 	PUBLIC_HEADERS
 		api.h
 		compat.h
@@ -51,6 +52,7 @@ add_project_library(common
 		misc/throw_exception.h
 		misc/uuid.h
 		misc/quoted_c.h
+		apilinktest.h
 	UNIT_TEST_SOURCES
 		test/unit/conversion/test_conversion.cpp
 		test/unit/lockfile/test_lockfile.cpp

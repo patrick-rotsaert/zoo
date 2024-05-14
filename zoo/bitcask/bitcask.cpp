@@ -8,6 +8,7 @@
 #include "zoo/bitcask/bitcask.h"
 #include "zoo/bitcask/datadir.h"
 #include "zoo/bitcask/keydir.h"
+#include "bitcask.h"
 
 namespace zoo {
 namespace bitcask {

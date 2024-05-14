@@ -23,6 +23,7 @@ add_project_library(squid_postgresql
 		detail/queryresults.cpp
 		detail/queryresults.h
 		detail/execresult.h
+		apilinktest.cpp
 	PUBLIC_HEADERS
 		error.h
 		statement.h
@@ -30,6 +31,7 @@ add_project_library(squid_postgresql
 		backendconnectionfactory.h
 		connection.h
 		detail/libpqfwd.h
+		apilinktest.h
 	UNIT_TEST_SOURCES
 		test/unit/test_conversions.cpp
 		test/unit/test_query.cpp

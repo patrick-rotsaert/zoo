@@ -36,6 +36,7 @@ add_project_library(fs_sftp
 		make_attributes.h
 		make_direntry.cpp
 		make_direntry.h
+		apilinktest.cpp
 	PUBLIC_HEADERS
 		issh_knownhosts.h
 		issh_identity_factory.h
@@ -43,6 +44,7 @@ add_project_library(fs_sftp
 		sftp_access.h
 		sftp_exceptions.h
 		sftp_options.h
+		apilinktest.h
 	UNIT_TEST_SOURCES
 		test/unit/test_make_attributes.cpp
 		test/unit/test_make_direntry.cpp
