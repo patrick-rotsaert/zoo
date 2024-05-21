@@ -3,9 +3,9 @@
 ## Quick start
 
 Please checkout the code in [example_controller.cpp](examples/example_controller/example_controller.cpp).
-It demonstrates the capabilities that this library provides.
+It demonstrates the capabilities of this library.
 
-To test this application, run it as follows:
+To test the example application, build and run it as follows:
 ```shell
 DOCROOT=/tmp/myfiles
 mkdir -p ${DOCROOT}
