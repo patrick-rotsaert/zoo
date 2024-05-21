@@ -5,6 +5,5 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 #
 
-add_subdirectory(playground)
 add_subdirectory(quickstart)
 

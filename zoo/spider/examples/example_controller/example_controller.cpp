@@ -130,6 +130,14 @@ class api_controller final : public controller
 	                  const request&                      req)
 	{
 		zlog(debug, "{} customer id={}, serial={}, api_key={}", req.method_string(), id, serial, api_key);
+		if (!api_key)
+		{
+			ZOO_THROW_EXCEPTION(exception{} << exception::mesg{ "An API key is required" } << exception::status{ status::unauthorized });
+		}
+		else if (api_key.value() != "the_api_key")
+		{
+			ZOO_THROW_EXCEPTION(exception{} << exception::mesg{ "Bad API key" } << exception::status{ status::unauthorized });
+		}
 		return json_response::create(status::ok, customer{ id, "The Customer Inc" });
 	}
 

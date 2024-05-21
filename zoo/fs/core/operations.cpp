@@ -22,9 +22,9 @@ void move_file(iaccess& access, source& source, const destination& dest)
 	source.current_path = new_path;
 }
 
-fspath copy_file(iaccess&                                       source_access,
+fspath copy_file(iaccess&                                        source_access,
                  const source&                                   source,
-                 iaccess&                                       dest_access,
+                 iaccess&                                        dest_access,
                  const destination&                              dest,
                  std::function<void(std::uint64_t bytes_copied)> on_progress)
 {

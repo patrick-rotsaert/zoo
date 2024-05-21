@@ -1,46 +1,28 @@
-# FS - C++ File Access Library
+//
+// Copyright (C) 2022-2024 Patrick Rotsaert
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
 
-This library provides an interface [iaccess](core/iaccess.h) that provides basic file operations.
-
-There are currently two implementations:
-1. [Local file system access](local/local_access.h)
-2. [Sftp file system access](sftp/sftp_access.h)
-
-Using the base class [iaccess](core/iaccess.h) allows for the implementation of generic algorithms. See [operations.cpp](core/operations.cpp) for an example of this.
-
-## Quick start
-
-All code samples imply:
-```cpp
-using namespace zoo::fs;
-```
-
-### Creating local access
-
-```cpp
 #include "zoo/fs/local/local_access.h"
+#include "zoo/fs/sftp/sftp_access.h"
+#include "zoo/fs/core/noop_interruptor.h"
+#include "zoo/fs/core/direntry.h"
+#include "zoo/fs/core/ifile.h"
+#include "zoo/fs/core/iwatcher.h"
+#include <iostream>
+#include <filesystem>
+#include <cassert>
 
-void get_local_access()
+using namespace zoo::fs;
+
+local::access get_local_access()
 {
 	auto access = local::access{ std::make_shared<noop_interruptor>() };
 	assert(!access.is_remote());
+	return access;
 }
-
-```
-
-All access classes require a `std::shared_ptr<iinterruptor>` argument which is can be used to interrupt long during operations.
-The `noop_interruptor` class is a dummy implementation of that interface.
-
-### Creating sftp access
-
-This is a bit more involved.
-The user must supply an implementation of [sftp::issh_known_hosts](sftp/issh_knownhosts.h) and [sftp::issh_identity_factory](sftp/issh_identity_factory.h).
-The former is responsible to verify and persist the host's public key hash. The latter for supplying SSH identities for public key authentication.
-There is currently no default implementation that uses the files in `~/.ssh/`.
-
-
-```cpp
-#include "zoo/fs/sftp/sftp_access.h"
 
 // User supplied known_hosts implementation.
 class known_hosts : public sftp::issh_known_hosts
@@ -86,7 +68,7 @@ class ssh_identity_factory : public sftp::issh_identity_factory
 	}
 };
 
-void get_sftp_access()
+sftp::access get_sftp_access()
 {
 	// The `host` and `user` members of `sftp::options` are required.
 	// The `port` member is optional and defaults to 22.
@@ -102,15 +84,8 @@ void get_sftp_access()
 		                        std::make_shared<ssh_identity_factory>(),
 		                        std::make_shared<noop_interruptor>() };
 	assert(access.is_remote());
+	return access;
 }
-```
-
-### Access operations
-
-```cpp
-#include "zoo/fs/core/direntry.h"
-#include "zoo/fs/core/ifile.h"
-#include "zoo/fs/core/iwatcher.h"
 
 void access_operations(iaccess& a)
 {
@@ -213,9 +188,21 @@ void directory_watcher(iaccess& source_access, const fspath& source_dir, iaccess
 		}
 	}
 }
-```
 
-## Motivation
-
-I was working on a tool that monitors a local or remote directory for incoming files and, given some conditions, run a configurable workflow on these files.
-The file system access needed abstraction to achieve this, so I decided to put this in a separate library.
+int main()
+{
+	try
+	{
+		auto first  = get_local_access();
+		auto second = get_sftp_access();
+		access_operations(first);
+		access_operations(second);
+		copy_file(first, "/tmp/foo", second, "/tmp/bar");
+		directory_watcher(first, "/some/dir", second, "/some/dir");
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << e.what() << "\n";
+		return 1;
+	}
+}

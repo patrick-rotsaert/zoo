@@ -5,7 +5,8 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 #
 
-add_subdirectory(core)
-add_subdirectory(local)
-add_subdirectory(sftp)
-add_subdirectory(examples)
+set(TARGET bitcask_quickstart)
+add_project_executable(${TARGET} quickstart.cpp)
+
+target_compile_features(${TARGET} PRIVATE cxx_std_20)
+target_link_libraries(${TARGET} PRIVATE zoo::bitcask)

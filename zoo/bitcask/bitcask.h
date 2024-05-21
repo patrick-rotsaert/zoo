@@ -36,16 +36,24 @@ public:
 	off64_t max_file_size() const;
 	void    max_file_size(off64_t size);
 
+	// Returns true if the bitcask does not contain any keys.
 	bool empty() const;
 
+	/// Get a key-value pair.
+	/// Returns the value or std::nullopt if the key does not exist.
 	std::optional<value_type> get(const std::string_view& key);
 
+	/// Insert or update a key-value pair.
 	/// Returns true if the key was inserted, false if the key existed.
 	bool put(const std::string_view& key, const std::string_view& value);
 
+	/// Delete a key and its value.
 	/// Returns true if the key was deleted, false if the key did not exist.
 	bool del(const std::string_view& key);
 
+	/// Iterate over all key-value pairs.
+	/// Iteration will stop if the callback returns false.
+	/// Returns true if all keys were traversed, false if a callback returned false.
 	bool traverse(std::function<bool(const std::string_view& key, const std::string_view& value)> callback);
 
 	// maintenance

@@ -1,23 +1,16 @@
-# BITCASK - C++ Bitcask Implementation
+//
+// Copyright (C) 2022-2024 Patrick Rotsaert
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
 
-Bitcask implementation, based on the [Bitcask paper](https://riak.com/assets/bitcask-intro.pdf).
-
-For parallel use from multiple threads, make sure the library is compiled with the CMake option
-```
-ZOO_THREAD_SAFE=ON
-```
-
-## Quick start
-
-All code samples imply:
-```cpp
-using namespace zoo::bitcask;
-```
-
-### Basic usage
-
-```cpp
 #include "zoo/bitcask/bitcask.h"
+#include <iostream>
+#include <filesystem>
+#include <cassert>
+
+using namespace zoo::bitcask;
 
 void basic_usage()
 {
@@ -25,7 +18,7 @@ void basic_usage()
 	// Constructor takes a path to a directory.
 	// The directory is created recursively if it does not exist.
 	const auto dir = std::filesystem::temp_directory_path() / "bitcask" / "bcdir0001";
-	bitcask bc{ dir };
+	bitcask    bc{ dir };
 
 	// Only one process/thread can have a bitbask open.
 	// bitcask other{ dir }; // would throw, since `dir` is locked.
@@ -44,11 +37,7 @@ void basic_usage()
 	bc.del("key01");
 	assert(!bc.get("key01").has_value());
 }
-```
 
-### Merging
-
-```cpp
 void merge()
 {
 	const auto dir = std::filesystem::temp_directory_path() / "bitcask" / "bcdir0001";
@@ -72,13 +61,17 @@ void merge()
 
 	// There is now only one data file left (the active file).
 }
-```
 
-## Motivation
-
-Stumbling across the [Bitcask paper](https://riak.com/assets/bitcask-intro.pdf), I thought this would be a fun weekend project.
-Indeed fun it was, but it took a little longer than a weekend to finish.
-Especially the merging was challenging to implement.
-The paper is quite vague on that part and I wanted to make it as efficient as possible which still allowing CRUD operations to run in parallel.
-
-There do exist good implementations already, but I intentionally did not look at them. Considered this to be an excercise.
+int main()
+{
+	try
+	{
+		basic_usage();
+		merge();
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << e.what() << "\n";
+		return 1;
+	}
+}

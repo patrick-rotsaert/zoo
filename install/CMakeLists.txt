@@ -27,6 +27,14 @@ if(zoo_BUILT_WITH_VCPKG_DEPS)
 			[[^/lib/]] # Linux system libs
 			[[^/usr/]] # Linux system libs
 		)
+
+		# if(_VCPKG_INSTALLED_DIR AND VCPKG_TARGET_TRIPLET)
+		# 	install(
+		# 		DIRECTORY ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include/
+		# 		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+		# 		COMPONENT ${COMPONENT_DEVELOPMENT}
+		# 	)
+		# endif()
 endif()
 
 foreach(comp ${zoo_FIND_PACKAGE_COMPONENTS})
