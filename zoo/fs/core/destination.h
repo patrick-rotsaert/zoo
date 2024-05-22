@@ -41,6 +41,41 @@ public:
 	                                                        // --
 	conflict_policy on_name_conflict;                       // How to handle an existing destination file.
 
+	/// The destination path (this->path) is constructed from @a path as follows:
+	///
+	/// If @a expand_time_placeholders is set, time placeholders are expanded as described above.
+	/// If the resulting path exists:
+	///   If it is a directory:
+	///     Append the original filename of @a source to the path.
+	///     If the resulting path exists:
+	///       If it is a directory:
+	///         Throw error.
+	///       Else:
+	///         Resolve name conflict.
+	///   Else if the path ends with a path separator:
+	///     Throw error.
+	///   Else:
+	///     Resolve name conflict.
+	/// Else:
+	///   If the path ends with a path separator:
+	///     Append the original filename of @a source to the path.
+	///   If the path has a parent path:
+	///     If @a create_parents is true:
+	///       Recursively create the parent path.
+	///
+	/// Name conflict resulution is controlled by @a on_name_conflict:
+	/// - OVERWRITE: The existing file will be overwritten.
+	/// - FAIL: The construction will fail.
+	/// - AUTORENAME:
+	///     A new name is formed as {stem}~{i}{ext}, where:
+	///     {stem} is the filename stem, i.e. "file" in "file.txt"
+	///     {ext} is the filename extension, i.e. ".txt" in "file.txt"
+	///     {i} is incremented starting from 1 until the new name does not exist.
+	///     Example: For a desination filename "file.txt", where "file.txt" exists,
+	///     the new name will be "file~1.txt". If that also exists, then "file~2.txt"
+	///     and so on.
+	///     Note that race conditions may occur if another thread or process
+	///     creates the same file after this constructor returns.
 	destination(const fspath&                        path,
 	            const std::optional<time_expansion>& expand_time_placeholders,
 	            bool                                 create_parents,

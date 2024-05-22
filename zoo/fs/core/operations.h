@@ -18,10 +18,14 @@
 namespace zoo {
 namespace fs {
 
-// TODO: add documentation
+/// Move a file from @a source to @a dest using the given @a access.
+/// After successful completion, the current_path member of @a source will hold the new path.
+/// See destination.h for an explanation on how the destination path is constructed.
 ZOO_FS_CORE_API void move_file(iaccess& access, source& source, const destination& dest);
 
-// TODO: add documentation
+/// Copy a file from @a source using the @a source_access to @a dest using the @a dest_access.
+/// The optional @a on_progress callback is called after each block is copied.
+/// See destination.h for an explanation on how the destination path is constructed.
 ZOO_FS_CORE_API fspath copy_file(iaccess&                                        source_access,
                                  const source&                                   source,
                                  iaccess&                                        dest_access,
