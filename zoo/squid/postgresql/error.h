@@ -18,14 +18,16 @@ namespace zoo {
 namespace squid {
 namespace postgresql {
 
+class ipq_api;
+
 class ZOO_SQUID_POSTGRESQL_API error : public squid::error
 {
 	std::optional<std::string> sql_state_;
 
 public:
 	explicit error(const std::string& message);
-	explicit error(const std::string& message, const PGconn& connection);
-	explicit error(const std::string& message, const PGconn& connection, const PGresult& result);
+	explicit error(ipq_api* api, const std::string& message, const PGconn& connection);
+	explicit error(ipq_api* api, const std::string& message, const PGconn& connection, const PGresult& result);
 
 	const std::optional<std::string>& sql_state() const;
 };

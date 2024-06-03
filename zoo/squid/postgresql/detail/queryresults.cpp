@@ -7,6 +7,7 @@
 
 #include "zoo/squid/postgresql/detail/queryresults.h"
 #include "zoo/squid/postgresql/detail/conversions.h"
+#include "zoo/squid/postgresql/detail/ipqapi.h"
 
 #include "zoo/squid/postgresql/error.h"
 
@@ -122,15 +123,20 @@ void store_result(const result::non_nullable_type& result, std::string_view colu
 	    result);
 }
 
-void store_result(const result& result, const PGresult& pgresult, int row_index, std::string_view column_name, int column_index)
+void store_result(ipq_api*         api,
+                  const result&    result,
+                  const PGresult&  pgresult,
+                  int              row_index,
+                  std::string_view column_name,
+                  int              column_index)
 {
-	assert(row_index < PQntuples(&pgresult));
-	assert(column_index < PQnfields(&pgresult));
+	assert(row_index < api->ntuples(&pgresult));
+	assert(column_index < api->nfields(&pgresult));
 	assert(column_name.data());
 
 	const auto& destination = result.value();
 
-	if (PQgetisnull(&pgresult, row_index, column_index))
+	if (api->getisnull(&pgresult, row_index, column_index))
 	{
 		std::visit(
 		    [&](auto&& arg) {
@@ -159,7 +165,7 @@ void store_result(const result& result, const PGresult& pgresult, int row_index,
 	}
 	else
 	{
-		const auto value = PQgetvalue(&pgresult, row_index, column_index);
+		const auto value = api->getvalue(&pgresult, row_index, column_index);
 		assert(value);
 
 		std::visit(
@@ -206,14 +212,15 @@ struct query_results::column final
 	}
 };
 
-query_results::query_results(std::shared_ptr<PGresult> pgresult)
-    : pgresult_{ std::move(pgresult) }
+query_results::query_results(ipq_api* api, std::shared_ptr<PGresult> pgresult)
+    : api_{ api }
+    , pgresult_{ std::move(pgresult) }
     , columns_{}
     , field_count_{}
 {
 	assert(this->pgresult_);
 
-	const auto column_count = PQnfields(this->pgresult_.get());
+	const auto column_count = api->nfields(this->pgresult_.get());
 	if (column_count < 0)
 	{
 		ZOO_THROW_EXCEPTION(error{ "PQnfields returned a negative value" });
@@ -222,8 +229,8 @@ query_results::query_results(std::shared_ptr<PGresult> pgresult)
 	this->field_count_ = static_cast<size_t>(column_count);
 }
 
-query_results::query_results(std::shared_ptr<PGresult> pgresult, const std::vector<result>& results)
-    : query_results{ pgresult }
+query_results::query_results(ipq_api* api, std::shared_ptr<PGresult> pgresult, const std::vector<result>& results)
+    : query_results{ api, pgresult }
 {
 	if (results.size() > this->field_count_)
 	{
@@ -237,7 +244,7 @@ query_results::query_results(std::shared_ptr<PGresult> pgresult, const std::vect
 	int index = 0;
 	for (const auto& result : results)
 	{
-		const auto column_name = PQfname(pgresult.get(), index);
+		const auto column_name = api->fname(pgresult.get(), index);
 		if (column_name == nullptr)
 		{
 			ZOO_THROW_EXCEPTION(error{ "PQfname returned a nullptr" });
@@ -249,8 +256,8 @@ query_results::query_results(std::shared_ptr<PGresult> pgresult, const std::vect
 	}
 }
 
-query_results::query_results(std::shared_ptr<PGresult> pgresult, const std::map<std::string, result>& results)
-    : query_results{ pgresult }
+query_results::query_results(ipq_api* api, std::shared_ptr<PGresult> pgresult, const std::map<std::string, result>& results)
+    : query_results{ api, pgresult }
 {
 	if (results.size() > this->field_count_)
 	{
@@ -263,7 +270,7 @@ query_results::query_results(std::shared_ptr<PGresult> pgresult, const std::map<
 	std::map<std::string_view, size_t> map{};
 	for (size_t index = 0; index < this->field_count_; ++index)
 	{
-		const auto column_name = PQfname(pgresult.get(), static_cast<int>(index));
+		const auto column_name = api->fname(pgresult.get(), static_cast<int>(index));
 		if (column_name == nullptr)
 		{
 			ZOO_THROW_EXCEPTION(error{ "PQfname returned a nullptr" });
@@ -298,7 +305,7 @@ size_t query_results::field_count() const
 
 std::string query_results::field_name(std::size_t index) const
 {
-	const auto name = PQfname(this->pgresult_.get(), static_cast<int>(index));
+	const auto name = this->api_->fname(this->pgresult_.get(), static_cast<int>(index));
 	if (name == nullptr)
 	{
 		ZOO_THROW_EXCEPTION(error{ "PQfname returned a null pointer" });
@@ -311,7 +318,7 @@ void query_results::fetch(int row_index)
 {
 	for (const auto& column : this->columns_)
 	{
-		store_result(column->res, *this->pgresult_, row_index, column->name, column->index);
+		store_result(this->api_, column->res, *this->pgresult_, row_index, column->name, column->index);
 	}
 }
 

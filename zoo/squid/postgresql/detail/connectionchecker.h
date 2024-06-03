@@ -15,15 +15,17 @@ namespace zoo {
 namespace squid {
 namespace postgresql {
 
+class ipq_api;
+
 class connection_checker final
 {
 public:
 	// must not return a nullptr
-	static PGconn* check(PGconn* connection);
+	static PGconn* check(ipq_api *api, PGconn* connection);
 
 	// must not return a nullptr
 	// connection must outlive the returned pointer
-	static PGconn* check(std::shared_ptr<PGconn> connection);
+	static PGconn* check(ipq_api *api, std::shared_ptr<PGconn> connection);
 };
 
 } // namespace postgresql

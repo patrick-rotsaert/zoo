@@ -17,19 +17,21 @@ namespace zoo {
 namespace squid {
 namespace postgresql {
 
+class ipq_api;
+
 class ZOO_SQUID_POSTGRESQL_API statement final : public ibackend_statement
 {
 	class impl;
 	std::unique_ptr<impl> pimpl_;
 
 public:
-	statement(std::shared_ptr<PGconn> connection, std::string_view query, bool reuse_statement);
+	statement(ipq_api *api, std::shared_ptr<PGconn> connection, std::string_view query, bool reuse_statement);
 	~statement() noexcept;
 
 	statement(statement&&);
 	statement& operator=(statement&&);
 
-	statement(const statement&) = delete;
+	statement(const statement&)            = delete;
 	statement& operator=(const statement&) = delete;
 
 	void execute(const std::map<std::string, parameter>& parameters, const std::vector<result>& results) override;
@@ -42,7 +44,7 @@ public:
 
 	std::uint64_t affected_rows() override;
 
-	static void execute(PGconn& connection, const std::string& query);
+	static void execute(ipq_api *api, PGconn& connection, const std::string& query);
 };
 
 } // namespace postgresql

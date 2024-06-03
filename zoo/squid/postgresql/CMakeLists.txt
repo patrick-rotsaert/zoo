@@ -23,6 +23,10 @@ add_project_library(squid_postgresql
 		detail/queryresults.cpp
 		detail/queryresults.h
 		detail/execresult.h
+		detail/ipqapi.cpp
+		detail/ipqapi.h
+		detail/pqapi.cpp
+		detail/pqapi.h
 		apilinktest.cpp
 	PUBLIC_HEADERS
 		error.h
@@ -32,6 +36,9 @@ add_project_library(squid_postgresql
 		connection.h
 		detail/libpqfwd.h
 		apilinktest.h
+	MOCK_SOURCES
+		detail/pqapimock.cpp
+		detail/pqapimock.h
 	UNIT_TEST_SOURCES
 		test/unit/test_conversions.cpp
 		test/unit/test_query.cpp

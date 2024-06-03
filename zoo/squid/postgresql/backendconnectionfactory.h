@@ -14,16 +14,22 @@ namespace zoo {
 namespace squid {
 namespace postgresql {
 
+class ipq_api;
+
 class ZOO_SQUID_POSTGRESQL_API backend_connection_factory final : public ibackend_connection_factory
 {
-	std::shared_ptr<ibackend_connection> create_backend_connection(std::string_view connection_info) const override;
+	ipq_api* api_;
 
 public:
-	backend_connection_factory()                                             = default;
+	explicit backend_connection_factory();
+	explicit backend_connection_factory(ipq_api& api);
+
 	backend_connection_factory(const backend_connection_factory&)            = delete;
 	backend_connection_factory(backend_connection_factory&& src)             = default;
 	backend_connection_factory& operator=(const backend_connection_factory&) = delete;
 	backend_connection_factory& operator=(backend_connection_factory&&)      = default;
+
+	std::shared_ptr<ibackend_connection> create_backend_connection(std::string_view connection_info) const override;
 };
 
 } // namespace postgresql

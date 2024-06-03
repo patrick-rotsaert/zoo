@@ -5,13 +5,20 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#pragma once
+#include "ipqapi.h"
 
-struct pg_conn;
-typedef struct pg_conn PGconn;
+namespace zoo {
+namespace squid {
+namespace postgresql {
 
-struct pg_result;
-typedef struct pg_result PGresult;
+ipq_api::ipq_api()
+{
+}
 
-struct pgNotify;
-typedef struct pgNotify PGnotify;
+ipq_api::~ipq_api()
+{
+}
+
+} // namespace postgresql
+} // namespace squid
+} // namespace zoo

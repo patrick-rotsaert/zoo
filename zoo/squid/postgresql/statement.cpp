@@ -8,6 +8,7 @@
 #include "zoo/squid/postgresql/statement.h"
 #include "zoo/squid/postgresql/error.h"
 
+#include "zoo/squid/postgresql/detail/ipqapi.h"
 #include "zoo/squid/postgresql/detail/query.h"
 #include "zoo/squid/postgresql/detail/queryparameters.h"
 #include "zoo/squid/postgresql/detail/queryresults.h"
@@ -21,8 +22,6 @@
 #include <optional>
 #include <atomic>
 #include <cassert>
-
-#include <libpq-fe.h>
 
 namespace zoo {
 namespace squid {
@@ -40,6 +39,7 @@ std::string next_statement_name()
 
 class statement::impl final
 {
+	ipq_api*                          api_;
 	std::shared_ptr<PGconn>           connection_;
 	std::unique_ptr<postgresql_query> query_;
 	bool                              reuse_statement_;
@@ -49,8 +49,9 @@ class statement::impl final
 	std::unique_ptr<query_results>    query_results_;
 
 public:
-	explicit impl(std::shared_ptr<PGconn> connection, std::string_view query, bool reuse_statement)
-	    : connection_{ std::move(connection) }
+	explicit impl(ipq_api* api, std::shared_ptr<PGconn> connection, std::string_view query, bool reuse_statement)
+	    : api_{ api }
+	    , connection_{ std::move(connection) }
 	    , query_{ std::make_unique<postgresql_query>(query) }
 	    , reuse_statement_{ reuse_statement }
 	    , prepared_{}
@@ -68,9 +69,9 @@ public:
 			if (this->prepared_)
 			{
 				assert(this->stmt_name_);
-				std::shared_ptr<PGresult>{
-					PQexec(connection_checker::check(this->connection_), ("DEALLOCATE " + this->stmt_name_.value()).c_str()), PQclear
-				};
+				std::shared_ptr<PGresult>{ this->api_->exec(connection_checker::check(this->api_, this->connection_),
+					                                        ("DEALLOCATE " + this->stmt_name_.value()).c_str()),
+					                       [this](PGresult* res) { this->api_->clear(res); } };
 			}
 		}
 		catch (...)
@@ -84,10 +85,10 @@ public:
 	{
 		if (pgresult)
 		{
-			const auto status = PQresultStatus(pgresult.get());
+			const auto status = this->api_->resultStatus(pgresult.get());
 			if (PGRES_TUPLES_OK == status)
 			{
-				this->exec_result_ = exec_result{ .pgresult = pgresult, .rows = PQntuples(pgresult.get()), .current_row = 0 };
+				this->exec_result_ = exec_result{ .pgresult = pgresult, .rows = this->api_->ntuples(pgresult.get()), .current_row = 0 };
 			}
 			else if (PGRES_COMMAND_OK == status)
 			{
@@ -95,14 +96,14 @@ public:
 			}
 			else
 			{
-				ZOO_THROW_EXCEPTION(error{ std::string{ exec_function } + " failed", *this->connection_, *pgresult.get() });
+				ZOO_THROW_EXCEPTION(error{ this->api_, std::string{ exec_function } + " failed", *this->connection_, *pgresult.get() });
 			}
 
-			this->query_results_ = std::make_unique<query_results>(pgresult, results);
+			this->query_results_ = std::make_unique<query_results>(this->api_, pgresult, results);
 		}
 		else
 		{
-			ZOO_THROW_EXCEPTION(error{ std::string{ exec_function } + " failed", *this->connection_ });
+			ZOO_THROW_EXCEPTION(error{ this->api_, std::string{ exec_function } + " failed", *this->connection_ });
 		}
 	}
 
@@ -127,53 +128,55 @@ public:
 
 				ZOO_LOG(trace, "preparing: {}", this->query_->query());
 
-				std::shared_ptr<PGresult> pgresult{ PQprepare(connection_checker::check(this->connection_),
-					                                          this->stmt_name_->c_str(),
-					                                          this->query_->query().c_str(),
-					                                          this->query_->parameter_count(),
-					                                          nullptr),
-					                                PQclear };
+				std::shared_ptr<PGresult> pgresult{ this->api_->prepare(connection_checker::check(this->api_, this->connection_),
+					                                                    this->stmt_name_->c_str(),
+					                                                    this->query_->query().c_str(),
+					                                                    this->query_->parameter_count(),
+					                                                    nullptr),
+					                                [this](PGresult* res) { this->api_->clear(res); } };
 				if (pgresult)
 				{
-					auto status = PQresultStatus(pgresult.get());
+					auto status = this->api_->resultStatus(pgresult.get());
 					if (PGRES_COMMAND_OK != status)
 					{
-						ZOO_THROW_EXCEPTION(error{ "PQprepare failed", *this->connection_, *pgresult });
+						ZOO_THROW_EXCEPTION(error{ this->api_, "PQprepare failed", *this->connection_, *pgresult });
 					}
 					this->prepared_ = true;
 				}
 				else
 				{
-					ZOO_THROW_EXCEPTION(error{ "PQprepare failed", *this->connection_ });
+					ZOO_THROW_EXCEPTION(error{ this->api_, "PQprepare failed", *this->connection_ });
 				}
 			}
 
 			assert(this->stmt_name_);
 
-			this->set_exec_result(std::shared_ptr<PGresult>{ PQexecPrepared(connection_checker::check(this->connection_),
-			                                                                this->stmt_name_->c_str(),
-			                                                                query_params.parameter_count(),
-			                                                                query_params.parameter_values(),
-			                                                                nullptr,
-			                                                                nullptr,
-			                                                                0),
-			                                                 PQclear },
-			                      "PQexecPrepared",
-			                      results);
+			this->set_exec_result(
+			    std::shared_ptr<PGresult>{ this->api_->execPrepared(connection_checker::check(this->api_, this->connection_),
+			                                                        this->stmt_name_->c_str(),
+			                                                        query_params.parameter_count(),
+			                                                        query_params.parameter_values(),
+			                                                        nullptr,
+			                                                        nullptr,
+			                                                        0),
+			                               [this](PGresult* res) { this->api_->clear(res); } },
+			    "PQexecPrepared",
+			    results);
 		}
 		else
 		{
-			this->set_exec_result(std::shared_ptr<PGresult>{ PQexecParams(connection_checker::check(this->connection_),
-			                                                              this->query_->query().c_str(),
-			                                                              query_params.parameter_count(),
-			                                                              nullptr,
-			                                                              query_params.parameter_values(),
-			                                                              nullptr,
-			                                                              nullptr,
-			                                                              0),
-			                                                 PQclear },
-			                      "PQexecParams",
-			                      results);
+			this->set_exec_result(
+			    std::shared_ptr<PGresult>{ this->api_->execParams(connection_checker::check(this->api_, this->connection_),
+			                                                      this->query_->query().c_str(),
+			                                                      query_params.parameter_count(),
+			                                                      nullptr,
+			                                                      query_params.parameter_values(),
+			                                                      nullptr,
+			                                                      nullptr,
+			                                                      0),
+			                               [this](PGresult* res) { this->api_->clear(res); } },
+			    "PQexecParams",
+			    results);
 		}
 	}
 
@@ -224,7 +227,7 @@ public:
 	{
 		if (this->exec_result_)
 		{
-			const auto num = PQcmdTuples(this->exec_result_->pgresult.get());
+			const auto num = this->api_->cmdTuples(this->exec_result_->pgresult.get());
 			if (!num || !(*num))
 			{
 				return 0ull;
@@ -238,9 +241,9 @@ public:
 	}
 };
 
-statement::statement(std::shared_ptr<PGconn> connection, std::string_view query, bool reuse_statement)
+statement::statement(ipq_api* api, std::shared_ptr<PGconn> connection, std::string_view query, bool reuse_statement)
     : ibackend_statement{}
-    , pimpl_{ std::make_unique<impl>(connection, query, reuse_statement) }
+    , pimpl_{ std::make_unique<impl>(api, connection, query, reuse_statement) }
 {
 }
 
@@ -280,20 +283,20 @@ std::uint64_t statement::affected_rows()
 	return this->pimpl_->affected_rows();
 }
 
-/*static*/ void statement::execute(PGconn& connection, const std::string& query)
+/*static*/ void statement::execute(ipq_api* api, PGconn& connection, const std::string& query)
 {
-	std::shared_ptr<PGresult> result{ PQexec(&connection, query.c_str()), PQclear };
+	std::shared_ptr<PGresult> result{ api->exec(&connection, query.c_str()), [api](PGresult* res) { api->clear(res); } };
 	if (result)
 	{
-		const auto status = PQresultStatus(result.get());
+		const auto status = api->resultStatus(result.get());
 		if (PGRES_TUPLES_OK != status && PGRES_COMMAND_OK != status)
 		{
-			ZOO_THROW_EXCEPTION(error{ "PQexec failed", connection, *result.get() });
+			ZOO_THROW_EXCEPTION(error{ api, "PQexec failed", connection, *result.get() });
 		}
 	}
 	else
 	{
-		ZOO_THROW_EXCEPTION(error{ "PQexec failed", connection });
+		ZOO_THROW_EXCEPTION(error{ api, "PQexec failed", connection });
 	}
 }
 
