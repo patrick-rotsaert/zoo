@@ -15,22 +15,25 @@ namespace zoo {
 namespace squid {
 namespace postgresql {
 
+class ipq_api;
+
 class ZOO_SQUID_POSTGRESQL_API backend_connection final : public ibackend_connection
 {
+	ipq_api*                api_;
 	std::shared_ptr<PGconn> connection_;
-
-	std::unique_ptr<ibackend_statement> create_statement(std::string_view query) override;
-	std::unique_ptr<ibackend_statement> create_prepared_statement(std::string_view query) override;
-	void                                execute(const std::string& query) override;
 
 public:
 	/// @a connection_info must contain a valid PostgreSQL connection string
-	explicit backend_connection(const std::string& connection_info);
+	explicit backend_connection(ipq_api* api, const std::string& connection_info);
 
 	backend_connection(const backend_connection&)            = delete;
 	backend_connection(backend_connection&& src)             = default;
 	backend_connection& operator=(const backend_connection&) = delete;
 	backend_connection& operator=(backend_connection&&)      = default;
+
+	std::unique_ptr<ibackend_statement> create_statement(std::string_view query) override;
+	std::unique_ptr<ibackend_statement> create_prepared_statement(std::string_view query) override;
+	void                                execute(const std::string& query) override;
 
 	PGconn& handle() const;
 };

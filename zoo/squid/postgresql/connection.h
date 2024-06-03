@@ -15,6 +15,7 @@ namespace squid {
 namespace postgresql {
 
 class backend_connection;
+class ipq_api;
 
 // Convenience class to create a connection to a PostgreSQL backend
 // This class should be used if access to the native connection handle (PGconn) is needed.
@@ -24,6 +25,7 @@ class ZOO_SQUID_POSTGRESQL_API connection final : public squid::connection
 
 public:
 	explicit connection(std::string_view connection_info);
+	explicit connection(ipq_api& api, std::string_view connection_info);
 
 	connection(const connection&)            = delete;
 	connection(connection&& src)             = default;

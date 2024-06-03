@@ -19,6 +19,12 @@ connection::connection(std::string_view connection_info)
 {
 }
 
+connection::connection(ipq_api& api, std::string_view connection_info)
+    : squid::connection{ backend_connection_factory{ api }, connection_info }
+    , backend_{ std::dynamic_pointer_cast<backend_connection>(this->squid::connection::backend()) }
+{
+}
+
 const backend_connection& connection::backend() const
 {
 	return *this->backend_;

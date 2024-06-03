@@ -9,6 +9,7 @@
 #include "zoo/squid/postgresql/statement.h"
 #include "zoo/squid/postgresql/error.h"
 
+#include "zoo/squid/postgresql/detail/ipqapi.h"
 #include "zoo/squid/postgresql/detail/connectionchecker.h"
 
 #include "zoo/common/misc/throw_exception.h"
@@ -21,27 +22,28 @@ namespace postgresql {
 
 std::unique_ptr<ibackend_statement> backend_connection::create_statement(std::string_view query)
 {
-	return std::make_unique<statement>(this->connection_, query, false);
+	return std::make_unique<statement>(this->api_, this->connection_, query, false);
 }
 
 std::unique_ptr<ibackend_statement> backend_connection::create_prepared_statement(std::string_view query)
 {
-	return std::make_unique<statement>(this->connection_, query, true);
+	return std::make_unique<statement>(this->api_, this->connection_, query, true);
 }
 
-/* static */ void backend_connection::execute(const std::string& query)
+void backend_connection::execute(const std::string& query)
 {
-	statement::execute(*connection_checker::check(this->connection_), query);
+	statement::execute(this->api_, *connection_checker::check(this->api_, this->connection_), query);
 }
 
-backend_connection::backend_connection(const std::string& connection_info)
-    : connection_{ PQconnectdb(connection_info.c_str()), PQfinish }
+backend_connection::backend_connection(ipq_api* api, const std::string& connection_info)
+    : api_{ api }
+    , connection_{ api->connectdb(connection_info.c_str()), [api](PGconn* conn) { api->finish(conn); } }
 {
 	if (this->connection_)
 	{
-		if (CONNECTION_OK != PQstatus(this->connection_.get()))
+		if (CONNECTION_OK != api->status(this->connection_.get()))
 		{
-			ZOO_THROW_EXCEPTION(error{ "PQconnectdb failed", *this->connection_.get() });
+			ZOO_THROW_EXCEPTION(error{ api, "PQconnectdb failed", *this->connection_.get() });
 		}
 	}
 	else

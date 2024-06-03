@@ -8,6 +8,8 @@
 #include "zoo/squid/postgresql/detail/connectionchecker.h"
 #include "zoo/squid/postgresql/error.h"
 
+#include "zoo/squid/postgresql/detail/ipqapi.h"
+
 #include "zoo/common/misc/throw_exception.h"
 
 #include <cassert>
@@ -18,23 +20,23 @@ namespace zoo {
 namespace squid {
 namespace postgresql {
 
-PGconn* connection_checker::check(PGconn* connection)
+PGconn* connection_checker::check(ipq_api* api, PGconn* connection)
 {
 	assert(connection);
-	if (CONNECTION_OK != PQstatus(connection))
+	if (CONNECTION_OK != api->status(connection))
 	{
-		PQreset(connection);
-		if (CONNECTION_OK != PQstatus(connection))
+		api->reset(connection);
+		if (CONNECTION_OK != api->status(connection))
 		{
-			ZOO_THROW_EXCEPTION(error{ "PQreset failed", *connection });
+			ZOO_THROW_EXCEPTION(error{ api, "PQreset failed", *connection });
 		}
 	}
 	return connection;
 }
 
-PGconn* connection_checker::check(std::shared_ptr<PGconn> connection)
+PGconn* connection_checker::check(ipq_api* api, std::shared_ptr<PGconn> connection)
 {
-	return connection_checker::check(connection.get());
+	return connection_checker::check(api, connection.get());
 }
 
 } // namespace postgresql

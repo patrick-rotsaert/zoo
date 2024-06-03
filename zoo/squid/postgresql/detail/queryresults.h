@@ -18,19 +18,22 @@ namespace zoo {
 namespace squid {
 namespace postgresql {
 
+class ipq_api;
+
 class query_results final
 {
 	struct column;
 
+	ipq_api*                             api_;
 	std::shared_ptr<PGresult>            pgresult_;
 	std::vector<std::unique_ptr<column>> columns_;
 	size_t                               field_count_; // number of fields in the statement, may differ from columns_.size()
 
-	explicit query_results(std::shared_ptr<PGresult> pgresult);
+	explicit query_results(ipq_api *api, std::shared_ptr<PGresult> pgresult);
 
 public:
-	explicit query_results(std::shared_ptr<PGresult> pgresult, const std::vector<result>& results);
-	explicit query_results(std::shared_ptr<PGresult> pgresult, const std::map<std::string, result>& results);
+	explicit query_results(ipq_api *api, std::shared_ptr<PGresult> pgresult, const std::vector<result>& results);
+	explicit query_results(ipq_api *api, std::shared_ptr<PGresult> pgresult, const std::map<std::string, result>& results);
 
 	~query_results() noexcept;
 

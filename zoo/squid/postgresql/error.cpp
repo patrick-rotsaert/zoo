@@ -7,6 +7,8 @@
 
 #include "zoo/squid/postgresql/error.h"
 
+#include "zoo/squid/postgresql/detail/ipqapi.h"
+
 #include <sstream>
 
 #include <libpq-fe.h>
@@ -17,12 +19,12 @@ namespace postgresql {
 
 namespace {
 
-std::string build_message(const std::string& message, const PGconn& connection)
+std::string build_message(ipq_api* api, const std::string& message, const PGconn& connection)
 {
 	std::ostringstream msg;
 	msg << message;
 
-	auto pqmessage = PQerrorMessage(&connection);
+	auto pqmessage = api->errorMessage(&connection);
 	if (pqmessage)
 	{
 		msg << "\n" << pqmessage;
@@ -31,21 +33,21 @@ std::string build_message(const std::string& message, const PGconn& connection)
 	return msg.str();
 }
 
-std::string build_message(const std::string& message, const PGconn& connection, const PGresult& result)
+std::string build_message(ipq_api* api, const std::string& message, const PGconn& connection, const PGresult& result)
 {
 	std::ostringstream msg;
 	msg << message;
 
-	auto status_name = PQresStatus(PQresultStatus(&result));
+	auto status_name = api->resStatus(api->resultStatus(&result));
 	if (status_name)
 	{
 		msg << " (" << status_name << ")";
 	}
 
-	auto pqmessage = PQresultErrorMessage(&result);
+	auto pqmessage = api->resultErrorMessage(&result);
 	if (!pqmessage)
 	{
-		pqmessage = PQerrorMessage(&connection);
+		pqmessage = api->errorMessage(&connection);
 	}
 
 	if (pqmessage)
@@ -64,17 +66,17 @@ error::error(const std::string& message)
 {
 }
 
-error::error(const std::string& message, const PGconn& connection)
-    : squid::error{ build_message(message, connection) }
+error::error(ipq_api* api, const std::string& message, const PGconn& connection)
+    : squid::error{ build_message(api, message, connection) }
     , sql_state_()
 {
 }
 
-error::error(const std::string& message, const PGconn& connection, const PGresult& result)
-    : squid::error{ build_message(message, connection, result) }
+error::error(ipq_api* api, const std::string& message, const PGconn& connection, const PGresult& result)
+    : squid::error{ build_message(api, message, connection, result) }
     , sql_state_()
 {
-	auto sql_state = PQresultErrorField(&result, PG_DIAG_SQLSTATE);
+	auto sql_state = api->resultErrorField(&result, PG_DIAG_SQLSTATE);
 	if (sql_state)
 	{
 		this->sql_state_ = std::string{ sql_state, 5 };
