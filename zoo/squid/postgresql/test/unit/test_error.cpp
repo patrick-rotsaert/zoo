@@ -23,10 +23,9 @@ TEST(ErrorTests, TestConstructionWithMessage)
 
 TEST(ErrorTests, TestConstructionWithApiMessageAndConnection)
 {
-	auto api      = pq_api_mock_nice{};
-	char errMsg[] = "the detail for conn";
+	auto api = pq_api_mock_nice{};
 
-	EXPECT_CALL(api, errorMessage(testing::Eq(pq_api_mock::test_connection))).WillOnce(testing::Return(errMsg));
+	EXPECT_CALL(api, errorMessage(testing::Eq(pq_api_mock::test_connection))).WillOnce(testing::Return("the detail for conn"));
 
 	auto e = error{ &api, "the message", *pq_api_mock::test_connection };
 
@@ -48,16 +47,13 @@ TEST(ErrorTests, TestApiErrorMessageReturnsNullptr)
 
 TEST(ErrorTests, TestConstructionWithApiMessageAndConnectionAndResult)
 {
-	auto api          = pq_api_mock_nice{};
-	char resErrMsg[]  = "the detail for result";
-	char statusName[] = "the status name";
-	char sqlState[]   = "12345";
+	auto api = pq_api_mock_nice{};
 
 	EXPECT_CALL(api, resultStatus(testing::Eq(pq_api_mock::test_result))).WillOnce(testing::Return(PGRES_FATAL_ERROR));
-	EXPECT_CALL(api, resStatus(PGRES_FATAL_ERROR)).WillOnce(testing::Return(statusName));
-	EXPECT_CALL(api, resultErrorMessage(testing::Eq(pq_api_mock::test_result))).WillOnce(testing::Return(resErrMsg));
+	EXPECT_CALL(api, resStatus(PGRES_FATAL_ERROR)).WillOnce(testing::Return("the status name"));
+	EXPECT_CALL(api, resultErrorMessage(testing::Eq(pq_api_mock::test_result))).WillOnce(testing::Return("the detail for result"));
 	EXPECT_CALL(api, errorMessage(testing::Eq(pq_api_mock::test_connection))).Times(0);
-	EXPECT_CALL(api, resultErrorField(testing::Eq(pq_api_mock::test_result), PG_DIAG_SQLSTATE)).WillOnce(testing::Return(sqlState));
+	EXPECT_CALL(api, resultErrorField(testing::Eq(pq_api_mock::test_result), PG_DIAG_SQLSTATE)).WillOnce(testing::Return("12345"));
 
 	auto e = error{ &api, "the message", *pq_api_mock::test_connection, *pq_api_mock::test_result };
 
@@ -68,15 +64,13 @@ TEST(ErrorTests, TestConstructionWithApiMessageAndConnectionAndResult)
 
 TEST(ErrorTests, TestConstructionWithApiMessageAndConnectionAndResultWithoutStatus)
 {
-	auto api         = pq_api_mock_nice{};
-	char resErrMsg[] = "the detail for result";
-	char sqlState[]  = "12345";
+	auto api = pq_api_mock_nice{};
 
 	EXPECT_CALL(api, resultStatus(testing::Eq(pq_api_mock::test_result))).WillOnce(testing::Return(PGRES_FATAL_ERROR));
 	EXPECT_CALL(api, resStatus(PGRES_FATAL_ERROR)).WillOnce(testing::ReturnNull());
-	EXPECT_CALL(api, resultErrorMessage(testing::Eq(pq_api_mock::test_result))).WillOnce(testing::Return(resErrMsg));
+	EXPECT_CALL(api, resultErrorMessage(testing::Eq(pq_api_mock::test_result))).WillOnce(testing::Return("the detail for result"));
 	EXPECT_CALL(api, errorMessage(testing::Eq(pq_api_mock::test_connection))).Times(0);
-	EXPECT_CALL(api, resultErrorField(testing::Eq(pq_api_mock::test_result), PG_DIAG_SQLSTATE)).WillOnce(testing::Return(sqlState));
+	EXPECT_CALL(api, resultErrorField(testing::Eq(pq_api_mock::test_result), PG_DIAG_SQLSTATE)).WillOnce(testing::Return("12345"));
 
 	auto e = error{ &api, "the message", *pq_api_mock::test_connection, *pq_api_mock::test_result };
 
@@ -87,16 +81,13 @@ TEST(ErrorTests, TestConstructionWithApiMessageAndConnectionAndResultWithoutStat
 
 TEST(ErrorTests, TestConstructionWithApiMessageAndConnectionAndResultWithoutResultMessage)
 {
-	auto api          = pq_api_mock_nice{};
-	char errMsg[]     = "the detail for conn";
-	char statusName[] = "the status name";
-	char sqlState[]   = "12345";
+	auto api = pq_api_mock_nice{};
 
 	EXPECT_CALL(api, resultStatus(testing::Eq(pq_api_mock::test_result))).WillOnce(testing::Return(PGRES_FATAL_ERROR));
-	EXPECT_CALL(api, resStatus(PGRES_FATAL_ERROR)).WillOnce(testing::Return(statusName));
+	EXPECT_CALL(api, resStatus(PGRES_FATAL_ERROR)).WillOnce(testing::Return("the status name"));
 	EXPECT_CALL(api, resultErrorMessage(testing::Eq(pq_api_mock::test_result))).WillOnce(testing::ReturnNull());
-	EXPECT_CALL(api, errorMessage(testing::Eq(pq_api_mock::test_connection))).WillOnce(testing::Return(errMsg));
-	EXPECT_CALL(api, resultErrorField(testing::Eq(pq_api_mock::test_result), PG_DIAG_SQLSTATE)).WillOnce(testing::Return(sqlState));
+	EXPECT_CALL(api, errorMessage(testing::Eq(pq_api_mock::test_connection))).WillOnce(testing::Return("the detail for conn"));
+	EXPECT_CALL(api, resultErrorField(testing::Eq(pq_api_mock::test_result), PG_DIAG_SQLSTATE)).WillOnce(testing::Return("12345"));
 
 	auto e = error{ &api, "the message", *pq_api_mock::test_connection, *pq_api_mock::test_result };
 
@@ -107,15 +98,13 @@ TEST(ErrorTests, TestConstructionWithApiMessageAndConnectionAndResultWithoutResu
 
 TEST(ErrorTests, TestConstructionWithApiMessageAndConnectionAndResultWithoutResultNorConnMessage)
 {
-	auto api          = pq_api_mock_nice{};
-	char statusName[] = "the status name";
-	char sqlState[]   = "12345";
+	auto api = pq_api_mock_nice{};
 
 	EXPECT_CALL(api, resultStatus(testing::Eq(pq_api_mock::test_result))).WillOnce(testing::Return(PGRES_FATAL_ERROR));
-	EXPECT_CALL(api, resStatus(PGRES_FATAL_ERROR)).WillOnce(testing::Return(statusName));
+	EXPECT_CALL(api, resStatus(PGRES_FATAL_ERROR)).WillOnce(testing::Return("the status name"));
 	EXPECT_CALL(api, resultErrorMessage(testing::Eq(pq_api_mock::test_result))).WillOnce(testing::ReturnNull());
 	EXPECT_CALL(api, errorMessage(testing::Eq(pq_api_mock::test_connection))).WillOnce(testing::ReturnNull());
-	EXPECT_CALL(api, resultErrorField(testing::Eq(pq_api_mock::test_result), PG_DIAG_SQLSTATE)).WillOnce(testing::Return(sqlState));
+	EXPECT_CALL(api, resultErrorField(testing::Eq(pq_api_mock::test_result), PG_DIAG_SQLSTATE)).WillOnce(testing::Return("12345"));
 
 	auto e = error{ &api, "the message", *pq_api_mock::test_connection, *pq_api_mock::test_result };
 

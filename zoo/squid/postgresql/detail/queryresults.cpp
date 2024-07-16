@@ -166,7 +166,13 @@ void store_result(ipq_api*         api,
 	else
 	{
 		const auto value = api->getvalue(&pgresult, row_index, column_index);
-		assert(value);
+
+		if (value == nullptr)
+		{
+			std::ostringstream msg;
+			msg << "PQgetvalue returned NULL for column " << std::quoted(column_name);
+			ZOO_THROW_EXCEPTION(error{ msg.str() });
+		}
 
 		std::visit(
 		    [&](auto&& arg) {

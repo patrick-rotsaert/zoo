@@ -43,10 +43,10 @@ public:
 	pq_api_mock& operator=(const pq_api_mock&) = delete;
 
 	MOCK_METHOD(void, clear, (PGresult * res), (override));
-	MOCK_METHOD(char*, cmdTuples, (PGresult * res), (override));
+	MOCK_METHOD(const char*, cmdTuples, (PGresult * res), (override));
 	MOCK_METHOD(PGconn*, connectdb, (const char* conninfo), (override));
 	MOCK_METHOD(int, consumeInput, (PGconn * conn), (override));
-	MOCK_METHOD(char*, errorMessage, (const PGconn* conn), (override));
+	MOCK_METHOD(const char*, errorMessage, (const PGconn* conn), (override));
 	MOCK_METHOD(PGresult*, exec, (PGconn * conn, const char* query), (override));
 	MOCK_METHOD(PGresult*,
 	            execParams,
@@ -70,10 +70,10 @@ public:
 	             int                resultFormat),
 	            (override));
 	MOCK_METHOD(void, finish, (PGconn * conn), (override));
-	MOCK_METHOD(char*, fname, (const PGresult* res, int field_num), (override));
+	MOCK_METHOD(const char*, fname, (const PGresult* res, int field_num), (override));
 	MOCK_METHOD(void, freemem, (void* ptr), (override));
 	MOCK_METHOD(int, getisnull, (const PGresult* res, int tup_num, int field_num), (override));
-	MOCK_METHOD(char*, getvalue, (const PGresult* res, int tup_num, int field_num), (override));
+	MOCK_METHOD(const char*, getvalue, (const PGresult* res, int tup_num, int field_num), (override));
 	MOCK_METHOD(int, nfields, (const PGresult* res), (override));
 	MOCK_METHOD(PGnotify*, notifies, (PGconn * conn), (override));
 	MOCK_METHOD(int, ntuples, (const PGresult* res), (override));
@@ -82,9 +82,9 @@ public:
 	            (PGconn * conn, const char* stmtName, const char* query, int nParams, const Oid* paramTypes),
 	            (override));
 	MOCK_METHOD(void, reset, (PGconn * conn), (override));
-	MOCK_METHOD(char*, resStatus, (ExecStatusType status), (override));
-	MOCK_METHOD(char*, resultErrorField, (const PGresult* res, int fieldcode), (override));
-	MOCK_METHOD(char*, resultErrorMessage, (const PGresult* res), (override));
+	MOCK_METHOD(const char*, resStatus, (ExecStatusType status), (override));
+	MOCK_METHOD(const char*, resultErrorField, (const PGresult* res, int fieldcode), (override));
+	MOCK_METHOD(const char*, resultErrorMessage, (const PGresult* res), (override));
 	MOCK_METHOD(ExecStatusType, resultStatus, (const PGresult* res), (override));
 	MOCK_METHOD(int, socket, (const PGconn* conn), (override));
 	MOCK_METHOD(ConnStatusType, status, (const PGconn* conn), (override));

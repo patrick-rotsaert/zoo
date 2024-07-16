@@ -26,7 +26,7 @@ void pq_api::clear(PGresult* res)
 	return PQclear(res);
 }
 
-char* pq_api::cmdTuples(PGresult* res)
+const char* pq_api::cmdTuples(PGresult* res)
 {
 	return PQcmdTuples(res);
 }
@@ -41,7 +41,7 @@ int pq_api::consumeInput(PGconn* conn)
 	return PQconsumeInput(conn);
 }
 
-char* pq_api::errorMessage(const PGconn* conn)
+const char* pq_api::errorMessage(const PGconn* conn)
 {
 	return PQerrorMessage(conn);
 }
@@ -79,7 +79,7 @@ void pq_api::finish(PGconn* conn)
 	return PQfinish(conn);
 }
 
-char* pq_api::fname(const PGresult* res, int field_num)
+const char* pq_api::fname(const PGresult* res, int field_num)
 {
 	return PQfname(res, field_num);
 }
@@ -94,7 +94,7 @@ int pq_api::getisnull(const PGresult* res, int tup_num, int field_num)
 	return PQgetisnull(res, tup_num, field_num);
 }
 
-char* pq_api::getvalue(const PGresult* res, int tup_num, int field_num)
+const char* pq_api::getvalue(const PGresult* res, int tup_num, int field_num)
 {
 	return PQgetvalue(res, tup_num, field_num);
 }
@@ -124,17 +124,17 @@ void pq_api::reset(PGconn* conn)
 	return PQreset(conn);
 }
 
-char* pq_api::resStatus(ExecStatusType status)
+const char* pq_api::resStatus(ExecStatusType status)
 {
 	return PQresStatus(status);
 }
 
-char* pq_api::resultErrorField(const PGresult* res, int fieldcode)
+const char* pq_api::resultErrorField(const PGresult* res, int fieldcode)
 {
 	return PQresultErrorField(res, fieldcode);
 }
 
-char* pq_api::resultErrorMessage(const PGresult* res)
+const char* pq_api::resultErrorMessage(const PGresult* res)
 {
 	return PQresultErrorMessage(res);
 }

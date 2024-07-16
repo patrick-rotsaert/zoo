@@ -28,10 +28,10 @@ public:
 	pq_api& operator=(const pq_api&) = delete;
 
 	void           clear(PGresult* res) override;
-	char*          cmdTuples(PGresult* res) override;
+	const char*    cmdTuples(PGresult* res) override;
 	PGconn*        connectdb(const char* conninfo) override;
 	int            consumeInput(PGconn* conn) override;
-	char*          errorMessage(const PGconn* conn) override;
+	const char*    errorMessage(const PGconn* conn) override;
 	PGresult*      exec(PGconn* conn, const char* query) override;
 	PGresult*      execParams(PGconn*            conn,
 	                          const char*        command,
@@ -49,18 +49,18 @@ public:
 	                            const int*         paramFormats,
 	                            int                resultFormat) override;
 	void           finish(PGconn* conn) override;
-	char*          fname(const PGresult* res, int field_num) override;
+	const char*    fname(const PGresult* res, int field_num) override;
 	void           freemem(void* ptr) override;
 	int            getisnull(const PGresult* res, int tup_num, int field_num) override;
-	char*          getvalue(const PGresult* res, int tup_num, int field_num) override;
+	const char*    getvalue(const PGresult* res, int tup_num, int field_num) override;
 	int            nfields(const PGresult* res) override;
 	PGnotify*      notifies(PGconn* conn) override;
 	int            ntuples(const PGresult* res) override;
 	PGresult*      prepare(PGconn* conn, const char* stmtName, const char* query, int nParams, const Oid* paramTypes) override;
 	void           reset(PGconn* conn) override;
-	char*          resStatus(ExecStatusType status) override;
-	char*          resultErrorField(const PGresult* res, int fieldcode) override;
-	char*          resultErrorMessage(const PGresult* res) override;
+	const char*    resStatus(ExecStatusType status) override;
+	const char*    resultErrorField(const PGresult* res, int fieldcode) override;
+	const char*    resultErrorMessage(const PGresult* res) override;
 	ExecStatusType resultStatus(const PGresult* res) override;
 	int            socket(const PGconn* conn) override;
 	ConnStatusType status(const PGconn* conn) override;

@@ -317,7 +317,7 @@ TEST_F(QueryResultsTests, TestFetchSignedChar)
 	EXPECT_EQ(res, 42);
 }
 
-TEST_F(QueryResultsTests, TestFetchUnsignedSignedChar)
+TEST_F(QueryResultsTests, TestFetchUnsignedChar)
 {
 	auto api = sqlite_api_mock_nice{};
 
