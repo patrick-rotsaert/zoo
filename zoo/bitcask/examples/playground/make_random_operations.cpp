@@ -29,7 +29,7 @@ void make_random_operations(std::map<key_type, value_type>&                     
 
 		auto it = map.begin();
 		//std::advance(it, dist(re)); // << very slow
-		std::next(it, dist(re)); // << much faster
+		it = std::next(it, dist(re)); // << much faster
 
 		return *it;
 	};
