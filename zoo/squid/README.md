@@ -240,8 +240,8 @@ void run_recurring_statement(connection& conn)
 		st.bind("dob", boost::gregorian::date{ 1958, 9, 7 });
 		st.execute(); // prepares and executes
 
-		st.bind("fname", "Schrader");
-		st.bind("lname", "Hank");
+		st.bind("lname", "Schrader");
+		st.bind("fname", "Hank");
 		st.bind("dob", boost::gregorian::date{ 1966, 3, 1 });
 		st.execute(); // only executes (with new parameter values)
 	}
@@ -340,7 +340,7 @@ Future planned:
 ## TODO list
 
 - [ ] Write unit tests.
-   - [ ] PostgreSQL
+   - [x] PostgreSQL
    - [ ] MySQL
    - [x] SQLite
 - [x] Write quick start.
