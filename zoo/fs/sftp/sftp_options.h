@@ -10,7 +10,7 @@
 #include "zoo/fs/sftp/config.h"
 #include <string>
 #include <optional>
-#include <cstddef>
+#include <cstdint>
 
 namespace zoo {
 namespace fs {

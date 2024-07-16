@@ -13,7 +13,7 @@
 #include "zoo/fs/core/iinterruptor.h"
 #include "zoo/fs/core/fspath.h"
 #include <memory>
-#include <cstddef>
+#include <cstdint>
 
 namespace zoo {
 namespace fs {

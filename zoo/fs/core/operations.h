@@ -13,7 +13,7 @@
 #include "zoo/fs/core/source.h"
 #include "zoo/fs/core/destination.h"
 #include <functional>
-#include <cstddef>
+#include <cstdint>
 
 namespace zoo {
 namespace fs {
