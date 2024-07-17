@@ -23,16 +23,21 @@ add_project_library(bitcask
 		file.h
 		hton.h
 		apilinktest.cpp
-	# TODO: unit tests
 	PUBLIC_HEADERS
 		bitcask.h
 		apilinktest.h
+	UNIT_TEST_SOURCES
+		test/unit/test_bitcask.cpp
 	PUBLIC_LIBRARIES
 		zoo::common
 		fmt::fmt
 	FIND_PACKAGE_COMPONENT
 		bitcask
 )
+
+if(ZOO_TEST)
+	target_link_libraries(bitcask_unit_test PRIVATE Boost::filesystem)
+endif()
 
 if(ZOO_BUILD_EXAMPLES)
 	add_subdirectory(examples)
