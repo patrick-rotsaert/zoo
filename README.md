@@ -138,7 +138,7 @@ All dependencies will be downloaded and built by vcpkg.
 
 ## Integration
 
-{TO DO}: Describe
+{TODO}: Describe
 - Subdirectory
 - Fetch content
 - Installed libraries
@@ -175,6 +175,10 @@ Component-aware generators (DEB and NSIS) split the packages into two components
 Run [.\dist_x86.cmd](dist_x86.cmd) (32-bit) or [.\dist_amd64.cmd](dist_amd64.cmd) (64-bit) to build and package all combinations of static/shared and release/debug libaries, the header files and CMake configuration files.
 
 ### Linux
+
+```shell
+sudo apt install ninja-build
+```
 
 Run [./dist.sh](dist.sh) to build and package all combinations of static/shared and release/debug libaries, the header files and CMake configuration files.
 

@@ -79,6 +79,6 @@ void merge()
 Stumbling across the [Bitcask paper](https://riak.com/assets/bitcask-intro.pdf), I thought this would be a fun weekend project.
 Indeed fun it was, but it took a little longer than a weekend to finish.
 Especially the merging was challenging to implement.
-The paper is quite vague on that part and I wanted to make it as efficient as possible which still allowing CRUD operations to run in parallel.
+The paper is quite vague on that part and I wanted to make it as efficient as possible while still allowing CRUD operations to run in parallel.
 
 There do exist good implementations already, but I intentionally did not look at them. Considered this to be an excercise.

@@ -90,7 +90,7 @@ void get_sftp_access()
 {
 	// The `host` and `user` members of `sftp::options` are required.
 	// The `port` member is optional and defaults to 22.
-	// The `password` member is optional. If supplied, it may be used for password authentication, of the SSH server allows it.
+	// The `password` member is optional. If supplied, it may be used for password authentication, if the SSH server allows it.
 	// The identities supplied by the SSH identity factory will used if the SSH server allows public key authentication.
 	// If the SSH identity factory returns an empty vector, then public key authentication will be skipped.
 	// Generally, the authentication process will try the following methods, in order, and only if the SSH server allows them:
