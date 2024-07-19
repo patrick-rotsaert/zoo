@@ -5,7 +5,7 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 #
 
-add_project_library(fs_core
+add_zoo_library(fs_core
 	SOURCES
 		iaccess.cpp
 		iinterruptor.cpp

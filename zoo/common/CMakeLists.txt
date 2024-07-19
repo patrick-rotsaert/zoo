@@ -16,7 +16,7 @@ if(WIN32)
 	list(APPEND EXTRA_PUBLIC_LIBRARIES bcrypt)
 endif()
 
-add_project_library(common
+add_zoo_library(common
 	SOURCES
 		conversion/conversion.cpp
 		lockfile/lockfile.cpp
@@ -73,7 +73,7 @@ configure_file(
 )
 
 if(ZOO_INSTALL)
-	install_project_header(${CMAKE_CURRENT_BINARY_DIR}/version.h ${PROJECT_BINARY_DIR})
+	install_zoo_header(${CMAKE_CURRENT_BINARY_DIR}/version.h ${PROJECT_BINARY_DIR})
 endif()
 
 if(ZOO_BUILD_EXAMPLES)

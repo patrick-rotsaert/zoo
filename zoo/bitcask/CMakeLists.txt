@@ -5,7 +5,7 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 #
 
-add_project_library(bitcask
+add_zoo_library(bitcask
 	SOURCES
 		bitcask.cpp
 		datadir.cpp

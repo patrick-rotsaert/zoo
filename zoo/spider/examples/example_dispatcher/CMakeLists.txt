@@ -6,7 +6,7 @@
 #
 
 set(TARGET spider_example_dispatcher)
-add_project_executable(${TARGET} example_dispatcher.cpp)
+add_zoo_executable(${TARGET} example_dispatcher.cpp)
 
 target_compile_features(${TARGET} PRIVATE cxx_std_20)
 target_link_libraries(${TARGET} PRIVATE zoo::spider)

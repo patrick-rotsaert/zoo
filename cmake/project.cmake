@@ -34,7 +34,7 @@ if(WIN32)
 	endforeach()
 endif()
 
-function(install_project_header HEADER BASE_DIR)
+function(install_zoo_header HEADER BASE_DIR)
 	file(REAL_PATH ${HEADER} HEADER_REALPATH)
 	file(RELATIVE_PATH HEADER_RELPATH ${BASE_DIR} ${HEADER_REALPATH})
 	get_filename_component(DIR ${HEADER_RELPATH} DIRECTORY)
@@ -45,7 +45,7 @@ function(install_project_header HEADER BASE_DIR)
 	)
 endfunction()
 
-function(add_project_executable TARGET)
+function(add_zoo_executable TARGET)
 	add_executable(${TARGET} ${ARGN})
 
 	if (WIN32)
@@ -56,7 +56,7 @@ endfunction()
 set(zoo_FIND_PACKAGE_COMPONENTS "" CACHE STRING "" FORCE)
 mark_as_advanced(zoo_FIND_PACKAGE_COMPONENTS)
 
-function(add_project_library TARGET)
+function(add_zoo_library TARGET)
 	set(OPTIONS SKIP_INSTALL)
 	set(ONE_VALUE_ARGS FIND_PACKAGE_COMPONENT)
 	set(MULTI_VALUE_ARGS
@@ -78,7 +78,7 @@ function(add_project_library TARGET)
 	configure_file(${PROJECT_SOURCE_DIR}/zoo/common/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h @ONLY)
 
 	if(ZOO_INSTALL)
-		install_project_header(${CMAKE_CURRENT_BINARY_DIR}/config.h ${PROJECT_BINARY_DIR})
+		install_zoo_header(${CMAKE_CURRENT_BINARY_DIR}/config.h ${PROJECT_BINARY_DIR})
 	endif()
 
 	# Set the target output name
@@ -111,7 +111,7 @@ function(add_project_library TARGET)
 		add_library(${TARGET} $<TARGET_OBJECTS:${TARGET}_objects>)
 		list(APPEND COMPILE_TARGETS ${TARGET})
 
-		add_project_executable(${TARGET}_unit_test ${P_UNIT_TEST_SOURCES} $<TARGET_OBJECTS:${TARGET}_objects>)
+		add_zoo_executable(${TARGET}_unit_test ${P_UNIT_TEST_SOURCES} $<TARGET_OBJECTS:${TARGET}_objects>)
 
 		if (P_MOCK_SOURCES)
 			target_sources(${TARGET}_unit_test PRIVATE ${P_MOCK_SOURCES})
@@ -280,7 +280,7 @@ function(add_project_library TARGET)
 
 		# Install public header files
 		foreach(HEADER ${P_PUBLIC_HEADERS})
-			install_project_header(${HEADER} ${PROJECT_SOURCE_DIR})
+			install_zoo_header(${HEADER} ${PROJECT_SOURCE_DIR})
 		endforeach()
 
 		# Install the PDB files

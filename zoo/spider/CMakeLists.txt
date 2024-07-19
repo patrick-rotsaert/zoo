@@ -5,7 +5,7 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 #
 
-add_project_library(spider
+add_zoo_library(spider
 	SOURCES
 		listener.cpp
 		http_session.cpp

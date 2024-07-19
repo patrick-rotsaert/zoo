@@ -5,7 +5,7 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 #
 
-add_project_library(fs_sftp
+add_zoo_library(fs_sftp
 	SOURCES
 		issh_api.cpp
 		issh_api.h

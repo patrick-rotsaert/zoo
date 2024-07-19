@@ -5,7 +5,7 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 #
 
-add_project_library(squid_demo_common
+add_zoo_library(squid_demo_common
 	SOURCES
 		demo_common.cpp
 		demo_common.h

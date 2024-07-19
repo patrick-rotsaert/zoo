@@ -6,7 +6,7 @@
 #
 
 set(TARGET fs_quickstart)
-add_project_executable(${TARGET} quickstart.cpp)
+add_zoo_executable(${TARGET} quickstart.cpp)
 
 target_compile_features(${TARGET} PRIVATE cxx_std_20)
 target_link_libraries(${TARGET} PRIVATE zoo::fs_local)

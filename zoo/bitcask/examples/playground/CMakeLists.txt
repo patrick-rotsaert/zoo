@@ -6,7 +6,7 @@
 #
 
 set(TARGET bitcask_playground)
-add_project_executable(${TARGET}
+add_zoo_executable(${TARGET}
 	bitcask_playground.cpp
 	test_operation.h
 	make_random_operations.cpp

@@ -5,7 +5,7 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 #
 
-add_project_library(squid_postgresql
+add_zoo_library(squid_postgresql
 	SOURCES
 		error.cpp
 		statement.cpp

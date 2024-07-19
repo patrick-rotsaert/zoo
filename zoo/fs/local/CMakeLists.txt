@@ -5,7 +5,7 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 #
 
-add_project_library(fs_local
+add_zoo_library(fs_local
 	SOURCES
 		local_access.cpp
 		local_watcher.cpp
