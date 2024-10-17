@@ -1,0 +1,10 @@
+// clang-format off
+#pragma once
+
+#cmakedefine CURSES_HAVE_CURSES_H
+#cmakedefine CURSES_HAVE_NCURSES_H
+#cmakedefine CURSES_HAVE_NCURSES_NCURSES_H
+#cmakedefine CURSES_HAVE_NCURSES_CURSES_H
+#cmakedefine HAVE_TERM_H
+#cmakedefine HAVE_TERMIO_H
+#cmakedefine HAVE_TERMIOS_H

@@ -22,3 +22,7 @@ endif()
 if(ZOO_WITH_SQUID)
 	add_subdirectory(squid)
 endif()
+
+if(ZOO_WITH_TUI)
+	add_subdirectory(tui)
+endif()

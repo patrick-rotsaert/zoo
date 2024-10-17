@@ -7,7 +7,7 @@
 
 cmake_minimum_required(VERSION 3.19)
 
-project(zoo VERSION 0.1.0 LANGUAGES CXX)
+project(zoo VERSION 0.1.0 LANGUAGES CXX C)
 
 # Make cache variables for install destinations
 include(GNUInstallDirs)
