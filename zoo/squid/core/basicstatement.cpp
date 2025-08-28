@@ -84,6 +84,26 @@ void basic_statement::execute()
 	}
 }
 
+void basic_statement::bind_execute(std::initializer_list<std::pair<std::string_view, parameter_by_value>> params)
+{
+	this->parameters_.clear();
+	for (auto&& pair : params)
+	{
+		this->parameters_.insert_or_assign(std::string{ pair.first }, std::move(pair.second));
+	}
+	this->execute();
+}
+
+void basic_statement::bind_ref_execute(std::initializer_list<std::pair<std::string_view, parameter_by_reference>> params)
+{
+	this->parameters_.clear();
+	for (auto&& pair : params)
+	{
+		this->parameters_.insert_or_assign(std::string{ pair.first }, std::move(pair.second));
+	}
+	this->execute();
+}
+
 bool basic_statement::fetch()
 {
 	if (this->statement_)

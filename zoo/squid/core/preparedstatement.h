@@ -33,7 +33,9 @@ public:
 
 	using basic_statement::operator<<;
 	using basic_statement::bind;
+	using basic_statement::bind_execute;
 	using basic_statement::bind_ref;
+	using basic_statement::bind_ref_execute;
 	using basic_statement::bind_result;
 	using basic_statement::bind_results;
 	using basic_statement::execute;

@@ -194,6 +194,9 @@ void run_one_off_statements(connection& conn)
 		st.bind("lname", "Doe");
 		st.bind("dob", boost::gregorian::date{ 1998, 1, 31 });
 		st.execute();
+
+		// Binding parameters (by value) and statement execution can be combined.
+		st.bind_execute({ { "fname", "Jokke" }, { "lname", "Doe" }, { "dob", boost::gregorian::date{ 1999, 12, 31 } } });
 	}
 
 	{
@@ -248,6 +251,23 @@ void run_recurring_statement(connection& conn)
 }
 ```
 
+A prepared statement can also be created by `connection::prepare(query)`.
+Binding parameters (by value) and executing the statement can be combined using the `basic_statement::bind_execute` method.
+
+```cpp
+#include "zoo/squid/core/preparedstatement.h"
+
+void run_recurring_statement_alt(connection& conn)
+{
+	auto st = conn.prepare(R"~(
+			INSERT INTO person(first_name, last_name, date_of_birth)
+			VALUES (:fname, :lname, :dob)
+		)~");
+
+	st.bind_execute({ { "fname", "Hank" }, { "lname", "Schrader" }, { "dob", boost::gregorian::date{ 1966, 3, 1 } } });
+}
+```
+
 Parameter values can also be bound by reference.
 For subsequent statement execution, the parameters don't need to be bound again, it is sufficient to update the bound values.
 
@@ -278,6 +298,29 @@ void run_recurring_statement_bind_ref(connection& conn)
   last  = "Pinkman";
   dob   = std::nullopt;
   st.execute(); // only executes (with new parameter values)
+}
+```
+
+Some shorter forms exist here as well.
+```cpp
+void run_recurring_statement_bind_ref_alt(connection& conn)
+{
+	auto st = conn.prepare(R"~(
+			INSERT INTO person(first_name, last_name, date_of_birth)
+			VALUES (:fname, :lname, :dob)
+		)~");
+
+	std::string                           first{ "Skyler" }, last{ "White" };
+	std::optional<boost::gregorian::date> dob = boost::gregorian::date{ 1970, 11, 8 };
+
+	// Bind, prepare and execute
+	st.bind_ref_execute({ { "fname", first }, { "lname", last }, { "dob", dob } });
+
+	// Set other values and execute again.
+	first = "Jesse";
+	last  = "Pinkman";
+	dob   = std::nullopt;
+	st.execute(); // only executes (with new parameter values)
 }
 ```
 

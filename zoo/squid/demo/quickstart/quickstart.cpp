@@ -118,6 +118,9 @@ void run_one_off_statements(connection& conn)
 		st.bind("lname", "Doe");
 		st.bind("dob", boost::gregorian::date{ 1998, 1, 31 });
 		st.execute();
+
+		// Binding parameters (by value) and statement execution can be combined.
+		st.bind_execute({ { "fname", "Jokke" }, { "lname", "Doe" }, { "dob", boost::gregorian::date{ 1999, 12, 31 } } });
 	}
 
 	{
@@ -163,12 +166,22 @@ void run_recurring_statement(connection& conn)
 	}
 }
 
-void run_recurring_statement_bind_ref(connection& conn)
+void run_recurring_statement_alt(connection& conn)
 {
-	prepared_statement st{ conn, R"~(
+	auto st = conn.prepare(R"~(
 			INSERT INTO person(first_name, last_name, date_of_birth)
 			VALUES (:fname, :lname, :dob)
-		)~" };
+		)~");
+
+	st.bind_execute({ { "fname", "Hank" }, { "lname", "Schrader" }, { "dob", boost::gregorian::date{ 1966, 3, 1 } } });
+}
+
+void run_recurring_statement_bind_ref(connection& conn)
+{
+	auto st = conn.prepare(R"~(
+			INSERT INTO person(first_name, last_name, date_of_birth)
+			VALUES (:fname, :lname, :dob)
+		)~");
 
 	std::string                           first{}, last{};
 	std::optional<boost::gregorian::date> dob{};
@@ -183,6 +196,26 @@ void run_recurring_statement_bind_ref(connection& conn)
 	last  = "White";
 	dob   = boost::gregorian::date{ 1970, 11, 8 };
 	st.execute(); // prepares and executes
+
+	// Set other values and execute again.
+	first = "Jesse";
+	last  = "Pinkman";
+	dob   = std::nullopt;
+	st.execute(); // only executes (with new parameter values)
+}
+
+void run_recurring_statement_bind_ref_alt(connection& conn)
+{
+	auto st = conn.prepare(R"~(
+			INSERT INTO person(first_name, last_name, date_of_birth)
+			VALUES (:fname, :lname, :dob)
+		)~");
+
+	std::string                           first{ "Skyler" }, last{ "White" };
+	std::optional<boost::gregorian::date> dob = boost::gregorian::date{ 1970, 11, 8 };
+
+	// Bind, prepare and execute
+	st.bind_ref_execute({ { "fname", first }, { "lname", last }, { "dob", dob } });
 
 	// Set other values and execute again.
 	first = "Jesse";
@@ -216,7 +249,9 @@ int main()
 			run_non_parameterized_statements(conn);
 			run_one_off_statements(conn);
 			run_recurring_statement(conn);
+			run_recurring_statement_alt(conn);
 			run_recurring_statement_bind_ref(conn);
+			run_recurring_statement_bind_ref_alt(conn);
 			catch_error();
 		}
 	}

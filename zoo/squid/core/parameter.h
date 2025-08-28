@@ -27,7 +27,7 @@ namespace zoo {
 namespace squid {
 
 /// This class holds a bound query parameter or a reference to it.
-class ZOO_SQUID_CORE_API parameter final
+class ZOO_SQUID_CORE_API parameter
 {
 public:
 	using value_type = std::variant< //
@@ -143,9 +143,9 @@ public:
 	/// @a value must be nul-terminated.
 	explicit parameter(const char* value, const by_value&);
 
-	parameter(const parameter&)            = delete;
+	parameter(const parameter&)            = default;
 	parameter(parameter&& src)             = default;
-	parameter& operator=(const parameter&) = delete;
+	parameter& operator=(const parameter&) = default;
 	parameter& operator=(parameter&&)      = default;
 
 	/// Get the value pointer
@@ -206,6 +206,24 @@ private:
 
 private:
 	type value_;
+};
+
+struct parameter_by_value : public parameter
+{
+	template<typename T>
+	parameter_by_value(const T& v)
+	    : parameter{ v, parameter::by_value{} }
+	{
+	}
+};
+
+struct parameter_by_reference : public parameter
+{
+	template<typename T>
+	parameter_by_reference(T& v)
+	    : parameter{ v, parameter::by_reference{} }
+	{
+	}
 };
 
 } // namespace squid

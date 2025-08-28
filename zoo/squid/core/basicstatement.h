@@ -71,6 +71,8 @@ public:
 	basic_statement& operator=(const basic_statement&) = delete;
 	basic_statement& operator=(basic_statement&&)      = default;
 
+	ibackend_statement& backend_statement() const;
+
 	///
 	/// Query modifier methods
 	/// These methods reset any previous backend statement
@@ -236,8 +238,18 @@ public:
 	///
 	/// statement execution methods
 
-	/// Execute the statement.
+	/// Execute the statement [ with previously bound parameters ].
 	void execute();
+
+	/// Execute the statement with the given parameters.
+	/// Previously bound parameters are replaced with the given parameters.
+	/// Parameters are bound by value (copied).
+	void bind_execute(std::initializer_list<std::pair<std::string_view, parameter_by_value>> params);
+
+	/// Execute the statement with the given parameters.
+	/// Previously bound parameters are replaced with the given parameters.
+	/// Parameters are bound by reference.
+	void bind_ref_execute(std::initializer_list<std::pair<std::string_view, parameter_by_reference>> params);
 
 	/// Fetch the next row.
 	/// Returns false when the last row was already fetched or when the statement
@@ -258,8 +270,6 @@ public:
 	/// Only useful for command statements.
 	/// Throws if the statement has not been executed.
 	std::uint64_t affected_rows();
-
-	ibackend_statement& backend_statement() const;
 };
 
 } // namespace squid

@@ -27,6 +27,7 @@ public:
 class ibackend_connection;
 class ibackend_connection_factory;
 class connection_pool;
+class prepared_statement;
 
 class ZOO_SQUID_CORE_API connection
 {
@@ -65,6 +66,9 @@ public:
 
 	/// Execute a statement without parameter nor result bindings.
 	void execute(const std::string& query);
+
+	/// Create a prepared a statement
+	prepared_statement prepare(std::string_view query);
 
 	/// Get the backend connection
 	const std::shared_ptr<ibackend_connection>& backend() const;

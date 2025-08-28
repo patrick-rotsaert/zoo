@@ -9,6 +9,7 @@
 #include "zoo/squid/core/connectionpool.h"
 #include "zoo/squid/core/ibackendconnectionfactory.h"
 #include "zoo/squid/core/ibackendconnection.h"
+#include "zoo/squid/core/preparedstatement.h"
 
 #include "zoo/common/misc/throw_exception.h"
 
@@ -41,6 +42,11 @@ connection::connection(connection_pool& pool)
 void connection::execute(const std::string& query)
 {
 	this->backend_->execute(query);
+}
+
+prepared_statement connection::prepare(std::string_view query)
+{
+	return prepared_statement{ *this, query };
 }
 
 connection::connection(connection_pool& pool, const std::chrono::milliseconds& timeout)
