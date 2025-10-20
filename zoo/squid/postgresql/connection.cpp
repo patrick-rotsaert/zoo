@@ -30,6 +30,14 @@ const backend_connection& connection::backend() const
 	return *this->backend_;
 }
 
+void connection::async_exec(boost::asio::io_context&                                               io,
+                            std::string_view                                                       query,
+                            std::initializer_list<std::pair<std::string_view, parameter_by_value>> params,
+                            async_completion_handler                                               handler)
+{
+	this->backend_->run_async_statement(io, std::move(query), std::move(params), std::move(handler));
+}
+
 } // namespace postgresql
 } // namespace squid
 } // namespace zoo

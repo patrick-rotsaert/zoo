@@ -8,6 +8,6 @@
 set(TARGET demo_postgresql)
 add_zoo_executable(${TARGET} demo_postgresql.cpp)
 
-target_compile_features(${TARGET} PRIVATE cxx_std_20)
+target_compile_features(${TARGET} PRIVATE cxx_std_23)
 target_link_libraries(${TARGET} PRIVATE zoo::squid_postgresql)
 target_link_libraries(${TARGET} PRIVATE zoo::squid_demo_common)

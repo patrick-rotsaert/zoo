@@ -57,7 +57,7 @@ public:
 	/// Returns std::nullopt if no connection is available within the specified timeout.
 	static std::optional<connection> create(connection_pool& pool, const std::chrono::milliseconds& timeout);
 
-	virtual ~connection() noexcept; ///FIXME?
+	virtual ~connection() noexcept;
 
 	connection(const connection&)            = delete;
 	connection(connection&& src)             = default;

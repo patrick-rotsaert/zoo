@@ -1,20 +1,18 @@
 //
-// Copyright (C) 2022-2024 Patrick Rotsaert
+// Copyright (C) 2022-2025 Patrick Rotsaert
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "ipqapi.h"
+#pragma once
 
 namespace zoo {
 namespace squid {
 namespace postgresql {
 
-ipq_api::ipq_api() = default;
+struct resultset_data;
 
-ipq_api::~ipq_api() = default;
-
-} // namespace postgresql
+}
 } // namespace squid
 } // namespace zoo

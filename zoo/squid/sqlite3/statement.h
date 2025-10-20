@@ -33,7 +33,7 @@ public:
 	statement(statement&&);
 	statement& operator=(statement&&);
 
-	statement(const statement&) = delete;
+	statement(const statement&)            = delete;
 	statement& operator=(const statement&) = delete;
 
 	void execute(const std::map<std::string, parameter>& parameters, const std::vector<result>& results) override;
@@ -45,7 +45,7 @@ public:
 
 	std::uint64_t affected_rows() override;
 
-	static void execute(isqlite_api& api, sqlite3& connection, const std::string& query);
+	static void execute(isqlite_api& api, sqlite3& connection, std::string_view query);
 };
 
 } // namespace sqlite

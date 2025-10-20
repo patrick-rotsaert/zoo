@@ -28,6 +28,7 @@ public:
 	virtual void           clear(PGresult* res)                                                                               = 0;
 	virtual const char*    cmdTuples(PGresult* res)                                                                           = 0;
 	virtual PGconn*        connectdb(const char* conninfo)                                                                    = 0;
+	virtual int            isBusy(PGconn* conn)                                                                               = 0;
 	virtual int            consumeInput(PGconn* conn)                                                                         = 0;
 	virtual const char*    errorMessage(const PGconn* conn)                                                                   = 0;
 	virtual PGresult*      exec(PGconn* conn, const char* query)                                                              = 0;
@@ -62,6 +63,17 @@ public:
 	virtual ExecStatusType resultStatus(const PGresult* res)                                                                  = 0;
 	virtual int            socket(const PGconn* conn)                                                                         = 0;
 	virtual ConnStatusType status(const PGconn* conn)                                                                         = 0;
+	virtual int            setnonblocking(PGconn* conn, int arg)                                                              = 0;
+	virtual int            flush(PGconn* conn)                                                                                = 0;
+	virtual PGresult*      getResult(PGconn* conn)                                                                            = 0;
+	virtual int            sendQueryParams(PGconn*            conn,
+	                                       const char*        command,
+	                                       int                nParams,
+	                                       const Oid*         paramTypes,
+	                                       const char* const* paramValues,
+	                                       const int*         paramLengths,
+	                                       const int*         paramFormats,
+	                                       int                resultFormat)                                                                  = 0;
 };
 
 } // namespace postgresql

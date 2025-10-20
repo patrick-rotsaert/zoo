@@ -43,7 +43,7 @@ public:
 
 	std::uint64_t affected_rows() override;
 
-	static void execute(MYSQL& connection, const std::string& query);
+	static void execute(MYSQL& connection, std::string_view query);
 
 	MYSQL_STMT& handle() const;
 };

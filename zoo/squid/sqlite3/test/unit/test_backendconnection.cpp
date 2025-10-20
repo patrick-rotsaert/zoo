@@ -77,7 +77,12 @@ TEST(BackendConnectionTests, TestExecuteQuery)
 			EXPECT_CALL(api, open(testing::StrEq(g_connection_info), testing::NotNull()))
 			    .WillOnce(testing::DoAll(&set_connection_handle, testing::Return(SQLITE_OK)));
 
-			EXPECT_CALL(api, prepare_v2(sqlite_api_mock::test_connection, testing::StrEq(g_query), -1, testing::NotNull(), nullptr))
+			EXPECT_CALL(api,
+			            prepare_v2(sqlite_api_mock::test_connection,
+			                       testing::StrEq(g_query),
+			                       testing::Eq(std::string_view{ g_query }.length()),
+			                       testing::NotNull(),
+			                       nullptr))
 			    .WillOnce(testing::DoAll(&set_statement_handle, testing::Return(SQLITE_OK)));
 
 			EXPECT_CALL(api, step(sqlite_api_mock::test_statement)).WillOnce(testing::Return(step_result));

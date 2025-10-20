@@ -6,7 +6,10 @@
 //
 
 #include "zoo/squid/postgresql/connection.h"
+#include "zoo/squid/postgresql/tuple.h"
 #include "zoo/squid/demo/demo_common/demo_common.h"
+
+#include <boost/asio/io_context.hpp>
 
 #include <stdexcept>
 #include <iostream>
@@ -16,6 +19,37 @@ namespace zoo {
 namespace squid {
 namespace demo {
 
+void async_demo(postgresql::connection& connection)
+{
+	boost::asio::io_context io{};
+
+	connection.async_exec(io, "SELECT :one AS one, :pi AS pi", { { "one", 1 }, { "pi", 3.141592 } }, [](postgresql::async_result result) {
+		if (std::holds_alternative<postgresql::async_error>(result))
+		{
+			const auto& err = std::get<postgresql::async_error>(result);
+			std::cerr << err.format() << '\n';
+		}
+		else
+		{
+			const auto& rs = std::get<postgresql::resultset>(result);
+			std::cout << "Affected rows: " << rs.affected_rows() << '\n';
+			std::cout << "Returned rows: " << rs.size() << '\n';
+			for (const auto& tup : rs)
+			{
+				for (const auto& field : tup)
+				{
+					std::cout << "Field " << field.name() << " = " << field.to_string_view() << '\n';
+				}
+				std::cout << "one is " << tup["one"].to_int() << ", pi is " << tup["pi"].to_double() << '\n';
+			}
+			const auto& tup = *(rs.end() - 1);
+			std::cout << "one is " << tup["one"].to_int() << ", pi is " << tup["pi"].to_double() << '\n';
+		}
+	});
+
+	io.run();
+}
+
 void demo()
 {
 	constexpr auto connection_info = "host=localhost port=54321 dbname=squid_demo_postgresql user=postgres password=Pass123";
@@ -24,6 +58,7 @@ void demo()
 	std::cout << "opened database " << std::quoted(connection_info) << "\n";
 
 	demo_all(connection, Backend::POSTGRESQL);
+	async_demo(connection);
 }
 
 } // namespace demo

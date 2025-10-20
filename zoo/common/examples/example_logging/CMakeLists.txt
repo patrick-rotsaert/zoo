@@ -8,5 +8,5 @@
 set(TARGET example_logging)
 add_zoo_executable(${TARGET} main.cpp example_backend.cpp example_backend.h)
 
-target_compile_features(${TARGET} PRIVATE cxx_std_20)
+target_compile_features(${TARGET} PRIVATE cxx_std_23)
 target_link_libraries(${TARGET} PRIVATE zoo::common)

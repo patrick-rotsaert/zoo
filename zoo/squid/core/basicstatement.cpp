@@ -62,7 +62,7 @@ void basic_statement::execute()
 	{
 		if (!this->query_)
 		{
-			ZOO_THROW_EXCEPTION(error{ "No statement nor query have has been provided" });
+			ZOO_THROW_EXCEPTION(error{ "No statement nor query has been provided" });
 		}
 		else
 		{

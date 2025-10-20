@@ -326,7 +326,7 @@ void backend_connection::execute(const std::string& query)
 	statement::execute(*this->connection_, query);
 }
 
-backend_connection::backend_connection(const std::string& connection_info)
+backend_connection::backend_connection(const std::string_view connection_info)
     : connection_{ connect_database(connection_info) }
 {
 }

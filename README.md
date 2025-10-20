@@ -16,7 +16,7 @@ It is however possible to use only parts of it.
 ## Building
 
 Requirements:
-- C++20 compiler
+- C++23 compiler
 - CMake >= 3.25 if using [CMakePresets.json](CMakePresets.json)
 - CMake >= 3.19 otherwise
 - Ninja, only required for the dist scripts.

@@ -206,9 +206,9 @@ std::uint64_t statement::affected_rows()
 	return this->pimpl_->affected_rows();
 }
 
-/*static*/ void statement::execute(MYSQL& connection, const std::string& query)
+/*static*/ void statement::execute(MYSQL& connection, std::string_view query)
 {
-	if (0 != mysql_real_query(&connection, query.c_str(), static_cast<unsigned long>(query.length())))
+	if (0 != mysql_real_query(&connection, query.data(), static_cast<unsigned long>(query.length())))
 	{
 		ZOO_THROW_EXCEPTION(error{ "mysql_real_query failed", connection });
 	}

@@ -36,6 +36,11 @@ PGconn* pq_api::connectdb(const char* conninfo)
 	return PQconnectdb(conninfo);
 }
 
+int pq_api::isBusy(PGconn* conn)
+{
+	return PQisBusy(conn);
+}
+
 int pq_api::consumeInput(PGconn* conn)
 {
 	return PQconsumeInput(conn);
@@ -152,6 +157,33 @@ int pq_api::socket(const PGconn* conn)
 ConnStatusType pq_api::status(const PGconn* conn)
 {
 	return PQstatus(conn);
+}
+
+int pq_api::setnonblocking(PGconn* conn, int arg)
+{
+	return PQsetnonblocking(conn, arg);
+}
+
+int pq_api::flush(PGconn* conn)
+{
+	return PQflush(conn);
+}
+
+PGresult* pq_api::getResult(PGconn* conn)
+{
+	return PQgetResult(conn);
+}
+
+int pq_api::sendQueryParams(PGconn*            conn,
+                            const char*        command,
+                            int                nParams,
+                            const Oid*         paramTypes,
+                            const char* const* paramValues,
+                            const int*         paramLengths,
+                            const int*         paramFormats,
+                            int                resultFormat)
+{
+	return PQsendQueryParams(conn, command, nParams, paramTypes, paramValues, paramLengths, paramFormats, resultFormat);
 }
 
 } // namespace postgresql

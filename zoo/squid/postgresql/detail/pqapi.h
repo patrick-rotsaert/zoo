@@ -30,6 +30,7 @@ public:
 	void           clear(PGresult* res) override;
 	const char*    cmdTuples(PGresult* res) override;
 	PGconn*        connectdb(const char* conninfo) override;
+	int            isBusy(PGconn* conn) override;
 	int            consumeInput(PGconn* conn) override;
 	const char*    errorMessage(const PGconn* conn) override;
 	PGresult*      exec(PGconn* conn, const char* query) override;
@@ -64,6 +65,17 @@ public:
 	ExecStatusType resultStatus(const PGresult* res) override;
 	int            socket(const PGconn* conn) override;
 	ConnStatusType status(const PGconn* conn) override;
+	int            setnonblocking(PGconn* conn, int arg) override;
+	int            flush(PGconn* conn) override;
+	PGresult*      getResult(PGconn* conn) override;
+	int            sendQueryParams(PGconn*            conn,
+	                               const char*        command,
+	                               int                nParams,
+	                               const Oid*         paramTypes,
+	                               const char* const* paramValues,
+	                               const int*         paramLengths,
+	                               const int*         paramFormats,
+	                               int                resultFormat) override;
 };
 
 } // namespace postgresql

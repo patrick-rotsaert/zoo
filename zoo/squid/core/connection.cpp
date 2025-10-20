@@ -39,6 +39,8 @@ connection::connection(connection_pool& pool)
 	assert(this->backend_);
 }
 
+connection::~connection() noexcept = default;
+
 void connection::execute(const std::string& query)
 {
 	this->backend_->execute(query);
@@ -82,10 +84,6 @@ std::optional<connection> connection::create(connection_pool& pool, const std::c
 	{
 		return std::nullopt;
 	}
-}
-
-connection::~connection() noexcept
-{
 }
 
 const std::shared_ptr<ibackend_connection>& connection::backend() const

@@ -30,7 +30,7 @@ TEST(ConnectionTests, TestCreateConnection)
 
 	auto c = connection(api, g_connection_info);
 
-	EXPECT_EQ(&c.backend().handle(), pq_api_mock::test_connection);
+	EXPECT_EQ(c.backend().native_connection().get(), pq_api_mock::test_connection);
 }
 
 } // namespace postgresql

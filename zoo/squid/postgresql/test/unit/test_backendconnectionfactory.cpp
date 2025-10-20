@@ -31,7 +31,7 @@ TEST(BackendConnectionFactoryTests, TestCreateBackendConnection)
 	auto conn     = std::dynamic_pointer_cast<backend_connection>(virtconn);
 	EXPECT_NE(conn, nullptr);
 
-	EXPECT_EQ(&conn->handle(), pq_api_mock::test_connection);
+	EXPECT_EQ(conn->native_connection().get(), pq_api_mock::test_connection);
 }
 
 } // namespace postgresql

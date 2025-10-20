@@ -8,7 +8,15 @@
 #pragma once
 
 #include "zoo/squid/postgresql/config.h"
+#include "zoo/squid/postgresql/async.h"
 #include "zoo/squid/core/connection.h"
+#include "zoo/squid/core/parameter.h"
+
+#include <boost/asio/io_context.hpp>
+
+#include <string_view>
+#include <initializer_list>
+#include <utility>
 
 namespace zoo {
 namespace squid {
@@ -35,6 +43,11 @@ public:
 	/// Get the backend
 	/// The backend provides a getter for the native connection handle (PGconn)
 	const backend_connection& backend() const;
+
+	void async_exec(boost::asio::io_context&                                               io,
+	                std::string_view                                                       query,
+	                std::initializer_list<std::pair<std::string_view, parameter_by_value>> params,
+	                async_completion_handler                                               handler);
 };
 
 } // namespace postgresql

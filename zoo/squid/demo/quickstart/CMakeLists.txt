@@ -8,7 +8,7 @@
 set(TARGET squid_quickstart)
 add_zoo_executable(${TARGET} quickstart.cpp)
 
-target_compile_features(${TARGET} PRIVATE cxx_std_20)
+target_compile_features(${TARGET} PRIVATE cxx_std_23)
 target_link_libraries(${TARGET} PRIVATE zoo::squid_postgresql)
 target_link_libraries(${TARGET} PRIVATE zoo::squid_mysql)
 target_link_libraries(${TARGET} PRIVATE zoo::squid_sqlite)

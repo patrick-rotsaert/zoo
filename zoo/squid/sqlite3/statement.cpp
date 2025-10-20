@@ -26,12 +26,12 @@ namespace sqlite {
 
 namespace {
 
-sqlite3_stmt* prepare_statement(isqlite_api& api, sqlite3& connection, const std::string& query)
+sqlite3_stmt* prepare_statement(isqlite_api& api, sqlite3& connection, std::string_view query)
 {
 	ZOO_LOG(trace, "preparing: {}", query);
 
 	sqlite3_stmt* stmt{ nullptr };
-	auto          rc = api.prepare_v2(&connection, query.c_str(), -1, &stmt, nullptr);
+	auto          rc = api.prepare_v2(&connection, query.data(), query.length(), &stmt, nullptr);
 
 	if (SQLITE_OK != rc)
 	{
@@ -221,7 +221,7 @@ std::uint64_t statement::affected_rows()
 	return this->pimpl_->affected_rows();
 }
 
-void statement::execute(isqlite_api& api, sqlite3& connection, const std::string& query)
+void statement::execute(isqlite_api& api, sqlite3& connection, std::string_view query)
 {
 	std::shared_ptr<sqlite3_stmt> statement{ prepare_statement(api, connection, query),
 		                                     [&api](sqlite3_stmt* pStmt) { api.finalize(pStmt); } };

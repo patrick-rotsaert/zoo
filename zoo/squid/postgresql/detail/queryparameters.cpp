@@ -62,7 +62,7 @@ const char* get_parameter_value(const parameter& parameter, std::string& value)
 		    else if constexpr (std::is_same_v<T, const float*> || std::is_same_v<T, const double*> || std::is_same_v<T, const long double*>)
 		    {
 			    assert(arg != nullptr);
-			    std::ostringstream ss;
+			    std::ostringstream ss; //@@FIXME
 			    constexpr auto     precision = std::numeric_limits<std::remove_cvref_t<decltype(*arg)>>::digits10;
 			    ss << std::setprecision(precision) << *arg;
 			    value = ss.str();

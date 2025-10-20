@@ -144,7 +144,7 @@ function(add_zoo_library TARGET)
 
 	foreach(TARGET ${COMPILE_TARGETS})
 		# Specify the C++ standard
-		target_compile_features(${TARGET} PRIVATE cxx_std_20)
+		target_compile_features(${TARGET} PRIVATE cxx_std_23)
 
 		# PIC
 		set_target_properties(${TARGET} PROPERTIES POSITION_INDEPENDENT_CODE True)

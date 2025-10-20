@@ -45,6 +45,7 @@ public:
 	MOCK_METHOD(void, clear, (PGresult * res), (override));
 	MOCK_METHOD(const char*, cmdTuples, (PGresult * res), (override));
 	MOCK_METHOD(PGconn*, connectdb, (const char* conninfo), (override));
+	MOCK_METHOD(int, isBusy, (PGconn * conn), (override));
 	MOCK_METHOD(int, consumeInput, (PGconn * conn), (override));
 	MOCK_METHOD(const char*, errorMessage, (const PGconn* conn), (override));
 	MOCK_METHOD(PGresult*, exec, (PGconn * conn, const char* query), (override));
@@ -88,6 +89,20 @@ public:
 	MOCK_METHOD(ExecStatusType, resultStatus, (const PGresult* res), (override));
 	MOCK_METHOD(int, socket, (const PGconn* conn), (override));
 	MOCK_METHOD(ConnStatusType, status, (const PGconn* conn), (override));
+	MOCK_METHOD(int, setnonblocking, (PGconn * conn, int arg), (override));
+	MOCK_METHOD(int, flush, (PGconn * conn), (override));
+	MOCK_METHOD(PGresult*, getResult, (PGconn * conn), (override));
+	MOCK_METHOD(int,
+	            sendQueryParams,
+	            (PGconn * conn,
+	             const char*        command,
+	             int                nParams,
+	             const Oid*         paramTypes,
+	             const char* const* paramValues,
+	             const int*         paramLengths,
+	             const int*         paramFormats,
+	             int                resultFormat),
+	            (override));
 };
 
 using pq_api_mock_nice   = testing::NiceMock<pq_api_mock>;

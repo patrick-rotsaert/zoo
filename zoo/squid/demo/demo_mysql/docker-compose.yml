@@ -4,7 +4,6 @@
 # (See accompanying file LICENSE or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 #
-version: "2"
 services:
   database:
     image: mysql:latest

@@ -10,9 +10,7 @@
 namespace zoo {
 namespace squid {
 
-ibackend_connection_factory::~ibackend_connection_factory() noexcept
-{
-}
+ibackend_connection_factory::~ibackend_connection_factory() noexcept = default;
 
 } // namespace squid
 } // namespace zoo

@@ -8,7 +8,7 @@
 set(TARGET fs_local_example_watcher)
 add_zoo_executable(${TARGET} example_watcher.cpp)
 
-target_compile_features(${TARGET} PRIVATE cxx_std_20)
+target_compile_features(${TARGET} PRIVATE cxx_std_23)
 target_link_libraries(${TARGET} PRIVATE zoo::fs_local)
 
 # Windows

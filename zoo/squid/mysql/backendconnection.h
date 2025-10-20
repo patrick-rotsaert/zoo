@@ -27,7 +27,7 @@ public:
 	/// @a connection_info must contain a path to a file
 	/// or ":memory:" for an in-memory database.
 	/// Files that do not exist will be created.
-	explicit backend_connection(const std::string& connection_info);
+	explicit backend_connection(std::string_view connection_info);
 
 	backend_connection(const backend_connection&)            = delete;
 	backend_connection(backend_connection&& src)             = default;

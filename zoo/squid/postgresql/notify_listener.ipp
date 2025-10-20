@@ -23,7 +23,7 @@ void notify_listener::on_wait(const boost::system::error_code& ec)
 {
 	if (!ec)
 	{
-		auto conn = &this->native_conn_;
+		auto conn = this->native_conn_.get();
 		PQconsumeInput(conn);
 		while (auto notify = PQnotifies(conn))
 		{
@@ -51,14 +51,14 @@ notify_listener::notify_listener(boost::asio::io_context& ioc,
     : stream_{ ioc }
     , connection_{ std::move(connection) }
     , callback_{ std::move(callback) }
-    , native_conn_{ connection_.backend().handle() }
+    , native_conn_{ connection_.backend().native_connection() }
 {
 	this->connection_.execute("LISTEN " + channel);
 
-	auto sock = PQsocket(&this->native_conn_);
+	auto sock = PQsocket(this->native_conn_.get());
 	if (sock < 0)
 	{
-		ZOO_THROW_EXCEPTION(error{ "PQsocket failed", this->native_conn_ });
+		ZOO_THROW_EXCEPTION(error{ "PQsocket failed", *this->native_conn_ });
 	}
 
 	this->stream_.assign(sock);

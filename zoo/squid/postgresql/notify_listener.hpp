@@ -30,7 +30,7 @@ class ZOO_SQUID_POSTGRESQL_API notify_listener final : public std::enable_shared
 	stream_descriptor stream_;
 	connection        connection_;
 	callback_type     callback_;
-	PGconn&           native_conn_;
+	std::shared_ptr<PGconn>           native_conn_;
 
 	void on_wait(const boost::system::error_code& ec);
 	void async_wait();

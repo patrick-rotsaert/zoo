@@ -21,10 +21,10 @@ namespace sqlite {
 
 namespace {
 
-sqlite3* connect_database(isqlite_api& api, const std::string& connection_info)
+sqlite3* connect_database(isqlite_api& api, std::string_view connection_info)
 {
 	sqlite3* handle{};
-	auto     err = api.open(connection_info.c_str(), &handle);
+	auto     err = api.open(std::string{ connection_info }.c_str(), &handle);
 	if (SQLITE_OK != err)
 	{
 		ZOO_THROW_EXCEPTION(error{ api, "sqlite3_open failed", err });
@@ -59,7 +59,7 @@ void backend_connection::execute(const std::string& query)
 	statement::execute(*this->api_, *this->connection_, query);
 }
 
-backend_connection::backend_connection(isqlite_api& api, const std::string& connection_info)
+backend_connection::backend_connection(isqlite_api& api, std::string_view connection_info)
     : api_{ &api }
     , connection_{ connect_database(api, connection_info), [&api](sqlite3* db) { api.close(db); } }
 {

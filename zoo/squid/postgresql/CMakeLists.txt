@@ -12,6 +12,11 @@ add_zoo_library(squid_postgresql
 		backendconnection.cpp
 		backendconnectionfactory.cpp
 		connection.cpp
+		resultset.cpp
+		resultsetiterator.cpp
+		asyncerror.cpp
+		detail/asyncbackendstatement.cpp
+		detail/asyncbackendstatement.h
 		detail/conversions.cpp
 		detail/conversions.h
 		detail/connectionchecker.cpp
@@ -34,6 +39,13 @@ add_zoo_library(squid_postgresql
 		backendconnection.h
 		backendconnectionfactory.h
 		connection.h
+		resultset.h
+		resultsetdatafwd.h
+		resultsetiterator.h
+		tuple.h
+		field.h
+		async.h
+		asyncerror.h
 		detail/libpqfwd.h
 		apilinktest.h
 	MOCK_SOURCES

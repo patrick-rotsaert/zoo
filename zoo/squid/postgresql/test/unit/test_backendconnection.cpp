@@ -30,7 +30,7 @@ TEST(BackendConnectionTests, TestOpenAndClose)
 	EXPECT_CALL(api, finish(pq_api_mock::test_connection)).Times(1);
 
 	auto c = backend_connection{ &api, g_connection_info };
-	EXPECT_EQ(&c.handle(), pq_api_mock::test_connection);
+	EXPECT_EQ(c.native_connection().get(), pq_api_mock::test_connection);
 }
 
 TEST(BackendConnectionTests, TestConnectReturnsNull)
