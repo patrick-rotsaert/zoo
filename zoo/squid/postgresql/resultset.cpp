@@ -162,6 +162,7 @@ tuple::tuple(const resultset_data* data, std::size_t tuple_index)
     : data_{ data }
     , fields_{}
 {
+	fields_.reserve(data->field_count);
 	for (std::size_t field_index = 0; field_index < data->field_count; ++field_index)
 	{
 		if (data->api->getisnull(data->res, tuple_index, field_index))
