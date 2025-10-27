@@ -186,6 +186,22 @@ int pq_api::sendQueryParams(PGconn*            conn,
 	return PQsendQueryParams(conn, command, nParams, paramTypes, paramValues, paramLengths, paramFormats, resultFormat);
 }
 
+int pq_api::sendPrepare(PGconn* conn, const char* stmtName, const char* query, int nParams, const Oid* paramTypes)
+{
+	return PQsendPrepare(conn, stmtName, query, nParams, paramTypes);
+}
+
+int pq_api::sendQueryPrepared(PGconn*            conn,
+                              const char*        stmtName,
+                              int                nParams,
+                              const char* const* paramValues,
+                              const int*         paramLengths,
+                              const int*         paramFormats,
+                              int                resultFormat)
+{
+	return PQsendQueryPrepared(conn, stmtName, nParams, paramValues, paramLengths, paramFormats, resultFormat);
+}
+
 } // namespace postgresql
 } // namespace squid
 } // namespace zoo

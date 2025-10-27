@@ -33,9 +33,14 @@ const backend_connection& connection::backend() const
 void connection::async_exec(boost::asio::io_context&                                               io,
                             std::string_view                                                       query,
                             std::initializer_list<std::pair<std::string_view, parameter_by_value>> params,
-                            async_completion_handler                                               handler)
+                            async_exec_completion_handler                                          handler)
 {
-	this->backend_->run_async_statement(io, std::move(query), std::move(params), std::move(handler));
+	this->backend_->run_async_exec(io, std::move(query), std::move(params), std::move(handler));
+}
+
+void connection::async_prepare(boost::asio::io_context& io, std::string_view query, async_prepare_completion_handler handler)
+{
+	this->backend_->run_async_prepare(io, std::move(query), std::move(handler));
 }
 
 } // namespace postgresql

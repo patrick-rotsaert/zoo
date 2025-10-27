@@ -8,7 +8,8 @@
 #pragma once
 
 #include "zoo/squid/postgresql/config.h"
-#include "zoo/squid/postgresql/async.h"
+#include "zoo/squid/postgresql/asyncexec.h"
+#include "zoo/squid/postgresql/asyncprepare.h"
 #include "zoo/squid/postgresql/detail/libpqfwd.h"
 #include "zoo/squid/core/ibackendconnection.h"
 #include "zoo/squid/core/parameter.h"
@@ -23,9 +24,10 @@ namespace squid {
 namespace postgresql {
 
 class ipq_api;
-class async_backend_statement;
+class async_backend;
 
-class ZOO_SQUID_POSTGRESQL_API backend_connection final : public ibackend_connection
+class ZOO_SQUID_POSTGRESQL_API backend_connection final : public ibackend_connection,
+                                                          public std::enable_shared_from_this<backend_connection>
 {
 	ipq_api*                api_;
 	std::shared_ptr<PGconn> connection_;
@@ -43,10 +45,15 @@ public:
 	std::unique_ptr<ibackend_statement> create_prepared_statement(std::string_view query) override;
 	void                                execute(const std::string& query) override;
 
-	void run_async_statement(boost::asio::io_context&                                               io,
-	                         std::string_view                                                       query,
-	                         std::initializer_list<std::pair<std::string_view, parameter_by_value>> params,
-	                         async_completion_handler                                               handler);
+	void run_async_exec(boost::asio::io_context&                                               io,
+	                    std::string_view                                                       query,
+	                    std::initializer_list<std::pair<std::string_view, parameter_by_value>> params,
+	                    async_exec_completion_handler                                          handler);
+	void run_async_prepare(boost::asio::io_context& io, std::string_view query, async_prepare_completion_handler handler);
+	void run_async_exec_prepared(boost::asio::io_context&                                               io,
+	                             std::string_view                                                       stmt_name,
+	                             std::initializer_list<std::pair<std::string_view, parameter_by_value>> params,
+	                             async_exec_completion_handler                                          handler);
 
 	std::shared_ptr<PGconn> native_connection() const;
 };

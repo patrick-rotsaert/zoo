@@ -9,7 +9,7 @@
 #include "zoo/squid/postgresql/statement.h"
 #include "zoo/squid/postgresql/error.h"
 
-#include "zoo/squid/postgresql/detail/asyncbackendstatement.h"
+#include "zoo/squid/postgresql/detail/asyncbackend.h"
 #include "zoo/squid/postgresql/detail/ipqapi.h"
 #include "zoo/squid/postgresql/detail/connectionchecker.h"
 
@@ -53,12 +53,25 @@ backend_connection::backend_connection(ipq_api* api, std::string_view connection
 	}
 }
 
-void backend_connection::run_async_statement(boost::asio::io_context&                                               io,
-                                             std::string_view                                                       query,
-                                             std::initializer_list<std::pair<std::string_view, parameter_by_value>> params,
-                                             async_completion_handler                                               handler)
+void backend_connection::run_async_exec(boost::asio::io_context&                                               io,
+                                        std::string_view                                                       query,
+                                        std::initializer_list<std::pair<std::string_view, parameter_by_value>> params,
+                                        async_exec_completion_handler                                          handler)
 {
-	async_backend_statement::run(this->api_, this->connection_, io, std::move(query), std::move(params), std::move(handler));
+	async_backend::exec(this->api_, shared_from_this(), io, std::move(query), std::move(params), std::move(handler));
+}
+
+void backend_connection::run_async_prepare(boost::asio::io_context& io, std::string_view query, async_prepare_completion_handler handler)
+{
+	async_backend::prepare(this->api_, shared_from_this(), io, std::move(query), std::move(handler));
+}
+
+void backend_connection::run_async_exec_prepared(boost::asio::io_context&                                               io,
+                                                 std::string_view                                                       stmt_name,
+                                                 std::initializer_list<std::pair<std::string_view, parameter_by_value>> params,
+                                                 async_exec_completion_handler                                          handler)
+{
+	async_backend::exec_prepared(this->api_, shared_from_this(), io, stmt_name, std::move(params), std::move(handler));
 }
 
 std::shared_ptr<PGconn> backend_connection::native_connection() const

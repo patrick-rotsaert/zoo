@@ -19,11 +19,43 @@ namespace zoo {
 namespace squid {
 namespace demo {
 
-void async_demo(postgresql::connection& connection)
+void async_exec_demo(postgresql::connection& connection)
 {
 	boost::asio::io_context io{};
 
-	connection.async_exec(io, "SELECT :one AS one, :pi AS pi", { { "one", 1 }, { "pi", 3.141592 } }, [](postgresql::async_result result) {
+	connection.async_exec(
+	    io, "SELECT :one AS one, :pi AS pi", { { "one", 1 }, { "pi", 3.141592 } }, [](postgresql::async_exec_result result) {
+		    if (std::holds_alternative<postgresql::async_error>(result))
+		    {
+			    const auto& err = std::get<postgresql::async_error>(result);
+			    std::cerr << err.format() << '\n';
+		    }
+		    else
+		    {
+			    const auto& rs = std::get<postgresql::resultset>(result);
+			    std::cout << "Affected rows: " << rs.affected_rows() << '\n';
+			    std::cout << "Returned rows: " << rs.size() << '\n';
+			    for (const auto& tup : rs)
+			    {
+				    for (const auto& field : tup)
+				    {
+					    std::cout << "Field " << field.name() << " = " << field.to_string_view() << '\n';
+				    }
+				    std::cout << "one is " << tup["one"].to_int() << ", pi is " << tup["pi"].to_double() << '\n';
+			    }
+			    const auto& tup = *(rs.end() - 1);
+			    std::cout << "one is " << tup["one"].to_int() << ", pi is " << tup["pi"].to_double() << '\n';
+		    }
+	    });
+
+	io.run();
+}
+
+void async_prepare_demo(postgresql::connection& connection)
+{
+	boost::asio::io_context io{};
+
+	connection.async_prepare(io, "SELECT :one AS one, :pi AS pi", [](postgresql::async_prepare_result result) {
 		if (std::holds_alternative<postgresql::async_error>(result))
 		{
 			const auto& err = std::get<postgresql::async_error>(result);
@@ -31,19 +63,30 @@ void async_demo(postgresql::connection& connection)
 		}
 		else
 		{
-			const auto& rs = std::get<postgresql::resultset>(result);
-			std::cout << "Affected rows: " << rs.affected_rows() << '\n';
-			std::cout << "Returned rows: " << rs.size() << '\n';
-			for (const auto& tup : rs)
-			{
-				for (const auto& field : tup)
+			auto& prepared = std::get<postgresql::async_prepared_statement>(result);
+			prepared.async_exec({ { "one", 1 }, { "pi", 3.141592 } }, [](postgresql::async_exec_result result) {
+				if (std::holds_alternative<postgresql::async_error>(result))
 				{
-					std::cout << "Field " << field.name() << " = " << field.to_string_view() << '\n';
+					const auto& err = std::get<postgresql::async_error>(result);
+					std::cerr << err.format() << '\n';
 				}
-				std::cout << "one is " << tup["one"].to_int() << ", pi is " << tup["pi"].to_double() << '\n';
-			}
-			const auto& tup = *(rs.end() - 1);
-			std::cout << "one is " << tup["one"].to_int() << ", pi is " << tup["pi"].to_double() << '\n';
+				else
+				{
+					const auto& rs = std::get<postgresql::resultset>(result);
+					std::cout << "Affected rows: " << rs.affected_rows() << '\n';
+					std::cout << "Returned rows: " << rs.size() << '\n';
+					for (const auto& tup : rs)
+					{
+						for (const auto& field : tup)
+						{
+							std::cout << "Field " << field.name() << " = " << field.to_string_view() << '\n';
+						}
+						std::cout << "one is " << tup["one"].to_int() << ", pi is " << tup["pi"].to_double() << '\n';
+					}
+					const auto& tup = *(rs.end() - 1);
+					std::cout << "one is " << tup["one"].to_int() << ", pi is " << tup["pi"].to_double() << '\n';
+				}
+			});
 		}
 	});
 
@@ -58,7 +101,8 @@ void demo()
 	std::cout << "opened database " << std::quoted(connection_info) << "\n";
 
 	demo_all(connection, Backend::POSTGRESQL);
-	async_demo(connection);
+	async_exec_demo(connection);
+	async_prepare_demo(connection);
 }
 
 } // namespace demo

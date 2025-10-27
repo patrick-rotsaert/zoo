@@ -15,8 +15,9 @@ add_zoo_library(squid_postgresql
 		resultset.cpp
 		resultsetiterator.cpp
 		asyncerror.cpp
-		detail/asyncbackendstatement.cpp
-		detail/asyncbackendstatement.h
+		asyncpreparedstatement.cpp
+		detail/asyncbackend.cpp
+		detail/asyncbackend.h
 		detail/conversions.cpp
 		detail/conversions.h
 		detail/connectionchecker.cpp
@@ -32,6 +33,8 @@ add_zoo_library(squid_postgresql
 		detail/ipqapi.h
 		detail/pqapi.cpp
 		detail/pqapi.h
+		detail/statementname.cpp
+		detail/statementname.h
 		apilinktest.cpp
 	PUBLIC_HEADERS
 		error.h
@@ -44,8 +47,10 @@ add_zoo_library(squid_postgresql
 		resultsetiterator.h
 		tuple.h
 		field.h
-		async.h
+		asyncexec.h
+		asyncprepare.h
 		asyncerror.h
+		asyncpreparedstatement.h
 		detail/libpqfwd.h
 		apilinktest.h
 	MOCK_SOURCES

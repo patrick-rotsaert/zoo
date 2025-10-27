@@ -8,7 +8,7 @@
 #pragma once
 
 #include "zoo/squid/postgresql/asyncerror.h"
-#include "zoo/squid/postgresql/resultset.h"
+#include "zoo/squid/postgresql/asyncpreparedstatement.h"
 
 #include <functional>
 #include <variant>
@@ -17,8 +17,8 @@ namespace zoo {
 namespace squid {
 namespace postgresql {
 
-using async_result             = std::variant<resultset, async_error>;
-using async_completion_handler = std::function<void(async_result)>;
+using async_prepare_result             = std::variant<async_prepared_statement, async_error>;
+using async_prepare_completion_handler = std::function<void(async_prepare_result)>;
 
 } // namespace postgresql
 } // namespace squid

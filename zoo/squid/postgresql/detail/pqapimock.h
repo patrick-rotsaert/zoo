@@ -103,6 +103,17 @@ public:
 	             const int*         paramFormats,
 	             int                resultFormat),
 	            (override));
+	MOCK_METHOD(int, sendPrepare, (PGconn * conn, const char* stmtName, const char* query, int nParams, const Oid* paramTypes), (override));
+	MOCK_METHOD(int,
+	            sendQueryPrepared,
+	            (PGconn * conn,
+	             const char*        stmtName,
+	             int                nParams,
+	             const char* const* paramValues,
+	             const int*         paramLengths,
+	             const int*         paramFormats,
+	             int                resultFormat),
+	            (override));
 };
 
 using pq_api_mock_nice   = testing::NiceMock<pq_api_mock>;

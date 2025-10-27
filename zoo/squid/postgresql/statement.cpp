@@ -14,28 +14,18 @@
 #include "zoo/squid/postgresql/detail/queryresults.h"
 #include "zoo/squid/postgresql/detail/connectionchecker.h"
 #include "zoo/squid/postgresql/detail/execresult.h"
+#include "zoo/squid/postgresql/detail/statementname.h"
 
 #include "zoo/common/conversion/conversion.h"
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/throw_exception.h"
 
 #include <optional>
-#include <atomic>
 #include <cassert>
 
 namespace zoo {
 namespace squid {
 namespace postgresql {
-
-namespace {
-
-std::string next_statement_name()
-{
-	static std::atomic<uint64_t> statement_number = 0;
-	return std::string{ "s_" } + std::to_string(++statement_number);
-}
-
-} // namespace
 
 class statement::impl final
 {

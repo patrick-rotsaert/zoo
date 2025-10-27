@@ -8,7 +8,8 @@
 #pragma once
 
 #include "zoo/squid/postgresql/config.h"
-#include "zoo/squid/postgresql/async.h"
+#include "zoo/squid/postgresql/asyncexec.h"
+#include "zoo/squid/postgresql/asyncprepare.h"
 #include "zoo/squid/core/connection.h"
 #include "zoo/squid/core/parameter.h"
 
@@ -47,7 +48,9 @@ public:
 	void async_exec(boost::asio::io_context&                                               io,
 	                std::string_view                                                       query,
 	                std::initializer_list<std::pair<std::string_view, parameter_by_value>> params,
-	                async_completion_handler                                               handler);
+	                async_exec_completion_handler                                          handler);
+
+	void async_prepare(boost::asio::io_context& io, std::string_view query, async_prepare_completion_handler handler);
 };
 
 } // namespace postgresql

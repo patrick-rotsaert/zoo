@@ -76,6 +76,14 @@ public:
 	                               const int*         paramLengths,
 	                               const int*         paramFormats,
 	                               int                resultFormat) override;
+	int            sendPrepare(PGconn* conn, const char* stmtName, const char* query, int nParams, const Oid* paramTypes) override;
+	int            sendQueryPrepared(PGconn*            conn,
+	                                 const char*        stmtName,
+	                                 int                nParams,
+	                                 const char* const* paramValues,
+	                                 const int*         paramLengths,
+	                                 const int*         paramFormats,
+	                                 int                resultFormat) override;
 };
 
 } // namespace postgresql
