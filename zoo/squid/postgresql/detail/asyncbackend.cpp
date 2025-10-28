@@ -9,6 +9,7 @@
 #include "zoo/squid/postgresql/detail/query.h"
 #include "zoo/squid/postgresql/detail/queryparameters.h"
 #include "zoo/squid/postgresql/detail/statementname.h"
+#include "zoo/common/logging/logging.h"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/io_context_strand.hpp>
@@ -16,6 +17,7 @@
 #include <boost/system/error_code.hpp>
 
 #include <map>
+#include <iostream>
 
 namespace zoo {
 namespace squid {
@@ -83,14 +85,27 @@ class async_operation : public std::enable_shared_from_this<Derived>
 		return std::static_pointer_cast<Derived>(this->shared_from_this());
 	}
 
-public:
-	virtual ~async_operation()
+	void release_stream()
 	{
 		// stream_ takes ownership of the descriptor.
 		// We need to prevent it being closed, because the PGconn object in fact owns it.
 		if (this->stream_.is_open())
 		{
+			ZOO_LOG(trace, "release fd={}", this->stream_.native_handle());
 			this->stream_.release();
+		}
+	}
+
+public:
+	virtual ~async_operation()
+	{
+		try
+		{
+			this->release_stream();
+		}
+		catch (const std::exception& e)
+		{
+			ZOO_LOG(warn, "{}", e.what());
 		}
 	}
 
@@ -99,6 +114,7 @@ protected:
 	std::shared_ptr<backend_connection> connection_;
 	boost::asio::io_context&            io_;
 	CompletionHandler                   handler_;
+	bool                                multi_result_possible_;
 
 	boost::asio::posix::stream_descriptor stream_;
 	boost::asio::io_context::strand       strand_;
@@ -110,11 +126,13 @@ protected:
 	explicit async_operation(ipq_api*                            api,
 	                         std::shared_ptr<backend_connection> connection,
 	                         boost::asio::io_context&            io,
-	                         CompletionHandler                   handler)
+	                         CompletionHandler                   handler,
+	                         bool                                multi_result_possible)
 	    : api_{ api }
 	    , connection_{ std::move(connection) }
 	    , io_{ io }
 	    , handler_{ std::move(handler) }
+	    , multi_result_possible_{ multi_result_possible }
 	    , stream_{ io }
 	    , strand_{ io }
 	{
@@ -137,6 +155,7 @@ protected:
 			return nullptr;
 		}
 
+		ZOO_LOG(trace, "assign fd={}", sock);
 		this->stream_.assign(sock);
 
 		return conn;
@@ -190,7 +209,20 @@ protected:
 			std::shared_ptr<PGresult> result{ this->api_->getResult(conn), [this](PGresult* res) { this->api_->clear(res); } };
 			if (result)
 			{
+				if (!this->multi_result_possible_)
+				{
+					this->release_stream();
+
+					const auto null = this->api_->getResult(conn);
+					assert(null == nullptr);
+				}
+
 				this->handle_result(std::move(result));
+
+				if (!this->multi_result_possible_)
+				{
+					break;
+				}
 			}
 			else
 			{
@@ -262,7 +294,7 @@ public:
 	                              std::shared_ptr<backend_connection> connection,
 	                              boost::asio::io_context&            io,
 	                              async_exec_completion_handler       handler)
-	    : async_operation{ api, std::move(connection), io, std::move(handler) }
+	    : async_operation{ api, std::move(connection), io, std::move(handler), true }
 	{
 	}
 
@@ -286,6 +318,7 @@ public:
 
 		if (auto conn = this->setup_connection())
 		{
+			ZOO_LOG(trace, "async exec: {}", query_.query());
 			if (this->api_->sendQueryParams(conn,
 			                                query_.query().c_str(),
 			                                query_params.parameter_count(),
@@ -305,14 +338,17 @@ public:
 
 class async_prepare_operation final : public async_operation<async_prepare_operation, async_prepare_completion_handler>
 {
-	std::string stmt_name_;
+	std::unique_ptr<postgresql_query> query_;
+	std::string                       stmt_name_;
 
 public:
 	explicit async_prepare_operation(ipq_api*                            api,
 	                                 std::shared_ptr<backend_connection> connection,
 	                                 boost::asio::io_context&            io,
+	                                 std::string_view                    query,
 	                                 async_prepare_completion_handler    handler)
-	    : async_operation{ api, std::move(connection), io, std::move(handler) }
+	    : async_operation{ api, std::move(connection), io, std::move(handler), false }
+	    , query_{ std::make_unique<postgresql_query>(std::move(query)) }
 	    , stmt_name_{ next_statement_name() }
 	{
 	}
@@ -323,7 +359,8 @@ public:
 
 		if (status == PGRES_COMMAND_OK)
 		{
-			return this->handler_(async_prepared_statement{ this->api_, this->connection_, this->io_, this->stmt_name_ });
+			return this->handler_(std::make_shared<async_prepared_statement>(
+			    this->api_, this->connection_, this->io_, std::move(this->query_), this->stmt_name_));
 		}
 		else
 		{
@@ -333,13 +370,12 @@ public:
 		}
 	}
 
-	void run(std::string_view query)
+	void run()
 	{
-		postgresql_query query_{ std::move(query) };
-
 		if (auto conn = this->setup_connection())
 		{
-			if (this->api_->sendPrepare(conn, this->stmt_name_.c_str(), query_.query().c_str(), query_.parameter_count(), nullptr) != 1)
+			ZOO_LOG(trace, "async prepare {}: {}", this->stmt_name_, query_->query());
+			if (this->api_->sendPrepare(conn, this->stmt_name_.c_str(), query_->query().c_str(), query_->parameter_count(), nullptr) != 1)
 			{
 				return this->fail("PQsendPrepare", *conn);
 			}
@@ -356,7 +392,7 @@ public:
 	                                       std::shared_ptr<backend_connection> connection,
 	                                       boost::asio::io_context&            io,
 	                                       async_exec_completion_handler       handler)
-	    : async_operation{ api, std::move(connection), io, std::move(handler) }
+	    : async_operation{ api, std::move(connection), io, std::move(handler), false }
 	{
 	}
 
@@ -365,39 +401,35 @@ public:
 		this->handler_(make_exec_result(*this->api_, "sendQueryPrepared", std::move(result), *this->connection_->native_connection()));
 	}
 
-	void run(std::string_view stmt_name, std::initializer_list<std::pair<std::string_view, parameter_by_value>> params)
+	void run(const postgresql_query&                                                query,
+	         std::string_view                                                       stmt_name,
+	         std::initializer_list<std::pair<std::string_view, parameter_by_value>> params)
 	{
-		//@@ TODO
-		(void)stmt_name;
-		(void)params;
+		std::map<std::string, parameter> params_{};
+		for (auto&& pair : params)
+		{
+			params_.insert_or_assign(std::string{ pair.first }, std::move(pair.second));
+		}
+		query_parameters query_params{ query, params_ };
 
-		return this->handler_(async_error{ .ec = std::nullopt, .message = "*NOT IMPLEMENTED*", .func = std::nullopt });
+		assert(query_params.parameter_count() == query.parameter_count());
 
-		// std::map<std::string, parameter> params_{};
-		// for (auto&& pair : params)
-		// {
-		// 	params_.insert_or_assign(std::string{ pair.first }, std::move(pair.second));
-		// }
-		// query_parameters query_params{ query_, params_ };
+		if (auto conn = this->setup_connection())
+		{
+			ZOO_LOG(trace, "async exec prepared {}", stmt_name);
+			if (this->api_->sendQueryPrepared(conn,
+			                                  std::string{ stmt_name }.c_str(),
+			                                  query_params.parameter_count(),
+			                                  query_params.parameter_values(),
+			                                  nullptr,
+			                                  nullptr,
+			                                  0) != 1)
+			{
+				return this->fail("sendQueryPrepared", *conn);
+			}
 
-		// assert(query_params.parameter_count() == query_.parameter_count());
-
-		// if (auto conn = this->setup_connection())
-		// {
-		// 	if (this->api_->sendQueryPrepared(conn,
-		// 	                                query_.query().c_str(),
-		// 	                                query_params.parameter_count(),
-		// 	                                nullptr,
-		// 	                                query_params.parameter_values(),
-		// 	                                nullptr,
-		// 	                                nullptr,
-		// 	                                0) != 1)
-		// 	{
-		// 		return this->fail("sendQueryPrepared", *conn);
-		// 	}
-
-		// 	return this->flush();
-		// }
+			return this->flush();
+		}
 	}
 };
 
@@ -420,18 +452,19 @@ void async_backend::prepare(ipq_api*                            api,
                             std::string_view                    query,
                             async_prepare_completion_handler    handler)
 {
-	return std::make_shared<async_prepare_operation>(api, std::move(connection), io, std::move(handler))->run(std::move(query));
+	return std::make_shared<async_prepare_operation>(api, std::move(connection), io, std::move(query), std::move(handler))->run();
 }
 
 void async_backend::exec_prepared(ipq_api*                                                               api,
                                   std::shared_ptr<backend_connection>                                    connection,
                                   boost::asio::io_context&                                               io,
+                                  const postgresql_query&                                                query,
                                   std::string_view                                                       stmt_name,
                                   std::initializer_list<std::pair<std::string_view, parameter_by_value>> params,
                                   async_exec_completion_handler                                          handler)
 {
 	return std::make_shared<async_exec_prepared_operation>(api, std::move(connection), io, std::move(handler))
-	    ->run(std::move(stmt_name), std::move(params));
+	    ->run(query, std::move(stmt_name), std::move(params));
 }
 
 } // namespace postgresql

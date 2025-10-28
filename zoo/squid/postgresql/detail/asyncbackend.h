@@ -12,6 +12,7 @@
 #include "zoo/squid/postgresql/asyncprepare.h"
 #include "zoo/squid/postgresql/backendconnection.h"
 #include "zoo/squid/postgresql/detail/ipqapi.h"
+#include "zoo/squid/postgresql/detail/query.h"
 #include "zoo/squid/core/parameter.h"
 
 #include <boost/asio/io_context.hpp>
@@ -44,6 +45,7 @@ public:
 	static void exec_prepared(ipq_api*                                                               api,
 	                          std::shared_ptr<backend_connection>                                    connection,
 	                          boost::asio::io_context&                                               io,
+	                          const postgresql_query&                                                query,
 	                          std::string_view                                                       stmt_name,
 	                          std::initializer_list<std::pair<std::string_view, parameter_by_value>> params,
 	                          async_exec_completion_handler                                          handler);

@@ -25,6 +25,7 @@ namespace postgresql {
 
 class ipq_api;
 class async_backend;
+class postgresql_query;
 
 class ZOO_SQUID_POSTGRESQL_API backend_connection final : public ibackend_connection,
                                                           public std::enable_shared_from_this<backend_connection>
@@ -51,6 +52,7 @@ public:
 	                    async_exec_completion_handler                                          handler);
 	void run_async_prepare(boost::asio::io_context& io, std::string_view query, async_prepare_completion_handler handler);
 	void run_async_exec_prepared(boost::asio::io_context&                                               io,
+	                             const postgresql_query&                                                query,
 	                             std::string_view                                                       stmt_name,
 	                             std::initializer_list<std::pair<std::string_view, parameter_by_value>> params,
 	                             async_exec_completion_handler                                          handler);

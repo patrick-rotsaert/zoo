@@ -11,6 +11,8 @@
 
 #include <boost/asio/io_context.hpp>
 
+#include <spdlog/spdlog.h>
+
 #include <stdexcept>
 #include <iostream>
 #include <iomanip>
@@ -63,8 +65,11 @@ void async_prepare_demo(postgresql::connection& connection)
 		}
 		else
 		{
-			auto& prepared = std::get<postgresql::async_prepared_statement>(result);
-			prepared.async_exec({ { "one", 1 }, { "pi", 3.141592 } }, [](postgresql::async_exec_result result) {
+			auto prepared = std::get<std::shared_ptr<postgresql::async_prepared_statement>>(result);
+			prepared->async_exec({ { "one", 1 }, { "pi", 3.141592 } }, [prepared](postgresql::async_exec_result result) {
+				// The prepared statement must not be deleted before the handler returns, that's what the capture is for.
+				(void)prepared;
+
 				if (std::holds_alternative<postgresql::async_error>(result))
 				{
 					const auto& err = std::get<postgresql::async_error>(result);
@@ -111,6 +116,9 @@ void demo()
 
 int main()
 {
+	// spdlog::set_level(spdlog::level::trace);
+	// spdlog::set_pattern("%L [%Y-%m-%d %H:%M:%S.%f](%t) %^%v%$ [%s:%#]");
+
 	try
 	{
 		zoo::squid::demo::demo();

@@ -12,12 +12,13 @@
 
 #include <functional>
 #include <variant>
+#include <memory>
 
 namespace zoo {
 namespace squid {
 namespace postgresql {
 
-using async_prepare_result             = std::variant<async_prepared_statement, async_error>;
+using async_prepare_result             = std::variant<std::shared_ptr<async_prepared_statement>, async_error>;
 using async_prepare_completion_handler = std::function<void(async_prepare_result)>;
 
 } // namespace postgresql

@@ -23,18 +23,21 @@ namespace squid {
 namespace postgresql {
 
 class backend_connection;
+class postgresql_query;
 
 class async_prepared_statement final
 {
 	ipq_api*                            api_;
 	std::shared_ptr<backend_connection> connection_;
 	boost::asio::io_context*            io_;
+	std::unique_ptr<postgresql_query>   query_;
 	std::string                         stmt_name_;
 
 public:
 	explicit async_prepared_statement(ipq_api*                            api,
 	                                  std::shared_ptr<backend_connection> connection,
 	                                  boost::asio::io_context&            io,
+	                                  std::unique_ptr<postgresql_query>   query,
 	                                  std::string                         stmt_name);
 	~async_prepared_statement();
 
