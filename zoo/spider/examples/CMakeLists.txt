@@ -8,3 +8,4 @@
 add_subdirectory(example_server)
 add_subdirectory(example_dispatcher)
 add_subdirectory(example_controller)
+add_subdirectory(example_controller2)

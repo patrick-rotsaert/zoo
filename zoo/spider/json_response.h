@@ -10,6 +10,7 @@
 #include "zoo/spider/config.h"
 #include "zoo/spider/aliases.h"
 #include "zoo/spider/message.h"
+#include "zoo/spider/concepts.hpp"
 
 #include <boost/json.hpp>
 
@@ -17,12 +18,6 @@
 
 namespace zoo {
 namespace spider {
-
-// FIXME: this should use a type trait like is_tag_invoked or similar,
-// but I did not yet find a way to do it.
-// Settle for is_described_class now.
-template<typename T>
-concept ConvertibleToBoostJson = boost::json::is_described_class<T>::value;
 
 class ZOO_SPIDER_API json_response final
 {

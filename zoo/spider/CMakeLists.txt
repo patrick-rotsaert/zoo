@@ -12,6 +12,9 @@ add_zoo_library(spider
 		http_session.h
 		irequest_handler.cpp
 		request_router.cpp
+		request_router2.cpp
+		path.cpp
+		pathspec.cpp
 		json_response.cpp
 		file_response.cpp
 		error_response.cpp
@@ -21,6 +24,9 @@ add_zoo_library(spider
 		ifile_event_listener.cpp
 		noop_file_event_listener.cpp
 		controller.cpp
+		controller2.cpp
+		conversions.cpp
+		openapi.cpp
 		log_response.cpp
 		exception.cpp
 		exception.h
@@ -34,6 +40,9 @@ add_zoo_library(spider
 		listener.h
 		irequest_handler.h
 		request_router.h
+		request_router2.h
+		path.h
+		pathspec.h
 		json_response.h
 		file_response.h
 		error_response.h
@@ -43,6 +52,11 @@ add_zoo_library(spider
 		noop_file_event_listener.h
 		dispatcher.hpp
 		controller.hpp
+		controller2.hpp
+		handler.hpp
+		conversions.h
+		parameters.h
+		openapi.h
 		log_response.h
 		tag_invoke/time_point.h
 		tag_invoke/date.h
@@ -50,6 +64,8 @@ add_zoo_library(spider
 		apilinktest.h
 	MSVC_PRIVATE_COMPILER_OPTIONS
 		/wd4702 # for boost\beast\core\impl\buffers_cat.hpp(186): warning C4702: unreachable code
+	UNIT_TEST_SOURCES
+		test/unit/test_pathspec.cpp
 	PUBLIC_LIBRARIES
 		zoo::common
 		Boost::system

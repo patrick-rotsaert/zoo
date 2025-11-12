@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <boost/optional/optional.hpp>
+
 #include <type_traits>
 #include <optional>
 
@@ -19,6 +21,11 @@ struct is_optional final : std::false_type
 
 template<typename T>
 struct is_optional<std::optional<T>> final : std::true_type
+{
+};
+
+template<typename T>
+struct is_optional<boost::optional<T>> final : std::true_type
 {
 };
 

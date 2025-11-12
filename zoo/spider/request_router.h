@@ -10,6 +10,7 @@
 #include "zoo/spider/config.h"
 #include "zoo/spider/irequest_handler.h"
 #include "zoo/spider/aliases.h"
+#include "zoo/spider/concepts.hpp"
 
 #include <boost/beast/http/message_generator.hpp>
 #include <boost/url/url_view.hpp>
@@ -24,12 +25,6 @@
 
 namespace zoo {
 namespace spider {
-
-// FIXME: this should use a type trait like is_tag_invoked or similar,
-// but I did not yet find a way to do it.
-// Settle for is_described_class now.
-template<typename T>
-concept ConvertibleFromBoostJson = boost::json::is_described_class<T>::value;
 
 class ZOO_SPIDER_API request_router final : public irequest_handler
 {
@@ -53,7 +48,7 @@ public:
 	request_router(request_router&&);
 	request_router& operator=(request_router&&);
 
-	request_router(const request_router&) = delete;
+	request_router(const request_router&)            = delete;
 	request_router& operator=(const request_router&) = delete;
 
 	void add_route(std::set<verb>&& methods, boost::regex&& pattern, request_handler&& handler);
