@@ -28,19 +28,22 @@
 
 #include <thread>
 
+namespace myns {
+
 using namespace zoo::spider;
 using namespace fmt::literals;
 
+BOOST_DEFINE_ENUM_CLASS(Status, available, sold, cancelled)
+
 struct customer final
 {
-	std::uint64_t id;
-	std::string   name;
+	std::uint64_t       id;
+	std::string         name;
+	std::vector<Status> statuses{};
 };
 
 // Note: structs must be described at namespace scope.
-BOOST_DESCRIBE_STRUCT(customer, (), (id, name))
-
-BOOST_DEFINE_ENUM_CLASS(Status, available, sold, cancelled)
+BOOST_DESCRIBE_STRUCT(customer, (), (id, name, statuses))
 
 /// Error handling
 
@@ -116,7 +119,7 @@ class api_controller final : public controller2
 		{
 			ZOO_THROW_EXCEPTION(exception{} << exception::mesg{ "Bad API key" } << exception::status{ status::unauthorized });
 		}
-		return { customer{ 42, "The Customer Inc" } };
+		return { customer{ 42, "The Customer Inc", { Status::available, Status::cancelled } } };
 	}
 
 	auto get_customer(std::uint64_t                       id,
@@ -222,16 +225,14 @@ public:
 	}
 };
 
+} // namespace myns
+
 int main(int argc, char* argv[])
 {
-	if (argc == 1)
-	{
-		std::cout << api_controller{}.open_api() << '\n';
-		return 0;
-	}
+	using namespace myns;
 
 	// Check command line arguments.
-	if (argc != 4)
+	if (argc != 4 && argc != 1)
 	{
 		fmt::print(stderr,
 		           "Usage: {prog} <address> <port> threads>\n"
@@ -240,12 +241,19 @@ int main(int argc, char* argv[])
 		           "prog"_a = argv[0]);
 		return EXIT_FAILURE;
 	}
-	auto const address = argv[1];
-	auto const port    = static_cast<std::uint16_t>(std::atoi(argv[2]));
-	auto const threads = std::max<int>(1, std::atoi(argv[3]));
 
 	spdlog::set_level(spdlog::level::trace);
 	spdlog::set_pattern("%L [%Y-%m-%d %H:%M:%S.%f Δt=%iμs](%t) %^%v%$ [%s:%#]");
+
+	if (argc == 1)
+	{
+		std::cout << api_controller{}.open_api() << '\n';
+		return 0;
+	}
+
+	auto const address = argv[1];
+	auto const port    = static_cast<std::uint16_t>(std::atoi(argv[2]));
+	auto const threads = std::max<int>(1, std::atoi(argv[3]));
 
 	zlog(info, "application started");
 

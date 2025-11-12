@@ -9,9 +9,12 @@
 
 #include "zoo/spider/handler.hpp"
 #include "zoo/common/misc/is_optional.hpp"
+#include "zoo/common/misc/is_vector.hpp"
+#include "zoo/common/logging/logging.h"
 
 #include <boost/json.hpp>
 #include <boost/json/conversion.hpp>
+#include <boost/describe.hpp>
 #include <boost/mp11.hpp>
 
 #include <tuple>
@@ -60,24 +63,27 @@ public:
 						        param["name"]     = arg.name;
 						        param["in"]       = "path";
 						        param["required"] = true;
-						        param["schema"]   = parameter_schema<ArgType>();
+						        param["schema"]   = value_schema<ArgType>();
 					        }
 					        else if constexpr (std::is_same_v<P, p::query>)
 					        {
 						        param["name"]     = arg.name;
 						        param["in"]       = "query";
 						        param["required"] = !is_optional_v<ArgType>;
-						        param["schema"]   = parameter_schema<ArgType>();
+						        param["schema"]   = value_schema<ArgType>();
 					        }
 					        else if constexpr (std::is_same_v<P, p::header>)
 					        {
 						        param["name"]     = arg.name;
 						        param["in"]       = "header";
 						        param["required"] = !is_optional_v<ArgType>;
-						        param["schema"]   = parameter_schema<ArgType>();
+						        param["schema"]   = value_schema<ArgType>();
 					        }
 					        else if constexpr (std::is_same_v<P, p::json>)
 					        {
+						        operation["requestBody"] = { { "required", true },
+							                                 { "content",
+							                                   { { "application/json", { { "schema", value_schema<ArgType>() } } } } } };
 					        }
 					        else if constexpr (std::is_same_v<P, p::request>)
 					        {
@@ -123,89 +129,170 @@ private:
 		return v.is_array() ? v.as_array() : v.emplace_array();
 	}
 
-	template<typename ArgType>
-	std::enable_if_t<is_optional_v<ArgType>, boost::json::object> parameter_schema()
+	template<typename T>
+	std::enable_if_t<is_optional_v<T>, boost::json::object> value_schema()
 	{
-		return parameter_schema<typename ArgType::value_type>();
+		return value_schema<typename T::value_type>();
 	}
 
-	template<typename ArgType>
-	std::enable_if_t<!is_optional_v<ArgType>, boost::json::object> parameter_schema()
+	template<typename T>
+	std::enable_if_t<!is_optional_v<T>, boost::json::object> value_schema()
 	{
 		boost::json::object schema;
 
-		if constexpr (std::is_same_v<ArgType, std::string>)
+		// schema["__type__"] = demangled_type_name<T>(); //@@
+
+		if constexpr (std::is_same_v<T, std::string>)
 		{
 			schema["type"] = "string";
 		}
-		else if constexpr (std::is_same_v<ArgType, bool>)
+		else if constexpr (std::is_same_v<T, bool>)
 		{
 			schema["type"] = "boolean";
 		}
-		else if constexpr (std::is_same_v<ArgType, uint8_t> || std::is_same_v<ArgType, int8_t> || std::is_same_v<ArgType, uint16_t> ||
-		                   std::is_same_v<ArgType, int16_t>)
+		else if constexpr (std::is_same_v<T, uint8_t> || std::is_same_v<T, int8_t> || std::is_same_v<T, uint16_t> ||
+		                   std::is_same_v<T, int16_t>)
 		{
 			schema["type"]    = "integer";
 			schema["format"]  = "int32";
-			schema["minimum"] = std::numeric_limits<ArgType>::min();
-			schema["maximum"] = std::numeric_limits<ArgType>::max();
+			schema["minimum"] = std::numeric_limits<T>::min();
+			schema["maximum"] = std::numeric_limits<T>::max();
 		}
-		else if constexpr (std::is_same_v<ArgType, uint32_t>)
+		else if constexpr (std::is_same_v<T, uint32_t>)
 		{
 			schema["type"]    = "integer";
 			schema["format"]  = "int64";
-			schema["minimum"] = std::numeric_limits<ArgType>::min();
-			schema["maximum"] = std::numeric_limits<ArgType>::max();
+			schema["minimum"] = std::numeric_limits<T>::min();
+			schema["maximum"] = std::numeric_limits<T>::max();
 		}
-		else if constexpr (std::is_same_v<ArgType, int32_t>)
+		else if constexpr (std::is_same_v<T, int32_t>)
 		{
 			schema["type"]   = "integer";
 			schema["format"] = "int32";
 		}
-		else if constexpr (std::is_same_v<ArgType, uint64_t>)
+		else if constexpr (std::is_same_v<T, uint64_t>)
 		{
 			schema["type"]    = "integer";
 			schema["format"]  = "int64";
 			schema["minimum"] = 0;
 		}
-		else if constexpr (std::is_same_v<ArgType, int64_t>)
+		else if constexpr (std::is_same_v<T, int64_t>)
 		{
 			schema["type"]   = "integer";
 			schema["format"] = "int64";
 		}
-		else if constexpr (std::is_same_v<ArgType, float>)
+		else if constexpr (std::is_same_v<T, float>)
 		{
 			schema["type"]   = "number";
 			schema["format"] = "float";
 		}
-		else if constexpr (std::is_same_v<ArgType, double> || std::is_same_v<ArgType, long double>)
+		else if constexpr (std::is_same_v<T, double> || std::is_same_v<T, long double>)
 		{
 			schema["type"]   = "number";
 			schema["format"] = "double";
 		}
-		else if constexpr (std::is_same_v<ArgType, boost::gregorian::date> || std::is_same_v<ArgType, conversion::date>)
+		else if constexpr (std::is_same_v<T, boost::gregorian::date> || std::is_same_v<T, conversion::date>)
 		{
 			schema["type"]   = "string";
 			schema["format"] = "date";
 		}
-		else if constexpr (std::is_same_v<ArgType, boost::posix_time::time_duration> || std::is_same_v<ArgType, conversion::time_of_day>)
+		else if constexpr (std::is_same_v<T, boost::posix_time::time_duration> || std::is_same_v<T, conversion::time_of_day>)
 		{
 			schema["type"]   = "string";
 			schema["format"] = "time";
 		}
-		else if constexpr (std::is_same_v<ArgType, boost::posix_time::ptime> || std::is_same_v<ArgType, conversion::time_point>)
+		else if constexpr (std::is_same_v<T, boost::posix_time::ptime> || std::is_same_v<T, conversion::time_point>)
 		{
 			schema["type"]   = "string";
 			schema["format"] = "date-time";
 		}
-		else if constexpr (std::is_enum_v<ArgType> && boost::json::is_described_enum<ArgType>::value)
+		else if constexpr (std::is_enum_v<T> && boost::json::is_described_enum<T>::value)
 		{
-			schema["type"] = "string";
-			auto& e        = schema["enum"].emplace_array();
-			boost::mp11::mp_for_each<boost::describe::describe_enumerators<ArgType>>([&](auto D) { e.emplace_back(D.name); });
+			schema["$ref"] = add_components_schema<T>();
 		}
+		else if constexpr (is_vector_v<T>)
+		{
+			schema["type"]  = "array";
+			schema["items"] = value_schema<typename T::value_type>();
+		}
+		else if constexpr (boost::json::is_described_class<T>::value)
+		{
+			schema["$ref"] = add_components_schema<T>();
+		}
+		// else
+		// {
+		// 	schema["__unknown__"] = true; //@@
+		// }
 
 		return schema;
+	}
+
+	template<typename T>
+	std::enable_if_t<std::is_enum_v<T> && boost::json::is_described_enum<T>::value, std::string> add_components_schema()
+	{
+		const auto type_name = get_type_name<T>();
+
+		auto& schema = upsert_component_schema(type_name);
+
+		schema["type"] = "string";
+		auto& e        = schema["enum"].emplace_array();
+		boost::mp11::mp_for_each<boost::describe::describe_enumerators<T>>([&](auto D) { e.emplace_back(D.name); });
+
+		return component_schema_ref(type_name);
+	}
+
+	template<typename T>
+	std::enable_if_t<boost::json::is_described_class<T>::value && boost::describe::has_describe_members<T>::value, std::string>
+	add_components_schema()
+	{
+		const auto type_name = get_type_name<T>();
+
+		auto& schema = upsert_component_schema(type_name);
+
+		schema["type"] = "object";
+
+		boost::json::array  required;
+		boost::json::object properties;
+
+		boost::mp11::mp_for_each<boost::describe::describe_members<T, boost::describe::mod_any_access>>([&](auto D) {
+			T* helper{};
+			using U = std::decay_t<decltype(helper->*D.pointer)>;
+			if constexpr (!is_optional_v<U>)
+			{
+				required.emplace_back(D.name);
+			}
+			properties[D.name] = value_schema<U>();
+		});
+
+		if (!required.empty())
+		{
+			schema["required"] = std::move(required);
+		}
+
+		if (!properties.empty())
+		{
+			schema["properties"] = std::move(properties);
+		}
+
+		return component_schema_ref(type_name);
+	}
+
+	boost::json::object& upsert_component_schema(std::string_view type_name)
+	{
+		auto& components = ensure_object(spec_["components"]);
+		auto& schemas    = ensure_object(components["schemas"]);
+		return schemas[type_name].emplace_object();
+	}
+
+	static std::string component_schema_ref(std::string_view type_name)
+	{
+		return fmt::format("#/components/schemas/{}", type_name);
+	}
+
+	template<typename T>
+	std::string get_type_name()
+	{
+		return demangled_type_name<T>(); //@@ FIXME: strip leading namespaces?
 	}
 
 	boost::json::object spec_;
