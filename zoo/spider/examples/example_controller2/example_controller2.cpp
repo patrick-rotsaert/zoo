@@ -35,7 +35,7 @@ using namespace fmt::literals;
 
 BOOST_DEFINE_ENUM_CLASS(Status, available, sold, cancelled)
 
-struct customer final
+struct Customer final
 {
 	std::uint64_t       id;
 	std::string         name;
@@ -43,49 +43,41 @@ struct customer final
 };
 
 // Note: structs must be described at namespace scope.
-BOOST_DESCRIBE_STRUCT(customer, (), (id, name, statuses))
+BOOST_DESCRIBE_STRUCT(Customer, (), (id, name, statuses))
 
 /// Error handling
 
-struct error final
+struct Error final
 {
-	struct source_location final
+	struct SourceLocation final
 	{
 		std::optional<std::string_view> file;
 		std::optional<std::string_view> function;
 		std::optional<int>              line;
 	};
 
-	std::string                    message;
-	std::optional<int>             error_code;
-	std::optional<source_location> location;
-};
+	std::string                   message;
+	std::optional<int>            error_code;
+	std::optional<SourceLocation> location;
 
-// Note: structs must be described at namespace scope.
-BOOST_DESCRIBE_STRUCT(error, (), (message, error_code, location))
-BOOST_DESCRIBE_STRUCT(error::source_location, (), (file, function, line))
-
-class api_exception_handler final : public controller2::exception_handler_base
-{
-	response handle(const std::exception& e, const request& req) override
+	static Error create(const std::exception& e)
 	{
-		//zlog(err, "{}", boost::diagnostic_information(e)); // very noisy
-		zlog(err, "{}", e.what());
+		auto err = Error{};
 
-		auto err = error{ e.what() };
+		err.status_ = status::internal_server_error;
+		if (const auto x = boost::get_error_info<ex_status>(e))
+		{
+			err.status_ = *x;
+		}
+
+		err.message = e.what();
 
 		if (const auto x = boost::get_error_info<ex_code>(e))
 		{
 			err.error_code = *x;
 		}
 
-		auto status = status::internal_server_error;
-		if (const auto x = boost::get_error_info<ex_status>(e))
-		{
-			status = *x;
-		}
-
-		auto loc = error::source_location{};
+		auto loc = Error::SourceLocation{};
 		if (const auto x = boost::get_error_info<boost::throw_file>(e))
 		{
 			loc.file = *x;
@@ -103,23 +95,37 @@ class api_exception_handler final : public controller2::exception_handler_base
 			err.location = std::move(loc);
 		}
 
-		return json_response::create(req, status, err);
+		return err;
 	}
+
+	http::status status() const noexcept
+	{
+		return status_;
+	}
+
+private:
+	http::status status_;
 };
 
-class api_controller final : public controller2
+// Note: structs must be described at namespace scope.
+BOOST_DESCRIBE_STRUCT(Error, (), (message, error_code, location))
+BOOST_DESCRIBE_STRUCT(Error::SourceLocation, (), (file, function, line))
+
+static_assert(IsValidErrorType<Error>, "Not a valid error type");
+
+class api_controller final : public controller2<Error>
 {
 	struct exception : public exception_base
 	{
 	};
 
-	std::vector<customer> list_customers(std::string api_key)
+	std::vector<Customer> list_customers(std::string api_key)
 	{
 		if (api_key != "the_api_key")
 		{
 			ZOO_THROW_EXCEPTION(exception{} << exception::mesg{ "Bad API key" } << exception::status{ status::unauthorized });
 		}
-		return { customer{ 42, "The Customer Inc", { Status::available, Status::cancelled } } };
+		return { Customer{ 42, "The Customer Inc", { Status::available, Status::cancelled } } };
 	}
 
 	auto get_customer(std::uint64_t                       id,
@@ -137,10 +143,10 @@ class api_controller final : public controller2
 		{
 			ZOO_THROW_EXCEPTION(exception{} << exception::mesg{ "Bad API key" } << exception::status{ status::unauthorized });
 		}
-		return customer{ id, "The Customer Inc" };
+		return Customer{ id, "The Customer Inc" };
 	}
 
-	auto post_customer(const customer& c, const url_view& url, int16_t)
+	auto post_customer(const Customer& c, const url_view& url, int16_t)
 	{
 		zlog(debug, "api post customer {}, number of query parameters={}", c.id, url.params().size());
 		return c;
@@ -160,67 +166,61 @@ class api_controller final : public controller2
 
 public:
 	explicit api_controller(const std::shared_ptr<request_router2>& router = std::make_shared<request_router2>())
-	    : controller2{ router }
+	    : controller2{ router, openapi_settings{ .strip_ns = "myns::", .info_title = "Demo API", .info_version = "1.0" } }
 	{
 		using p = controller2::p;
 
-		this->add_operation(
-		    verb::get,                               // HTTP method
-		    path_spec{ "api" } / "v1" / "customers", // Path spec
-		    &api_controller::list_customers,         // Callback
-		    // Descriptors for the callback arguments.
-		    // There must be a descriptor for each argument and they must be passed in the same order as the callback arguments.
-		    p::header{ "x-api-key" } // Header parameters refer to the header name, e.g. `X-Api-Key: abc12345`
-		                             //                                                   ~~~~~~~~~
+		add_operation(verb::get,                               // HTTP method
+		              path_spec{ "api" } / "v1" / "customers", // Path spec
+		              &api_controller::list_customers,         // Callback
+		              // Descriptors for the callback arguments.
+		              // There must be a descriptor for each argument and they must be passed in the same order as the callback arguments.
+		              p::header{ "x-api-key" } // Header parameters refer to the header name, e.g. `X-Api-Key: abc12345`
+		                                       //                                                   ~~~~~~~~~
 		);
 
-		this->add_operation(
-		    verb::get,                                        // HTTP method
-		    path_spec{ "api" } / "v1" / "customers" / "{id}", // Path spec
-		    &api_controller::get_customer,                    // Callback
-		    // Descriptors for the callback arguments.
-		    // There must be a descriptor for each argument and they must be passed in the same order as the callback arguments.
-		    p::path{ "id" },          // Path parameters refer to a named sub-expression path spec, i.e. `{id}`
-		                              //                                                                   ~~
-		    p::query{ "serial" },     // Query parameters refer to the key name, e.g. http://localhost/api/customer/123?serial=123abc
-		                              //                                                                                ~~~~~~
-		    p::header{ "x-api-key" }, // Header parameters refer to the header name, e.g. `X-Api-Key: abc12345`
-		                              //                                                   ~~~~~~~~~
-		    p::query{ "status" },
-		    p::request{} // Request parameter (const request&)
+		add_operation(verb::get,                                        // HTTP method
+		              path_spec{ "api" } / "v1" / "customers" / "{id}", // Path spec
+		              &api_controller::get_customer,                    // Callback
+		              // Descriptors for the callback arguments.
+		              // There must be a descriptor for each argument and they must be passed in the same order as the callback arguments.
+		              p::path{ "id" },      // Path parameters refer to a named sub-expression path spec, i.e. `{id}`
+		                                    //                                                                   ~~
+		              p::query{ "serial" }, // Query parameters refer to the key name, e.g. http://localhost/api/customer/123?serial=123abc
+		                                    //                                                                                ~~~~~~
+		              p::header{ "x-api-key" }, // Header parameters refer to the header name, e.g. `X-Api-Key: abc12345`
+		                                        //                                                   ~~~~~~~~~
+		              p::query{ "status" },
+		              p::request{} // Request parameter (const request&)
 		);
 
-		this->add_operation(
-		    verb::post,                              // HTTP method
-		    path_spec{ "api" } / "v1" / "customers", // Path spec
-		    &api_controller::post_customer,          // Callback
-		    // Descriptors for the callback arguments.
-		    // There must be a descriptor for each argument and they must be passed in the same order as the callback arguments.
-		    p::json{ "customer" }, // Json parameters are deserialized from the request payload.
-		                           // The name ("customer") is used only in logging in case deserialization fails.
-		    p::url{},              // Url parameter (const url_view&)
-		    p::query{ "u" });
+		add_operation(verb::post,                              // HTTP method
+		              path_spec{ "api" } / "v1" / "customers", // Path spec
+		              &api_controller::post_customer,          // Callback
+		              // Descriptors for the callback arguments.
+		              // There must be a descriptor for each argument and they must be passed in the same order as the callback arguments.
+		              p::json{ "customer" }, // Json parameters are deserialized from the request payload.
+		                                     // The name ("customer") is used only in logging in case deserialization fails.
+		              p::url{},              // Url parameter (const url_view&)
+		              p::query{ "u" });
 
-		this->add_operation(
-		    verb::get,                          // HTTP method
-		    path_spec{ "api" } / "v1" / "fail", // Path spec
-		    &api_controller::fail,              // Callback
-		    // Descriptors for the callback arguments.
-		    // There must be a descriptor for each argument and they must be passed in the same order as the callback arguments.
-		    p::request{} // Request parameter (const request&)
+		add_operation(verb::get,                          // HTTP method
+		              path_spec{ "api" } / "v1" / "fail", // Path spec
+		              &api_controller::fail,              // Callback
+		              // Descriptors for the callback arguments.
+		              // There must be a descriptor for each argument and they must be passed in the same order as the callback arguments.
+		              p::request{} // Request parameter (const request&)
 		);
 
-		this->add_operation(verb::get,                          // HTTP method
-		                    path_spec{ "api" } / "v1" / "noop", // Path spec
-		                    &api_controller::noop               // Callback
-		);                                                      // No descriptors because callback does not take any arguments.
-
-		this->exception_handler(std::make_shared<api_exception_handler>());
+		add_operation(verb::get,                          // HTTP method
+		              path_spec{ "api" } / "v1" / "noop", // Path spec
+		              &api_controller::noop               // Callback
+		);                                                // No descriptors because callback does not take any arguments.
 	}
 
 	std::string open_api() const
 	{
-		const auto jv = this->openapi_spec();
+		const auto jv = openapi_spec();
 		return boost::json::serialize(jv);
 	}
 };

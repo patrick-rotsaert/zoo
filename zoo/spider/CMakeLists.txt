@@ -24,9 +24,7 @@ add_zoo_library(spider
 		ifile_event_listener.cpp
 		noop_file_event_listener.cpp
 		controller.cpp
-		controller2.cpp
 		conversions.cpp
-		openapi.cpp
 		log_response.cpp
 		exception.cpp
 		exception.h

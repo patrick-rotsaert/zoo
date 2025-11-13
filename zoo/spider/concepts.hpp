@@ -8,10 +8,12 @@
 #pragma once
 
 #include "zoo/spider/tag_invoke/optional.hpp"
+#include "zoo/spider/aliases.h"
 
 #include <boost/json.hpp>
 #include <type_traits>
 #include <concepts>
+#include <stdexcept>
 
 namespace zoo {
 namespace spider {
@@ -38,6 +40,14 @@ template<typename T>
 concept ConvertibleFromBoostJson = !std::is_abstract_v<T> && (requires(const boost::json::value& jv) {
 	{ tag_invoke(boost::json::value_to_tag<std::remove_cvref_t<T>>{}, jv) } -> std::same_as<std::remove_cvref_t<T>>;
 } || boost::json::is_described_class<T>::value);
+
+template<typename T>
+concept IsValidErrorType = std::is_class_v<T> && boost::json::is_described_class<T>::value && requires(const std::exception& e) {
+	{ T::create(e) } -> std::same_as<T>;
+} && requires(const T& t) {
+	{ t.status() } -> std::same_as<http::status>;
+	{ t.status() } noexcept;
+};
 
 } // namespace spider
 } // namespace zoo

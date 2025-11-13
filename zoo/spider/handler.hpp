@@ -61,7 +61,7 @@ public:
 			ZOO_THROW_EXCEPTION(std::invalid_argument{ "Callback must be provided by a class derived from controller" });
 		}
 
-		this->callback_ = [controller, method](Args... args) { return (controller->*method)(args...); };
+		callback_ = [controller, method](Args... args) { return (controller->*method)(args...); };
 
 		validate_descriptors(std::make_index_sequence<N>());
 	}
@@ -75,8 +75,7 @@ public:
 		catch (const argument_error& e)
 		{
 			// The type `argument_error` is private, so we're sure that the throw site is in the arguments collection.
-			// All other exception types will not be catched.
-			// Set the http status in the exception
+			// Set the appropriate http status in the exception.
 			e << ex_status{ status::bad_request };
 			throw;
 		}
@@ -97,7 +96,7 @@ private:
 	template<std::size_t... I>
 	void validate_descriptors(std::index_sequence<I...>)
 	{
-		((validate_descriptor<typename std::tuple_element_t<I, ArgsTuple>>(this->descriptors_[I])), ...);
+		((validate_descriptor<typename std::tuple_element_t<I, ArgsTuple>>(descriptors_[I])), ...);
 	}
 
 	template<typename T>
@@ -144,18 +143,18 @@ private:
 	template<typename ArgsTuple>
 	ResultType invoke(ArgsTuple&& args)
 	{
-		return std::apply(this->callback_, std::forward<ArgsTuple>(args));
+		return std::apply(callback_, std::forward<ArgsTuple>(args));
 	}
 
 	template<std::size_t... I>
 	ArgsTuple collect_arguments(const parameter_sources& sources, std::index_sequence<I...>)
 	{
 		return std::make_tuple(collect_argument<typename std::tuple_element_t<I, ArgsTuple>>(
-		    sources, this->descriptors_[I], static_cast<typename std::tuple_element_t<I, ArgsTuple>*>(0))...);
+		    sources, descriptors_[I], static_cast<typename std::tuple_element_t<I, ArgsTuple>*>(0))...);
 	}
 
 	template<typename T>
-	std::enable_if_t<!std::is_pointer_v<T>, T>
+	static std::enable_if_t<!std::is_pointer_v<T>, T>
 	collect_argument(const parameter_sources& sources, const parameters::descriptor& descriptor, const T* const tag)
 	{
 		return std::visit(
@@ -201,7 +200,7 @@ private:
 	}
 
 	template<typename T>
-	T collect_path_argument(const parameter_sources& sources, const p::path& param, const T* const tag)
+	static T collect_path_argument(const parameter_sources& sources, const p::path& param, const T* const tag)
 	{
 		const auto it = sources.param.find(param.name);
 		if (it == sources.param.end())
@@ -213,7 +212,7 @@ private:
 	}
 
 	template<typename T>
-	T collect_query_argument(const parameter_sources& sources, const p::query& param, const T* const tag)
+	static T collect_query_argument(const parameter_sources& sources, const p::query& param, const T* const tag)
 	{
 		const auto it = sources.url.params().find(param.name);
 		if (it == sources.url.params().end())
@@ -228,7 +227,7 @@ private:
 	}
 
 	template<typename T>
-	T collect_header_argument(const parameter_sources& sources, const p::header& param, const T* const tag)
+	static T collect_header_argument(const parameter_sources& sources, const p::header& param, const T* const tag)
 	{
 		const auto it = sources.req.find(param.name);
 		if (it == sources.req.end())
@@ -243,7 +242,7 @@ private:
 	}
 
 	template<typename T>
-	T collect_string_argument(std::string_view name, std::string_view value, const T* const tag)
+	static T collect_string_argument(std::string_view name, std::string_view value, const T* const tag)
 	{
 		try
 		{

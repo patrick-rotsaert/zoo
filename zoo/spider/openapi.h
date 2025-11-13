@@ -8,6 +8,7 @@
 #pragma once
 
 #include "zoo/spider/handler.hpp"
+#include "zoo/spider/concepts.hpp"
 #include "zoo/common/misc/is_optional.hpp"
 #include "zoo/common/misc/is_vector.hpp"
 #include "zoo/common/logging/logging.h"
@@ -16,6 +17,8 @@
 #include <boost/json/conversion.hpp>
 #include <boost/describe.hpp>
 #include <boost/mp11.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
+#include <boost/algorithm/string/replace.hpp>
 
 #include <tuple>
 #include <array>
@@ -24,10 +27,33 @@
 namespace zoo {
 namespace spider {
 
+struct openapi_settings
+{
+	std::string_view strip_ns;
+	std::string_view info_title;
+	std::string_view info_version;
+};
+
+template<IsValidErrorType DefaultErrorType>
 class openapi final
 {
 public:
-	explicit openapi();
+	explicit openapi(openapi_settings settings)
+	    : settings_{ std::move(settings) }
+	    , spec_{}
+	    , default_response_ref_{}
+	{
+		using namespace boost::json;
+
+		spec_["openapi"] = "3.0.0";
+		spec_["info"]    = { { "title", settings_.info_title }, { "version", settings_.info_version } };
+
+		ensure_object(spec_["paths"]); // make sure paths appears before components
+
+		object default_response = { { "description", "An unexpected error response." },
+			                        { "content", { { "application/json", { { "schema", value_schema<DefaultErrorType>() } } } } } };
+		default_response_ref_   = add_components_response("default", default_response);
+	}
 
 	template<class Callback, typename... ArgDescriptors>
 	void add_operation(verb method, const path_spec& path, Callback callback, ArgDescriptors... descriptors)
@@ -40,93 +66,112 @@ public:
 
 		std::array<parameters::descriptor, sizeof...(descriptors)> parameter_descriptors = { parameters::descriptor{ descriptors }... };
 
-		auto& paths_object = ensure_object(spec_["paths"]);
-		auto& path_object  = ensure_object(paths_object[path.to_string()]);
-		auto& operation    = ensure_object(path_object[method_name(method)]);
-
-		array parameters;
-
-		[&]<std::size_t... I>(std::index_sequence<I...>) {
-			(
-			    [&]() {
-				    using ArgType          = typename std::tuple_element_t<I, ArgsTuple>;
-				    const auto& descriptor = parameter_descriptors[I];
-
-				    boost::json::object param;
-
-				    std::visit(
-				        [&](auto&& arg) {
-					        using p = parameters::p;
-					        using P = std::decay_t<decltype(arg)>;
-					        if constexpr (std::is_same_v<P, p::path>)
-					        {
-						        param["name"]     = arg.name;
-						        param["in"]       = "path";
-						        param["required"] = true;
-						        param["schema"]   = value_schema<ArgType>();
-					        }
-					        else if constexpr (std::is_same_v<P, p::query>)
-					        {
-						        param["name"]     = arg.name;
-						        param["in"]       = "query";
-						        param["required"] = !is_optional_v<ArgType>;
-						        param["schema"]   = value_schema<ArgType>();
-					        }
-					        else if constexpr (std::is_same_v<P, p::header>)
-					        {
-						        param["name"]     = arg.name;
-						        param["in"]       = "header";
-						        param["required"] = !is_optional_v<ArgType>;
-						        param["schema"]   = value_schema<ArgType>();
-					        }
-					        else if constexpr (std::is_same_v<P, p::json>)
-					        {
-						        operation["requestBody"] = { { "required", true },
-							                                 { "content",
-							                                   { { "application/json", { { "schema", value_schema<ArgType>() } } } } } };
-					        }
-					        else if constexpr (std::is_same_v<P, p::request>)
-					        {
-						        return;
-					        }
-					        else if constexpr (std::is_same_v<P, p::url>)
-					        {
-						        return;
-					        }
-					        else
-					        {
-						        static_assert(false, "non-exhaustive visitor!");
-					        }
-				        },
-				        descriptor);
-
-				    if (!param.empty())
-				    {
-					    parameters.emplace_back(std::move(param));
-				    }
-			    }(),
-			    ...);
-		}(std::make_index_sequence<Handler::N>());
-
-		if (!parameters.empty())
+		object operation;
 		{
-			operation["parameters"] = std::move(parameters);
+			array parameters;
+
+			[&]<std::size_t... I>(std::index_sequence<I...>) {
+				(
+				    [&]() {
+					    using ArgType          = typename std::tuple_element_t<I, ArgsTuple>;
+					    const auto& descriptor = parameter_descriptors[I];
+
+					    boost::json::object param;
+
+					    std::visit(
+					        [&](auto&& arg) {
+						        using p = parameters::p;
+						        using P = std::decay_t<decltype(arg)>;
+						        if constexpr (std::is_same_v<P, p::path>)
+						        {
+							        param["name"]     = arg.name;
+							        param["in"]       = "path";
+							        param["required"] = true;
+							        param["schema"]   = value_schema<ArgType>();
+						        }
+						        else if constexpr (std::is_same_v<P, p::query>)
+						        {
+							        param["name"]     = arg.name;
+							        param["in"]       = "query";
+							        param["required"] = !is_optional_v<ArgType>;
+							        param["schema"]   = value_schema<ArgType>();
+						        }
+						        else if constexpr (std::is_same_v<P, p::header>)
+						        {
+							        param["name"]     = arg.name;
+							        param["in"]       = "header";
+							        param["required"] = !is_optional_v<ArgType>;
+							        param["schema"]   = value_schema<ArgType>();
+						        }
+						        else if constexpr (std::is_same_v<P, p::json>)
+						        {
+							        operation["requestBody"] = {
+								        { "required", true },
+								        { "content", { { "application/json", { { "schema", value_schema<ArgType>() } } } } }
+							        };
+						        }
+						        else if constexpr (std::is_same_v<P, p::request>)
+						        {
+							        return;
+						        }
+						        else if constexpr (std::is_same_v<P, p::url>)
+						        {
+							        return;
+						        }
+						        else
+						        {
+							        static_assert(false, "non-exhaustive visitor!");
+						        }
+					        },
+					        descriptor);
+
+					    if (!param.empty())
+					    {
+						    parameters.emplace_back(std::move(param));
+					    }
+				    }(),
+				    ...);
+			}(std::make_index_sequence<Handler::N>());
+
+			if (!parameters.empty())
+			{
+				operation["parameters"] = std::move(parameters);
+			}
 		}
+
+		{
+			object responses;
+
+			responses["default"] = { { "$ref", default_response_ref_ } };
+
+			if (!responses.empty())
+			{
+				operation["responses"] = std::move(responses);
+			}
+		}
+
+		auto& paths_object               = ensure_object(spec_["paths"]);
+		auto& path_object                = ensure_object(paths_object["/" + path.to_string()]);
+		path_object[method_name(method)] = std::move(operation);
 	}
 
-	const boost::json::object& spec() const;
+	const boost::json::object& spec() const
+	{
+		return spec_;
+	}
 
 private:
-	static std::string method_name(verb method); //@@
-
-	static boost::json::object& ensure_object(boost::json::value& v)
+	static std::string method_name(verb method) //@@ TODO: move to utility class
 	{
-		return v.is_object() ? v.as_object() : v.emplace_object();
+		auto        sv = to_string(method);
+		std::string name{ sv.begin(), sv.end() };
+		boost::algorithm::to_lower(name);
+		return name;
 	}
 
-	static boost::json::array& ensure_array(boost::json::value& v)
+	static boost::json::object& ensure_object(boost::json::value& v) //@@ TODO: move to utility class
 	{
-		return v.is_array() ? v.as_array() : v.emplace_array();
+		return v.is_object() ? v.as_object() : v.emplace_object();
 	}
 
 	template<typename T>
@@ -142,7 +187,7 @@ private:
 
 		// schema["__type__"] = demangled_type_name<T>(); //@@
 
-		if constexpr (std::is_same_v<T, std::string>)
+		if constexpr (std::is_same_v<T, std::string> || std::is_same_v<T, std::string_view>)
 		{
 			schema["type"] = "string";
 		}
@@ -219,10 +264,11 @@ private:
 		{
 			schema["$ref"] = add_components_schema<T>();
 		}
-		// else
-		// {
-		// 	schema["__unknown__"] = true; //@@
-		// }
+		else
+		{
+			// schema["__unknown__"] = true; //@@
+			zlog(warn, "Unsupported type {}", demangled_type_name<T>());
+		}
 
 		return schema;
 	}
@@ -232,13 +278,18 @@ private:
 	{
 		const auto type_name = get_type_name<T>();
 
-		auto& schema = upsert_component_schema(type_name);
+		if (!components_schema_exists(type_name))
+		{
+			boost::json::object schema;
 
-		schema["type"] = "string";
-		auto& e        = schema["enum"].emplace_array();
-		boost::mp11::mp_for_each<boost::describe::describe_enumerators<T>>([&](auto D) { e.emplace_back(D.name); });
+			schema["type"] = "string";
+			auto& e        = schema["enum"].emplace_array();
+			boost::mp11::mp_for_each<boost::describe::describe_enumerators<T>>([&](auto D) { e.emplace_back(D.name); });
 
-		return component_schema_ref(type_name);
+			add_components_schema(type_name, std::move(schema));
+		}
+
+		return components_schema_ref(type_name);
 	}
 
 	template<typename T>
@@ -247,55 +298,109 @@ private:
 	{
 		const auto type_name = get_type_name<T>();
 
-		auto& schema = upsert_component_schema(type_name);
+		if (!components_schema_exists(type_name))
+		{
+			boost::json::object schema;
 
-		schema["type"] = "object";
+			schema["type"] = "object";
 
-		boost::json::array  required;
-		boost::json::object properties;
+			boost::json::object properties;
+			boost::json::array  required;
 
-		boost::mp11::mp_for_each<boost::describe::describe_members<T, boost::describe::mod_any_access>>([&](auto D) {
-			T* helper{};
-			using U = std::decay_t<decltype(helper->*D.pointer)>;
-			if constexpr (!is_optional_v<U>)
+			boost::mp11::mp_for_each<boost::describe::describe_members<T, boost::describe::mod_any_access>>([&](auto D) {
+				T* helper{};
+				using U = std::decay_t<decltype(helper->*D.pointer)>;
+				if constexpr (!is_optional_v<U>)
+				{
+					required.emplace_back(D.name);
+				}
+				properties[D.name] = value_schema<U>();
+			});
+
+			if (!properties.empty())
 			{
-				required.emplace_back(D.name);
+				schema["properties"] = std::move(properties);
 			}
-			properties[D.name] = value_schema<U>();
-		});
 
-		if (!required.empty())
-		{
-			schema["required"] = std::move(required);
+			if (!required.empty())
+			{
+				schema["required"] = std::move(required);
+			}
+
+			add_components_schema(type_name, std::move(schema));
 		}
 
-		if (!properties.empty())
-		{
-			schema["properties"] = std::move(properties);
-		}
-
-		return component_schema_ref(type_name);
+		return components_schema_ref(type_name);
 	}
 
-	boost::json::object& upsert_component_schema(std::string_view type_name)
+	void add_components_schema(std::string_view type_name, boost::json::object schema)
 	{
-		auto& components = ensure_object(spec_["components"]);
-		auto& schemas    = ensure_object(components["schemas"]);
-		return schemas[type_name].emplace_object();
+		auto& components   = ensure_object(spec_["components"]);
+		auto& schemas      = ensure_object(components["schemas"]);
+		schemas[type_name] = std::move(schema);
 	}
 
-	static std::string component_schema_ref(std::string_view type_name)
+	bool components_schema_exists(std::string_view type_name) const
+	{
+		if (spec_.contains("components"))
+		{
+			const auto& components = spec_.at("components").as_object();
+			if (components.contains("schemas"))
+			{
+				const auto& schemas = components.at("schemas").as_object();
+				return schemas.contains(type_name);
+			}
+		}
+		return false;
+	}
+
+	static std::string components_schema_ref(std::string_view type_name)
 	{
 		return fmt::format("#/components/schemas/{}", type_name);
+	}
+
+	std::string add_components_response(std::string_view type_name, boost::json::object response)
+	{
+		auto& components     = ensure_object(spec_["components"]);
+		auto& responses      = ensure_object(components["responses"]);
+		responses[type_name] = std::move(response);
+		return components_response_ref(type_name);
+	}
+
+	bool components_response_exists(std::string_view type_name) const
+	{
+		if (spec_.contains("components"))
+		{
+			const auto& components = spec_.at("components").as_object();
+			if (components.contains("responses"))
+			{
+				const auto& responses = components.at("responses").as_object();
+				return responses.contains(type_name);
+			}
+		}
+		return false;
+	}
+
+	static std::string components_response_ref(std::string_view type_name)
+	{
+		return fmt::format("#/components/responses/{}", type_name);
 	}
 
 	template<typename T>
 	std::string get_type_name()
 	{
-		return demangled_type_name<T>(); //@@ FIXME: strip leading namespaces?
+		auto type_name = demangled_type_name<T>();
+		if (!settings_.strip_ns.empty() && std::string_view{ type_name }.starts_with(settings_.strip_ns))
+		{
+			type_name = type_name.substr(settings_.strip_ns.length());
+		}
+		boost::algorithm::replace_all(type_name, "::", "_");
+		return type_name;
 	}
 
+	openapi_settings    settings_;
 	boost::json::object spec_;
+	std::string         default_response_ref_;
 };
 
 } // namespace spider
