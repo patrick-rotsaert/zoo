@@ -9,11 +9,13 @@
 
 #include "zoo/spider/tag_invoke/optional.hpp"
 #include "zoo/spider/aliases.h"
+#include "zoo/common/misc/byte_string.h"
 
 #include <boost/json.hpp>
 #include <type_traits>
 #include <concepts>
 #include <stdexcept>
+#include <string_view>
 
 namespace zoo {
 namespace spider {
@@ -21,15 +23,15 @@ namespace spider {
 // template<typename T>
 // concept ConvertibleToBoostJson = boost::json::is_described_class<T>::value;
 
-// template<typename T>
-// concept ConvertibleToBoostJson = !std::is_abstract_v<T> && requires(const std::remove_cvref_t<T>& t) {
-// 	{ boost::json::value_from(t) } -> std::same_as<boost::json::value>;
-// };
-
 template<typename T>
-concept ConvertibleToBoostJson = !std::is_abstract_v<T> && (requires(const std::remove_cvref_t<T>& t) {
-	{ tag_invoke(boost::json::value_from_tag{}, t) } -> std::same_as<boost::json::value>;
-} || boost::json::is_described_class<T>::value);
+concept ConvertibleToBoostJson = !std::is_abstract_v<T> && requires(const std::remove_cvref_t<T>& t) {
+	{ boost::json::value_from(t) } -> std::same_as<boost::json::value>;
+};
+
+// template<typename T>
+// concept ConvertibleToBoostJson = !std::is_abstract_v<T> && (requires(const std::remove_cvref_t<T>& t) {
+// 	{ tag_invoke(boost::json::value_from_tag{}, t) } -> std::same_as<boost::json::value>;
+// } || boost::json::is_described_class<T>::value);
 
 // template<typename T>
 // concept ConvertibleFromBoostJson = !std::is_abstract_v<T> && requires(const boost::json::value& jv) {
@@ -47,6 +49,25 @@ concept IsValidErrorType = std::is_class_v<T> && boost::json::is_described_class
 } && requires(const T& t) {
 	{ t.status() } -> std::same_as<http::status>;
 	{ t.status() } noexcept;
+};
+
+template<typename T>
+concept IsStatusResult = requires {
+	{ T::STATUS } -> std::convertible_to<http::status>;
+	typename T::value_type;
+} && requires(const T& t) {
+	{ std::remove_cvref_t<decltype(t.result)>() } -> std::same_as<typename T::value_type>;
+};
+
+template<typename T>
+concept IsBinaryContentContainer = requires {
+	{ T::CONTENT_TYPE } -> std::convertible_to<const std::string_view&>;
+} && requires(const T& t) {
+	{ t.content_type() } -> std::same_as<std::string_view>;
+	{ t.content_type() } noexcept;
+} && requires(const T& t) {
+	{ t.content() } -> std::same_as<byte_string_view>;
+	{ t.content() } noexcept;
 };
 
 } // namespace spider

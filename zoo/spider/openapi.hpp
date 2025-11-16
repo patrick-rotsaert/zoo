@@ -9,6 +9,7 @@
 
 #include "zoo/spider/handler.hpp"
 #include "zoo/spider/concepts.hpp"
+#include "zoo/spider/status_utility.hpp"
 #include "zoo/common/misc/is_optional.hpp"
 #include "zoo/common/misc/is_vector.hpp"
 #include "zoo/common/logging/logging.h"
@@ -23,6 +24,10 @@
 #include <tuple>
 #include <array>
 #include <limits>
+#include <typeindex>
+#include <typeinfo>
+#include <unordered_map>
+#include <optional>
 
 namespace zoo {
 namespace spider {
@@ -32,6 +37,47 @@ struct openapi_settings
 	std::string_view strip_ns;
 	std::string_view info_title;
 	std::string_view info_version;
+};
+
+class openapi_type_name_registry
+{
+public:
+	template<typename T>
+	static void register_type_name(std::string name)
+	{
+		type_name_map()[std::type_index(typeid(T))] = std::move(name);
+	}
+
+	template<typename T>
+	static std::optional<std::string> get_type_name()
+	{
+		const auto& map = type_name_map();
+		const auto  it  = map.find(std::type_index(typeid(T)));
+		if (it == map.end())
+		{
+			return std::nullopt;
+		}
+		else
+		{
+			return it->second;
+		}
+	}
+
+private:
+	static auto& type_name_map()
+	{
+		static std::unordered_map<std::type_index, std::string> map{};
+		return map;
+	}
+};
+
+template<typename T>
+struct openapi_type_name_registrar
+{
+	explicit openapi_type_name_registrar(std::string name)
+	{
+		openapi_type_name_registry::register_type_name<T>(std::move(name));
+	}
 };
 
 template<IsValidErrorType DefaultErrorType>
@@ -60,9 +106,9 @@ public:
 	{
 		using namespace boost::json;
 
-		using Handler = handler<Callback>;
-		// using ResultType = typename Handler::ResultType;
-		using ArgsTuple = typename Handler::ArgsTuple;
+		using Handler    = handler<Callback>;
+		using ResultType = typename Handler::ResultType;
+		using ArgsTuple  = typename Handler::ArgsTuple;
 
 		std::array<parameters::descriptor, sizeof...(descriptors)> parameter_descriptors = { parameters::descriptor{ descriptors }... };
 
@@ -142,12 +188,11 @@ public:
 		{
 			object responses;
 
+			add_response<ResultType>(responses, status_utility::success_status_for_method(method));
+
 			responses["default"] = { { "$ref", default_response_ref_ } };
 
-			if (!responses.empty())
-			{
-				operation["responses"] = std::move(responses);
-			}
+			operation["responses"] = std::move(responses);
 		}
 
 		auto& paths_object               = ensure_object(spec_["paths"]);
@@ -175,6 +220,35 @@ private:
 	}
 
 	template<typename T>
+	void add_response(boost::json::object& responses, http::status status)
+	{
+		if constexpr (std::is_void_v<T>)
+		{
+			responses[std::to_string(static_cast<int>(status))] = { { "description", http::obsolete_reason(status) } };
+		}
+		else if constexpr (IsStatusResult<T>)
+		{
+			return add_response<typename T::value_type>(responses, T::STATUS);
+		}
+		else if constexpr (IsBinaryContentContainer<T>)
+		{
+			responses[std::to_string(static_cast<int>(status))] = { { "description", http::obsolete_reason(status) },
+				                                                    { "content",
+				                                                      { { T::CONTENT_TYPE, { { "schema", value_schema<T>() } } } } } };
+		}
+		else if constexpr (ConvertibleToBoostJson<T>)
+		{
+			responses[std::to_string(static_cast<int>(status))] = { { "description", http::obsolete_reason(status) },
+				                                                    { "content",
+				                                                      { { "application/json", { { "schema", value_schema<T>() } } } } } };
+		}
+		else
+		{
+			zlog(warn, "Unsupported response type {}", demangled_type_name<T>());
+		}
+	}
+
+	template<typename T>
 	std::enable_if_t<is_optional_v<T>, boost::json::object> value_schema()
 	{
 		return value_schema<typename T::value_type>();
@@ -184,8 +258,6 @@ private:
 	std::enable_if_t<!is_optional_v<T>, boost::json::object> value_schema()
 	{
 		boost::json::object schema;
-
-		// schema["__type__"] = demangled_type_name<T>(); //@@
 
 		if constexpr (std::is_same_v<T, std::string> || std::is_same_v<T, std::string_view>)
 		{
@@ -264,10 +336,14 @@ private:
 		{
 			schema["$ref"] = add_components_schema<T>();
 		}
+		else if constexpr (IsBinaryContentContainer<T>)
+		{
+			schema["type"]   = "string";
+			schema["format"] = "binary";
+		}
 		else
 		{
-			// schema["__unknown__"] = true; //@@
-			zlog(warn, "Unsupported type {}", demangled_type_name<T>());
+			zlog(warn, "Unsupported value type {}", demangled_type_name<T>());
 		}
 
 		return schema;
@@ -389,6 +465,10 @@ private:
 	template<typename T>
 	std::string get_type_name()
 	{
+		if (auto name = openapi_type_name_registry::get_type_name<T>())
+		{
+			return std::move(name.value());
+		}
 		auto type_name = demangled_type_name<T>();
 		if (!settings_.strip_ns.empty() && std::string_view{ type_name }.starts_with(settings_.strip_ns))
 		{

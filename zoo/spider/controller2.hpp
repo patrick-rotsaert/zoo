@@ -18,18 +18,20 @@
 #include "zoo/spider/config.h"
 #include "zoo/spider/handler.hpp"
 #include "zoo/spider/concepts.hpp"
+#include "zoo/spider/openapi.hpp"
 #include "zoo/spider/parameters.h"
 #include "zoo/spider/request_router2.h"
-#include "zoo/spider/openapi.h"
 #include "zoo/spider/error_response.h"
 #include "zoo/spider/response_wrapper.hpp"
 #include "zoo/spider/json_response.h"
+#include "zoo/spider/binary_response.h"
 #include "zoo/spider/empty_response.h"
 #include "zoo/spider/exception.h"
 
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/formatters.hpp"
 #include "zoo/common/misc/demangled_type_name.hpp"
+#include "zoo/common/misc/is_variant.hpp"
 
 #include <boost/json.hpp>
 #include <boost/exception/get_error_info.hpp>
@@ -48,11 +50,12 @@
 namespace zoo {
 namespace spider {
 
-template<IsValidErrorType ErrorType>
+template<IsValidErrorType DefaultErrorType>
 class controller2
 {
 public:
-	using p = parameters::p;
+	using p            = parameters::p;
+	using openapi_type = openapi<DefaultErrorType>;
 
 	explicit controller2(std::shared_ptr<request_router2> router, openapi_settings settings)
 	    : router_{ std::move(router) }
@@ -60,9 +63,7 @@ public:
 	{
 	}
 
-	virtual ~controller2()
-	{
-	}
+	virtual ~controller2() = default;
 
 	const std::shared_ptr<request_router2>& router() const
 	{
@@ -82,32 +83,34 @@ protected:
 		// I would have preferred to use a unique_ptr, but then the handler would need to be
 		// move-captured, thus making the lambda non-copyable and std::function would fail to create.
 		auto h = std::make_shared<handler<Callback>>(this, callback, descriptors...);
-		router_->add_route(
-		    method, std::move(path), [handler = h, this](request&& req, url_view&& url, path_spec::param_map&& param) -> response_wrapper {
-			    try
-			    {
-				    if constexpr (std::is_void_v<ResultType>)
-				    {
-					    handler->call(parameter_sources{ req, url, param });
-					    auto res = empty_response::create(status::ok); //@@ status
-					    res.version(req.version());
-					    res.keep_alive(req.keep_alive());
-					    return res;
-				    }
-				    else
-				    {
-					    auto res = make_response(handler->call(parameter_sources{ req, url, param }));
-					    res.version(req.version());
-					    res.keep_alive(req.keep_alive());
-					    return res;
-				    }
-			    }
-			    catch (const std::exception& e)
-			    {
-				    ZOO_LOG(err, "{}", e.what());
-				    return make_error_response(e, req);
-			    }
-		    });
+		router_->add_route(method,
+		                   std::move(path),
+		                   [method, handler = h, this](request&& req, url_view&& url, path_spec::param_map&& param) -> response_wrapper {
+			                   try
+			                   {
+				                   if constexpr (std::is_void_v<ResultType>)
+				                   {
+					                   handler->call(parameter_sources{ req, url, param });
+					                   auto res = empty_response::create(status_utility::success_status_for_method(method));
+					                   res.version(req.version());
+					                   res.keep_alive(req.keep_alive());
+					                   return res;
+				                   }
+				                   else
+				                   {
+					                   auto res = make_response(handler->call(parameter_sources{ req, url, param }),
+					                                            status_utility::success_status_for_method(method));
+					                   res.version(req.version());
+					                   res.keep_alive(req.keep_alive());
+					                   return res;
+				                   }
+			                   }
+			                   catch (const std::exception& e)
+			                   {
+				                   ZOO_LOG(err, "{}", e.what());
+				                   return make_error_response(e, req);
+			                   }
+		                   });
 	}
 
 	const boost::json::object& openapi_spec() const
@@ -117,7 +120,7 @@ protected:
 
 private:
 	template<typename T>
-	response_wrapper make_response(T&& payload)
+	static response_wrapper make_response(T&& payload, http::status status)
 	{
 		if constexpr (std::is_same_v<T, response_wrapper>)
 		{
@@ -127,21 +130,34 @@ private:
 		{
 			return response_wrapper{ std::move(payload) };
 		}
+		else if constexpr (is_variant_v<T>)
+		{
+			return std::visit([status](auto&& arg) -> response_wrapper { return make_response(std::move(arg), status); },
+			                  std::move(payload));
+		}
+		else if constexpr (IsStatusResult<T>)
+		{
+			return make_response(std::move(payload.result), T::STATUS);
+		}
+		else if constexpr (IsBinaryContentContainer<T>)
+		{
+			return binary_response::create(status, payload.content_type(), payload.content());
+		}
 		else
 		{
-			return json_response::create(status::ok, std::move(payload)); //@@ status
+			return json_response::create(status, std::move(payload));
 		}
 	}
 
-	response make_error_response(const std::exception& e, const request& req)
+	static response make_error_response(const std::exception& e, const request& req)
 	{
-		auto       payload = ErrorType::create(e);
+		auto       payload = DefaultErrorType::create(e);
 		const auto status  = payload.status();
-		return json_response::create(status, std::move(payload));
+		return json_response::create(req, status, std::move(payload));
 	}
 
 	std::shared_ptr<request_router2> router_;
-	openapi<ErrorType>               oas_;
+	openapi_type                     oas_;
 };
 
 } // namespace spider

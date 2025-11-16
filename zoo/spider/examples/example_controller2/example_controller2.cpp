@@ -11,7 +11,9 @@
 #include "zoo/spider/file_response.h"
 #include "zoo/spider/json_response.h"
 #include "zoo/spider/empty_response.h"
-#include "zoo/spider/noop_file_event_listener.h"
+#include "zoo/spider/binary_response.h"
+#include "zoo/spider/content_container.hpp"
+#include "zoo/spider/status_result.hpp"
 #include "zoo/spider/aliases.h"
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/formatters.hpp"
@@ -24,14 +26,19 @@
 #include <boost/exception/all.hpp>
 
 #include <spdlog/spdlog.h>
+#include "spdlog/sinks/stdout_color_sinks.h"
+
 #include <fmt/format.h>
 
 #include <thread>
+
+#include "test_png_image.h"
 
 namespace myns {
 
 using namespace zoo::spider;
 using namespace fmt::literals;
+using namespace std::string_view_literals;
 
 BOOST_DEFINE_ENUM_CLASS(Status, available, sold, cancelled)
 
@@ -113,11 +120,50 @@ BOOST_DESCRIBE_STRUCT(Error::SourceLocation, (), (file, function, line))
 
 static_assert(IsValidErrorType<Error>, "Not a valid error type");
 
+template<typename T>
+struct Test
+{
+	bool succeeded;
+	T    data;
+};
+
+#define DESCRIBE_TEST_SPECIALIZATION(TYPE, NAME)                                                                                           \
+	BOOST_DESCRIBE_STRUCT(Test<TYPE>, (), (succeeded, data))                                                                               \
+	using NAME = Test<TYPE>;                                                                                                               \
+	zoo::spider::openapi_type_name_registrar<NAME> NAME##_registrar{ #NAME };
+
+DESCRIBE_TEST_SPECIALIZATION(std::string, FooBar)
+
+template<http::status Status, typename T>
+auto make_status_result(T&& result)
+{
+	return status_result<Status, T>{ std::move(result) };
+}
+
 class api_controller final : public controller2<Error>
 {
 	struct exception : public exception_base
 	{
 	};
+
+	auto test()
+	{
+		// return FooBar{ true, "hello" };
+		// return status_result<status::accepted, FooBar>{ true, "hello" };
+		return make_status_result<status::accepted>(FooBar{ true, "hello" });
+	}
+
+	std::variant<status_result<status::accepted, FooBar>, status_result<status::not_found, std::string>> test2(bool found)
+	{
+		if (found)
+		{
+			return make_status_result<status::accepted>(FooBar{ true, "hello" });
+		}
+		else
+		{
+			return make_status_result<status::not_found>(std::string{ "FAIL" });
+		}
+	}
 
 	std::vector<Customer> list_customers(std::string api_key)
 	{
@@ -149,7 +195,8 @@ class api_controller final : public controller2<Error>
 	auto post_customer(const Customer& c, const url_view& url, int16_t)
 	{
 		zlog(debug, "api post customer {}, number of query parameters={}", c.id, url.params().size());
-		return c;
+		// return c;
+		return make_status_result<status::created>(c);
 	}
 
 	void noop()
@@ -164,11 +211,25 @@ class api_controller final : public controller2<Error>
 		                                << exception::status{ status::not_implemented });
 	}
 
+	auto image(const request& req)
+	{
+		return image_container::create_view("image/png"sv, test_png_image::data());
+	}
+
 public:
 	explicit api_controller(const std::shared_ptr<request_router2>& router = std::make_shared<request_router2>())
 	    : controller2{ router, openapi_settings{ .strip_ns = "myns::", .info_title = "Demo API", .info_version = "1.0" } }
 	{
 		using p = controller2::p;
+
+		add_operation(verb::get,                          // HTTP method
+		              path_spec{ "api" } / "v1" / "test", // Path spec
+		              &api_controller::test               // Callback
+		);
+		add_operation(verb::get,                           // HTTP method
+		              path_spec{ "api" } / "v1" / "test2", // Path spec
+		              &api_controller::test2,              // Callback
+		              p::query("found"));
 
 		add_operation(verb::get,                               // HTTP method
 		              path_spec{ "api" } / "v1" / "customers", // Path spec
@@ -216,6 +277,14 @@ public:
 		              path_spec{ "api" } / "v1" / "noop", // Path spec
 		              &api_controller::noop               // Callback
 		);                                                // No descriptors because callback does not take any arguments.
+
+		add_operation(verb::get,                           // HTTP method
+		              path_spec{ "api" } / "v1" / "image", // Path spec
+		              &api_controller::image,              // Callback
+		              // Descriptors for the callback arguments.
+		              // There must be a descriptor for each argument and they must be passed in the same order as the callback arguments.
+		              p::request{} // Request parameter (const request&)
+		);
 	}
 
 	std::string open_api() const
@@ -226,6 +295,27 @@ public:
 };
 
 } // namespace myns
+
+void init_logging_to_stderr()
+{
+	auto stderr_logger = spdlog::stderr_color_mt("stderr");
+
+	// // 1. Create the specific stderr sink (thread-safe, with colors)
+	// auto stderr_sink = std::make_shared<spdlog::sinks::>();
+
+	// // 2. Create a new logger using only this sink
+	// //    We name it "stderr_logger" but it will act as the global default.
+	// auto stderr_logger = std::make_shared<spdlog::logger>("stderr_logger", stderr_sink);
+
+	// 3. Apply your desired settings to this specific logger
+	stderr_logger->set_level(spdlog::level::trace);
+	stderr_logger->set_pattern("%L [%Y-%m-%d %H:%M:%S.%f Δt=%iμs](%t) %^%v%$ [%s:%#]");
+
+	// 4. Set the new logger as the global default.
+	//    Any subsequent calls to SPDLOG_... macros will now use this logger,
+	//    which only writes to stderr.
+	spdlog::set_default_logger(stderr_logger);
+}
 
 int main(int argc, char* argv[])
 {
@@ -242,8 +332,7 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	spdlog::set_level(spdlog::level::trace);
-	spdlog::set_pattern("%L [%Y-%m-%d %H:%M:%S.%f Δt=%iμs](%t) %^%v%$ [%s:%#]");
+	init_logging_to_stderr();
 
 	if (argc == 1)
 	{

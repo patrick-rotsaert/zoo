@@ -17,6 +17,8 @@ add_zoo_library(spider
 		pathspec.cpp
 		json_response.cpp
 		file_response.cpp
+		buffer_response.cpp
+		binary_response.cpp
 		error_response.cpp
 		empty_response.cpp
 		tracked_file.cpp
@@ -43,6 +45,8 @@ add_zoo_library(spider
 		pathspec.h
 		json_response.h
 		file_response.h
+		buffer_response.h
+		binary_response.h
 		error_response.h
 		empty_response.h
 		response_wrapper.hpp
@@ -54,7 +58,7 @@ add_zoo_library(spider
 		handler.hpp
 		conversions.h
 		parameters.h
-		openapi.h
+		openapi.hpp
 		log_response.h
 		tag_invoke/time_point.h
 		tag_invoke/date.h

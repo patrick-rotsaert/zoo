@@ -7,22 +7,21 @@
 
 #pragma once
 
-#include <vector>
+#include "zoo/spider/aliases.h"
+
 #include <type_traits>
 
 namespace zoo {
+namespace spider {
 
-template<typename T>
-struct is_vector : std::false_type
+template<http::status Status, typename T>
+struct status_result
 {
+	static constexpr auto STATUS = Status;
+
+	using value_type = std::decay_t<T>;
+	value_type result;
 };
 
-template<typename U, typename Alloc>
-struct is_vector<std::vector<U, Alloc>> : std::true_type
-{
-};
-
-template<typename T>
-inline constexpr bool is_vector_v = is_vector<T>::value;
-
+} // namespace spider
 } // namespace zoo

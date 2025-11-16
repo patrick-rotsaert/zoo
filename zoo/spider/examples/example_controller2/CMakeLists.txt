@@ -6,7 +6,7 @@
 #
 
 set(TARGET spider_example_controller2)
-add_zoo_executable(${TARGET} example_controller2.cpp)
+add_zoo_executable(${TARGET} example_controller2.cpp test_png_image.cpp)
 
 target_compile_features(${TARGET} PRIVATE cxx_std_23)
 target_link_libraries(${TARGET} PRIVATE zoo::spider)
