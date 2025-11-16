@@ -12,6 +12,7 @@
 #include "zoo/spider/status_utility.hpp"
 #include "zoo/common/misc/is_optional.hpp"
 #include "zoo/common/misc/is_vector.hpp"
+#include "zoo/common/misc/is_variant.hpp"
 #include "zoo/common/logging/logging.h"
 
 #include <boost/json.hpp>
@@ -26,6 +27,7 @@
 #include <limits>
 #include <typeindex>
 #include <typeinfo>
+#include <map>
 #include <unordered_map>
 #include <optional>
 
@@ -214,6 +216,27 @@ private:
 		return name;
 	}
 
+	template<typename T>
+	static std::string_view get_content_type()
+	{
+		if constexpr (IsStatusResult<T>)
+		{
+			return get_content_type<typename T::value_type>();
+		}
+		else if constexpr (IsBinaryContentContainer<T>)
+		{
+			return T::CONTENT_TYPE;
+		}
+		else if constexpr (ConvertibleToBoostJson<T>)
+		{
+			return "application/json";
+		}
+		else
+		{
+			return {};
+		}
+	}
+
 	static boost::json::object& ensure_object(boost::json::value& v) //@@ TODO: move to utility class
 	{
 		return v.is_object() ? v.as_object() : v.emplace_object();
@@ -224,7 +247,8 @@ private:
 	{
 		if constexpr (std::is_void_v<T>)
 		{
-			responses[std::to_string(static_cast<int>(status))] = { { "description", http::obsolete_reason(status) } };
+			responses[std::to_string(static_cast<int>(http::status::no_content))] = { { "description",
+				                                                                        http::obsolete_reason(http::status::no_content) } };
 		}
 		else if constexpr (IsStatusResult<T>)
 		{
@@ -232,19 +256,82 @@ private:
 		}
 		else if constexpr (IsBinaryContentContainer<T>)
 		{
-			responses[std::to_string(static_cast<int>(status))] = { { "description", http::obsolete_reason(status) },
-				                                                    { "content",
-				                                                      { { T::CONTENT_TYPE, { { "schema", value_schema<T>() } } } } } };
+			responses[std::to_string(static_cast<int>(status))] = {
+				{ "description", http::obsolete_reason(status) },
+				{ "content", { { get_content_type<T>(), { { "schema", value_schema<T>() } } } } }
+			};
+		}
+		else if constexpr (is_variant_v<T>)
+		{
+			add_variant_response<T>(responses, status);
 		}
 		else if constexpr (ConvertibleToBoostJson<T>)
 		{
-			responses[std::to_string(static_cast<int>(status))] = { { "description", http::obsolete_reason(status) },
-				                                                    { "content",
-				                                                      { { "application/json", { { "schema", value_schema<T>() } } } } } };
+			responses[std::to_string(static_cast<int>(status))] = {
+				{ "description", http::obsolete_reason(status) },
+				{ "content", { { get_content_type<T>(), { { "schema", value_schema<T>() } } } } }
+			};
 		}
 		else
 		{
 			zlog(warn, "Unsupported response type {}", demangled_type_name<T>());
+		}
+	}
+
+	template<typename T>
+	void add_variant_response(boost::json::object& responses, http::status status)
+	{
+		std::map<http::status, std::unordered_map<std::string_view, std::vector<boost::json::object>>> map;
+
+		[&]<std::size_t... I>(std::index_sequence<I...>) {
+			(
+			    [&]() {
+				    using V = std::variant_alternative_t<I, T>;
+				    if constexpr (IsStatusResult<V>)
+				    {
+					    map[V::STATUS][get_content_type<V>()].push_back(value_schema<typename V::value_type>());
+				    }
+				    else if constexpr (IsBinaryContentContainer<V> || ConvertibleToBoostJson<V>)
+				    {
+					    map[status][get_content_type<V>()].push_back(value_schema<V>());
+				    }
+				    else
+				    {
+					    zlog(warn, "Unsupported response variant type {}", demangled_type_name<V>());
+				    }
+			    }(),
+			    ...);
+		}(std::make_index_sequence<std::variant_size_v<T>>());
+
+		for (const auto& status_pair : map)
+		{
+			const auto          status      = status_pair.first;
+			const auto&         content_map = status_pair.second;
+			boost::json::object response;
+			response["description"] = http::obsolete_reason(status);
+			boost::json::object content;
+			for (const auto& content_pair : content_map)
+			{
+				const auto&         content_type = content_pair.first;
+				auto&               schemas      = content_pair.second;
+				boost::json::object type_content;
+				if (schemas.size() > 1u)
+				{
+					boost::json::array oneof;
+					for (auto& schema : schemas)
+					{
+						oneof.emplace_back(std::move(schema));
+					}
+					type_content["schema"] = { { "oneOf", std::move(oneof) } };
+				}
+				else
+				{
+					type_content["schema"] = std::move(schemas.front());
+				}
+				content[content_type] = std::move(type_content);
+			}
+			response["content"]                                 = std::move(content);
+			responses[std::to_string(static_cast<int>(status))] = std::move(response);
 		}
 	}
 

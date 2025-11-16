@@ -153,11 +153,16 @@ class api_controller final : public controller2<Error>
 		return make_status_result<status::accepted>(FooBar{ true, "hello" });
 	}
 
-	std::variant<status_result<status::accepted, FooBar>, status_result<status::not_found, std::string>> test2(bool found)
+	std::variant<status_result<status::ok, FooBar>,
+	             status_result<status::ok, image_container>, // not used, for OAS demo only
+	             status_result<status::not_found, std::string>,
+	             status_result<status::not_found, Error> // not used, for OAS demo only
+	             >
+	test2(bool found)
 	{
 		if (found)
 		{
-			return make_status_result<status::accepted>(FooBar{ true, "hello" });
+			return make_status_result<status::ok>(FooBar{ true, "hello" });
 		}
 		else
 		{

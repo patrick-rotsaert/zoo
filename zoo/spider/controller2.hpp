@@ -91,7 +91,7 @@ protected:
 				                   if constexpr (std::is_void_v<ResultType>)
 				                   {
 					                   handler->call(parameter_sources{ req, url, param });
-					                   auto res = empty_response::create(status_utility::success_status_for_method(method));
+					                   auto res = empty_response::create(status::no_content);
 					                   res.version(req.version());
 					                   res.keep_alive(req.keep_alive());
 					                   return res;
