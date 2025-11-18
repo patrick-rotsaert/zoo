@@ -9,7 +9,7 @@
 
 #include "zoo/spider/config.h"
 #include "zoo/spider/irequest_handler.h"
-#include "zoo/spider/pathspec.h"
+#include "zoo/spider/operation.h"
 #include "zoo/spider/aliases.h"
 
 #include <boost/beast/http/message_generator.hpp>
@@ -40,7 +40,7 @@ public:
 	request_router2(const request_router2&)            = delete;
 	request_router2& operator=(const request_router2&) = delete;
 
-	void add_route(verb method, path_spec&& path, request_handler&& handler);
+	void add_route(operation op, request_handler handler);
 };
 
 } // namespace spider

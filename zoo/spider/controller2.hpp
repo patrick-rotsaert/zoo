@@ -16,6 +16,7 @@
 #pragma once
 
 #include "zoo/spider/config.h"
+#include "zoo/spider/operation.h"
 #include "zoo/spider/handler.hpp"
 #include "zoo/spider/concepts.hpp"
 #include "zoo/spider/openapi.hpp"
@@ -72,9 +73,9 @@ public:
 
 protected:
 	template<class Callback, typename... ArgDescriptors>
-	void add_operation(verb method, path_spec&& path, Callback callback, ArgDescriptors... descriptors)
+	void add_operation(operation op, Callback callback, ArgDescriptors... descriptors)
 	{
-		oas_.add_operation(method, path, callback, descriptors...);
+		oas_.add_operation(op, callback, descriptors...);
 
 		using ResultType = typename handler<Callback>::ResultType;
 
@@ -82,9 +83,9 @@ protected:
 		// This is why the handler is created as a shared_ptr, rather than a unique_ptr.
 		// I would have preferred to use a unique_ptr, but then the handler would need to be
 		// move-captured, thus making the lambda non-copyable and std::function would fail to create.
-		auto h = std::make_shared<handler<Callback>>(this, callback, descriptors...);
-		router_->add_route(method,
-		                   std::move(path),
+		const auto method = op.method;
+		auto       h      = std::make_shared<handler<Callback>>(this, callback, descriptors...);
+		router_->add_route(std::move(op),
 		                   [method, handler = h, this](request&& req, url_view&& url, path_spec::param_map&& param) -> response_wrapper {
 			                   try
 			                   {

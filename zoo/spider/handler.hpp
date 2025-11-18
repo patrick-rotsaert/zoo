@@ -180,10 +180,9 @@ private:
 				    }
 				    catch (const std::exception& e)
 				    {
-					    ZOO_THROW_EXCEPTION(
-					        argument_error{ fmt::format(
-					            "'{}': could not convert request body to type {}: {}", param.name, demangled_type_name<T>(), e.what()) }
-					        << boost::errinfo_nested_exception{ boost::current_exception() });
+					    ZOO_THROW_EXCEPTION(argument_error{ fmt::format(
+					                            "Could not convert request body to type {}: {}", demangled_type_name<T>(), e.what()) }
+					                        << boost::errinfo_nested_exception{ boost::current_exception() });
 				    }
 			    }
 			    else if constexpr (std::is_same_v<P, p::request> && std::is_same_v<T, request>)

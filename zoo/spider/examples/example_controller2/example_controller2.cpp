@@ -17,6 +17,7 @@
 #include "zoo/spider/aliases.h"
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/formatters.hpp"
+#include "zoo/common/misc/rlws.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/signal_set.hpp>
@@ -51,6 +52,7 @@ struct Customer final
 
 // Note: structs must be described at namespace scope.
 BOOST_DESCRIBE_STRUCT(Customer, (), (id, name, statuses))
+SPIDER_OAS_REGISTER_TYPE_EXAMPLE(Customer, (Customer{ 1234, "The customer name", { Status::sold } }))
 
 /// Error handling
 
@@ -105,6 +107,14 @@ struct Error final
 		return err;
 	}
 
+	static Error create(int error_code, std::string message)
+	{
+		auto err       = Error{};
+		err.message    = std::move(message);
+		err.error_code = error_code;
+		return err;
+	}
+
 	http::status status() const noexcept
 	{
 		return status_;
@@ -130,9 +140,10 @@ struct Test
 #define DESCRIBE_TEST_SPECIALIZATION(TYPE, NAME)                                                                                           \
 	BOOST_DESCRIBE_STRUCT(Test<TYPE>, (), (succeeded, data))                                                                               \
 	using NAME = Test<TYPE>;                                                                                                               \
-	zoo::spider::openapi_type_name_registrar<NAME> NAME##_registrar{ #NAME };
+	SPIDER_OAS_REGISTER_TYPE_NAME(NAME, #NAME)
 
 DESCRIBE_TEST_SPECIALIZATION(std::string, FooBar)
+SPIDER_OAS_REGISTER_TYPE_EXAMPLE(FooBar, (FooBar{ true, "The foo string" }))
 
 template<http::status Status, typename T>
 auto make_status_result(T&& result)
@@ -209,11 +220,19 @@ class api_controller final : public controller2<Error>
 		zlog(debug, "noop");
 	}
 
-	void fail(const request& req)
+	status_result<status::not_implemented, Error> fail(const request& req, std::optional<bool> useException)
 	{
-		zlog(debug, "fail, method is {}", req.method_string());
-		ZOO_THROW_EXCEPTION(exception{} << exception::mesg{ "The error message" } << exception::code{ 42 }
-		                                << exception::status{ status::not_implemented });
+		zlog(debug, "fail, method is {}, use exception is {}", req.method_string(), useException);
+
+		if (useException.value_or(false))
+		{
+			ZOO_THROW_EXCEPTION(exception{} << exception::mesg{ "The exception message" } << exception::code{ 42 }
+			                                << exception::status{ status::not_implemented });
+		}
+		else
+		{
+			return make_status_result<status::not_implemented>(Error::create(42, "The error message"));
+		}
 	}
 
 	auto image(const request& req)
@@ -227,27 +246,35 @@ public:
 	{
 		using p = controller2::p;
 
-		add_operation(verb::get,                          // HTTP method
-		              path_spec{ "api" } / "v1" / "test", // Path spec
-		              &api_controller::test               // Callback
+		add_operation(operation{ .method       = verb::get,                          // HTTP method
+		                         .path         = path_spec{ "api" } / "v1" / "test", // Path spec
+		                         .operation_id = "test",
+		                         .summary      = "Just a test" },
+		              &api_controller::test // Callback
 		);
-		add_operation(verb::get,                           // HTTP method
-		              path_spec{ "api" } / "v1" / "test2", // Path spec
-		              &api_controller::test2,              // Callback
-		              p::query("found"));
+		add_operation(operation{ .method       = verb::get,                           // HTTP method
+		                         .path         = path_spec{ "api" } / "v1" / "test2", // Path spec
+		                         .operation_id = "test2",
+		                         .summary      = "Just another test" },
+		              &api_controller::test2, // Callback
+		              p::query{ "found" });
 
-		add_operation(verb::get,                               // HTTP method
-		              path_spec{ "api" } / "v1" / "customers", // Path spec
-		              &api_controller::list_customers,         // Callback
+		add_operation(operation{ .method       = verb::get,                               // HTTP method
+		                         .path         = path_spec{ "api" } / "v1" / "customers", // Path spec
+		                         .operation_id = "listCustomers",
+		                         .summary      = "Get a list of customers" },
+		              &api_controller::list_customers, // Callback
 		              // Descriptors for the callback arguments.
 		              // There must be a descriptor for each argument and they must be passed in the same order as the callback arguments.
-		              p::header{ "x-api-key" } // Header parameters refer to the header name, e.g. `X-Api-Key: abc12345`
-		                                       //                                                   ~~~~~~~~~
+		              p::header{ "x-api-key", "The API Key" } // Header parameters refer to the header name, e.g. `X-Api-Key: abc12345`
+		                                                      //                                                   ~~~~~~~~~
 		);
 
-		add_operation(verb::get,                                        // HTTP method
-		              path_spec{ "api" } / "v1" / "customers" / "{id}", // Path spec
-		              &api_controller::get_customer,                    // Callback
+		add_operation(operation{ .method       = verb::get,                                        // HTTP method
+		                         .path         = path_spec{ "api" } / "v1" / "customers" / "{id}", // Path spec
+		                         .operation_id = "getCustomer",
+		                         .summary      = "Get a single customer" },
+		              &api_controller::get_customer, // Callback
 		              // Descriptors for the callback arguments.
 		              // There must be a descriptor for each argument and they must be passed in the same order as the callback arguments.
 		              p::path{ "id" },      // Path parameters refer to a named sub-expression path spec, i.e. `{id}`
@@ -260,32 +287,42 @@ public:
 		              p::request{} // Request parameter (const request&)
 		);
 
-		add_operation(verb::post,                              // HTTP method
-		              path_spec{ "api" } / "v1" / "customers", // Path spec
-		              &api_controller::post_customer,          // Callback
+		add_operation(operation{ .method       = verb::post,                              // HTTP method
+		                         .path         = path_spec{ "api" } / "v1" / "customers", // Path spec
+		                         .operation_id = "createCustomer",
+		                         .summary      = "Create a customer" },
+		              &api_controller::post_customer, // Callback
 		              // Descriptors for the callback arguments.
 		              // There must be a descriptor for each argument and they must be passed in the same order as the callback arguments.
-		              p::json{ "customer" }, // Json parameters are deserialized from the request payload.
-		                                     // The name ("customer") is used only in logging in case deserialization fails.
-		              p::url{},              // Url parameter (const url_view&)
+		              p::json{}, // Json parameters are deserialized from the request payload.
+		                         // The name ("customer") is used only in logging in case deserialization fails.
+		              p::url{},  // Url parameter (const url_view&)
 		              p::query{ "u" });
 
-		add_operation(verb::get,                          // HTTP method
-		              path_spec{ "api" } / "v1" / "fail", // Path spec
-		              &api_controller::fail,              // Callback
+		add_operation(operation{ .method       = verb::get,                          // HTTP method
+		                         .path         = path_spec{ "api" } / "v1" / "fail", // Path spec
+		                         .operation_id = "fail",
+		                         .summary      = "Operation that always fails" },
+		              &api_controller::fail, // Callback
 		              // Descriptors for the callback arguments.
 		              // There must be a descriptor for each argument and they must be passed in the same order as the callback arguments.
-		              p::request{} // Request parameter (const request&)
+		              p::request{}, // Request parameter (const request&)
+		              p::query{ "exception" }
+
 		);
 
-		add_operation(verb::get,                          // HTTP method
-		              path_spec{ "api" } / "v1" / "noop", // Path spec
-		              &api_controller::noop               // Callback
-		);                                                // No descriptors because callback does not take any arguments.
+		add_operation(operation{ .method       = verb::get,                          // HTTP method
+		                         .path         = path_spec{ "api" } / "v1" / "noop", // Path spec
+		                         .operation_id = "noop",
+		                         .summary      = "An operation that does nothing" },
+		              &api_controller::noop // Callback
+		);                                  // No descriptors because callback does not take any arguments.
 
-		add_operation(verb::get,                           // HTTP method
-		              path_spec{ "api" } / "v1" / "image", // Path spec
-		              &api_controller::image,              // Callback
+		add_operation(operation{ .method       = verb::get,                           // HTTP method
+		                         .path         = path_spec{ "api" } / "v1" / "image", // Path spec
+		                         .operation_id = "getImage",
+		                         .summary      = "Get the image" },
+		              &api_controller::image, // Callback
 		              // Descriptors for the callback arguments.
 		              // There must be a descriptor for each argument and they must be passed in the same order as the callback arguments.
 		              p::request{} // Request parameter (const request&)
@@ -300,6 +337,15 @@ public:
 };
 
 } // namespace myns
+
+// Define annotations for class members
+// These have to be defined at global namespace (for now?)
+SPIDER_OAS_ANNOTATE_MEMBER(myns::Error::message, "The error message")
+
+SPIDER_OAS_ANNOTATE_MEMBER(myns::Customer::id, R"(
+	The customer ID.
+	This is the primary key.)"_rlws)
+SPIDER_OAS_ANNOTATE_MEMBER(myns::Customer::name, "The customer name")
 
 void init_logging_to_stderr()
 {

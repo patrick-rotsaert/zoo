@@ -8,8 +8,10 @@
 #pragma once
 
 #include "zoo/spider/handler.hpp"
+#include "zoo/spider/operation.h"
 #include "zoo/spider/concepts.hpp"
 #include "zoo/spider/status_utility.hpp"
+#include "zoo/spider/annotation.hpp"
 #include "zoo/common/misc/is_optional.hpp"
 #include "zoo/common/misc/is_vector.hpp"
 #include "zoo/common/misc/is_variant.hpp"
@@ -30,6 +32,7 @@
 #include <map>
 #include <unordered_map>
 #include <optional>
+#include <functional>
 
 namespace zoo {
 namespace spider {
@@ -45,7 +48,7 @@ class openapi_type_name_registry
 {
 public:
 	template<typename T>
-	static void register_type_name(std::string name)
+	static void register_type(std::string name)
 	{
 		type_name_map()[std::type_index(typeid(T))] = std::move(name);
 	}
@@ -78,9 +81,57 @@ struct openapi_type_name_registrar
 {
 	explicit openapi_type_name_registrar(std::string name)
 	{
-		openapi_type_name_registry::register_type_name<T>(std::move(name));
+		openapi_type_name_registry::register_type<T>(std::move(name));
 	}
 };
+
+#define SPIDER_OAS_REGISTER_TYPE_NAME(TYPE, NAME) zoo::spider::openapi_type_name_registrar<TYPE> TYPE##_type_name_registrar{ NAME };
+
+class openapi_type_example_registry
+{
+public:
+	using factory_type = std::function<boost::json::value()>;
+
+	template<typename T>
+	static void register_type(factory_type&& factory)
+	{
+		type_factory_map()[std::type_index(typeid(T))] = std::move(factory);
+	}
+
+	template<typename T>
+	static std::optional<boost::json::value> get_type_example()
+	{
+		const auto& map = type_factory_map();
+		const auto  it  = map.find(std::type_index(typeid(T)));
+		if (it == map.end())
+		{
+			return std::nullopt;
+		}
+		else
+		{
+			return it->second();
+		}
+	}
+
+private:
+	static auto& type_factory_map()
+	{
+		static std::unordered_map<std::type_index, factory_type> map{};
+		return map;
+	}
+};
+
+template<typename T>
+struct openapi_type_example_registrar
+{
+	explicit openapi_type_example_registrar(openapi_type_example_registry::factory_type&& factory)
+	{
+		openapi_type_example_registry::register_type<T>(std::move(factory));
+	}
+};
+
+#define SPIDER_OAS_REGISTER_TYPE_EXAMPLE(TYPE, EXAMPLE)                                                                                    \
+	zoo::spider::openapi_type_example_registrar<TYPE> TYPE##_type_example_registrar{ []() { return boost::json::value_from(EXAMPLE); } };
 
 template<IsValidErrorType DefaultErrorType>
 class openapi final
@@ -104,7 +155,7 @@ public:
 	}
 
 	template<class Callback, typename... ArgDescriptors>
-	void add_operation(verb method, const path_spec& path, Callback callback, ArgDescriptors... descriptors)
+	void add_operation(operation op, Callback callback, ArgDescriptors... descriptors)
 	{
 		using namespace boost::json;
 
@@ -115,6 +166,16 @@ public:
 		std::array<parameters::descriptor, sizeof...(descriptors)> parameter_descriptors = { parameters::descriptor{ descriptors }... };
 
 		object operation;
+
+		if (!op.operation_id.empty())
+		{
+			operation["operationId"] = op.operation_id;
+		}
+		if (!op.summary.empty())
+		{
+			operation["summary"] = op.summary;
+		}
+
 		{
 			array parameters;
 
@@ -170,6 +231,14 @@ public:
 						        {
 							        static_assert(false, "non-exhaustive visitor!");
 						        }
+
+						        if constexpr (std::is_base_of_v<parameters::named_parameter, P>)
+						        {
+							        if (!arg.description.empty())
+							        {
+								        param["description"] = arg.description;
+							        }
+						        }
 					        },
 					        descriptor);
 
@@ -190,16 +259,16 @@ public:
 		{
 			object responses;
 
-			add_response<ResultType>(responses, status_utility::success_status_for_method(method));
+			add_response<ResultType>(responses, status_utility::success_status_for_method(op.method));
 
 			responses["default"] = { { "$ref", default_response_ref_ } };
 
 			operation["responses"] = std::move(responses);
 		}
 
-		auto& paths_object               = ensure_object(spec_["paths"]);
-		auto& path_object                = ensure_object(paths_object["/" + path.to_string()]);
-		path_object[method_name(method)] = std::move(operation);
+		auto& paths_object                  = ensure_object(spec_["paths"]);
+		auto& path_object                   = ensure_object(paths_object["/" + op.path.to_string()]);
+		path_object[method_name(op.method)] = std::move(operation);
 	}
 
 	const boost::json::object& spec() const
@@ -477,7 +546,12 @@ private:
 				{
 					required.emplace_back(D.name);
 				}
-				properties[D.name] = value_schema<U>();
+				properties[D.name]      = value_schema<U>();
+				const auto& description = annotation_v<decltype(D)>;
+				if (!description.empty())
+				{
+					properties[D.name].as_object()["description"] = description;
+				}
 			});
 
 			if (!properties.empty())
@@ -488,6 +562,11 @@ private:
 			if (!required.empty())
 			{
 				schema["required"] = std::move(required);
+			}
+
+			if (auto example = openapi_type_example_registry::get_type_example<T>())
+			{
+				schema["example"] = std::move(example.value());
 			}
 
 			add_components_schema(type_name, std::move(schema));

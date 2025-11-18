@@ -66,6 +66,12 @@ namespace filesystem {
 class path;
 }
 
+namespace describe {
+}
+
+namespace mp11 {
+}
+
 } // namespace boost
 
 //
@@ -80,6 +86,8 @@ namespace http      = beast::http;
 namespace websocket = beast::websocket;
 namespace net       = boost::asio;
 namespace fs        = boost::filesystem;
+namespace bd        = boost::describe;
+namespace mp11      = boost::mp11;
 
 using error_code        = beast::error_code;
 using string_view       = beast::string_view;

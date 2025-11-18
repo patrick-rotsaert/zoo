@@ -30,13 +30,11 @@ class request_router2::impl final
 {
 	struct route final
 	{
-		verb                             method;
-		path_spec                        path;
+		operation                        op;
 		request_router2::request_handler handler;
 
-		route(verb method, path_spec&& path, request_router2::request_handler&& handler)
-		    : method{ method }
-		    , path{ std::move(path) }
+		route(operation op, request_router2::request_handler handler)
+		    : op{ std::move(op) }
 		    , handler{ std::move(handler) }
 		{
 		}
@@ -49,9 +47,9 @@ public:
 	{
 		for (const auto& route : this->routes_)
 		{
-			if (route.method == req.method())
+			if (route.op.method == req.method())
 			{
-				auto param_map = route.path.match(p);
+				auto param_map = route.op.path.match(p);
 				if (param_map.has_value())
 				{
 					return route.handler(std::move(req), std::move(url), std::move(param_map.value()));
@@ -78,9 +76,9 @@ public:
 		return this->route_request(std::move(req), std::move(url.value()), path{ url.value().path() });
 	}
 
-	void add_route(verb method, path_spec&& path, request_handler&& handler)
+	void add_route(operation op, request_handler handler)
 	{
-		this->routes_.emplace_back(method, std::move(path), std::move(handler));
+		this->routes_.emplace_back(std::move(op), std::move(handler));
 	}
 };
 
@@ -98,9 +96,9 @@ message_generator request_router2::handle_request(request&& req)
 	return this->pimpl_->route_request(std::move(req));
 }
 
-void request_router2::add_route(verb method, path_spec&& path, request_handler&& handler)
+void request_router2::add_route(operation op, request_handler handler)
 {
-	return this->pimpl_->add_route(method, std::move(path), std::move(handler));
+	return this->pimpl_->add_route(std::move(op), std::move(handler));
 }
 
 } // namespace spider

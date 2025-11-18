@@ -12,7 +12,7 @@
 
 #include <boost/url/url_view.hpp>
 
-#include <string>
+#include <string_view>
 #include <variant>
 
 namespace zoo {
@@ -20,24 +20,26 @@ namespace spider {
 
 struct parameters final
 {
-	struct path_parameter final
+	struct named_parameter
 	{
-		std::string name;
+		std::string_view name;
+		std::string_view description;
 	};
 
-	struct query_parameter final
+	struct path_parameter final : named_parameter
 	{
-		std::string name;
 	};
 
-	struct header_parameter final
+	struct query_parameter final : named_parameter
 	{
-		std::string name;
+	};
+
+	struct header_parameter final : named_parameter
+	{
 	};
 
 	struct json_body final
 	{
-		std::string name;
 	};
 
 	struct request_parameter final
