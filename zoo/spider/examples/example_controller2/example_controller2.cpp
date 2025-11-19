@@ -15,9 +15,11 @@
 #include "zoo/spider/content_container.hpp"
 #include "zoo/spider/status_result.hpp"
 #include "zoo/spider/aliases.h"
+#include "zoo/spider/tag_invoke/uuid.h"
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/formatters.hpp"
 #include "zoo/common/misc/rlws.hpp"
+#include "zoo/common/misc/uuid.h"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/signal_set.hpp>
@@ -142,8 +144,11 @@ struct Test
 	using NAME = Test<TYPE>;                                                                                                               \
 	SPIDER_OAS_REGISTER_TYPE_NAME(NAME, #NAME)
 
-DESCRIBE_TEST_SPECIALIZATION(std::string, FooBar)
-SPIDER_OAS_REGISTER_TYPE_EXAMPLE(FooBar, (FooBar{ true, "The foo string" }))
+DESCRIBE_TEST_SPECIALIZATION(std::string, TestString)
+SPIDER_OAS_REGISTER_TYPE_EXAMPLE(TestString, (TestString{ true, "The test string" }))
+
+DESCRIBE_TEST_SPECIALIZATION(boost::uuids::uuid, TestUuid)
+SPIDER_OAS_REGISTER_TYPE_EXAMPLE(TestUuid, (TestUuid{ true, zoo::conversion::string_to_uuid("969fbc80-ab71-45b2-b34c-d211890823d0") }))
 
 template<http::status Status, typename T>
 auto make_status_result(T&& result)
@@ -159,12 +164,13 @@ class api_controller final : public controller2<Error>
 
 	auto test()
 	{
-		// return FooBar{ true, "hello" };
-		// return status_result<status::accepted, FooBar>{ true, "hello" };
-		return make_status_result<status::accepted>(FooBar{ true, "hello" });
+		// return TestString{ true, "hello" };
+		// return status_result<status::accepted, TestString>{ true, "hello" };
+		// return make_status_result<status::accepted>(TestString{ true, "hello" });
+		return make_status_result<status::accepted>(TestUuid{ true, zoo::uuid::generate() });
 	}
 
-	std::variant<status_result<status::ok, FooBar>,
+	std::variant<status_result<status::ok, TestString>,
 	             status_result<status::ok, image_container>, // not used, for OAS demo only
 	             status_result<status::not_found, std::string>,
 	             status_result<status::not_found, Error> // not used, for OAS demo only
@@ -173,7 +179,7 @@ class api_controller final : public controller2<Error>
 	{
 		if (found)
 		{
-			return make_status_result<status::ok>(FooBar{ true, "hello" });
+			return make_status_result<status::ok>(TestString{ true, "hello" });
 		}
 		else
 		{

@@ -33,6 +33,7 @@ add_zoo_library(spider
 		tag_invoke/time_point.cpp
 		tag_invoke/date.cpp
 		tag_invoke/time_duration.cpp
+		tag_invoke/uuid.cpp
 		apilinktest.cpp
 	PUBLIC_HEADERS
 		aliases.h
@@ -63,6 +64,7 @@ add_zoo_library(spider
 		tag_invoke/time_point.h
 		tag_invoke/date.h
 		tag_invoke/time_duration.h
+		tag_invoke/uuid.h
 		apilinktest.h
 		#//@@ TODO: add new required public header files
 	MSVC_PRIVATE_COMPILER_OPTIONS

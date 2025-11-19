@@ -15,6 +15,7 @@
 #include <boost/optional/optional.hpp>
 #include "boost/json/conversion.hpp"
 #include "boost/describe/enum_from_string.hpp"
+#include <boost/uuid/uuid.hpp>
 
 #include <fmt/format.h>
 
@@ -41,6 +42,7 @@ public:
 	static date                             from_string_view(std::string_view in, const date* const tag);
 	static time_of_day                      from_string_view(std::string_view in, const time_of_day* const tag);
 	static time_point                       from_string_view(std::string_view in, const time_point* const tag);
+	static boost::uuids::uuid               from_string_view(std::string_view in, const boost::uuids::uuid* const tag);
 
 	template<typename T>
 	static std::enable_if_t<std::is_scalar_v<T> && !std::is_enum_v<T>, T> from_string_view(std::string_view in, const T* const)

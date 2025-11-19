@@ -12,6 +12,7 @@
 
 #include <boost/date_time/gregorian/greg_date.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
+#include <boost/uuid/uuid.hpp>
 
 #include <fmt/format.h>
 
@@ -111,6 +112,12 @@ boost::posix_time::time_duration ZOO_COMMON_API string_to_boost_time_duration(st
 
 void ZOO_COMMON_API        boost_time_duration_to_string(const boost::posix_time::time_duration& in, std::string& out);
 std::string ZOO_COMMON_API boost_time_duration_to_string(const boost::posix_time::time_duration& in);
+
+void ZOO_COMMON_API        uuid_to_string(const boost::uuids::uuid& in, std::string& out);
+std::string ZOO_COMMON_API uuid_to_string(const boost::uuids::uuid& in);
+
+void ZOO_COMMON_API               string_to_uuid(std::string_view in, boost::uuids::uuid& out);
+boost::uuids::uuid ZOO_COMMON_API string_to_uuid(std::string_view in);
 
 } // namespace conversion
 } // namespace zoo

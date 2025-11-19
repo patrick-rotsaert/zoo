@@ -64,5 +64,10 @@ conversions::time_point conversions::from_string_view(std::string_view in, const
 	return conversion::string_to_time_point(in);
 }
 
+boost::uuids::uuid conversions::from_string_view(std::string_view in, const boost::uuids::uuid* const)
+{
+	return conversion::string_to_uuid(in);
+}
+
 } // namespace spider
 } // namespace zoo

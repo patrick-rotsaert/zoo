@@ -479,6 +479,11 @@ private:
 			schema["type"]   = "string";
 			schema["format"] = "date-time";
 		}
+		else if constexpr (std::is_same_v<T, boost::uuids::uuid>)
+		{
+			schema["type"]   = "string";
+			schema["format"] = "uuid";
+		}
 		else if constexpr (std::is_enum_v<T> && boost::json::is_described_enum<T>::value)
 		{
 			schema["$ref"] = add_components_schema<T>();
