@@ -8,8 +8,8 @@
 #pragma once
 
 #include "zoo/spider/config.h"
+#include "zoo/spider/rest/pathfwd.h"
 #include "zoo/spider/aliases.h"
-#include "zoo/spider/pathfwd.h"
 
 #include <vector>
 #include <string>

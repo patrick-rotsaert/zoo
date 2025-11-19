@@ -7,8 +7,8 @@
 
 #pragma once
 
+#include "zoo/spider/rest/pathspec.h"
 #include "zoo/spider/message.h"
-#include "zoo/spider/pathspec.h"
 
 #include <boost/url/url_view.hpp>
 

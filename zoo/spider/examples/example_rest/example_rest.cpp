@@ -5,7 +5,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "zoo/spider/controller2.hpp"
+#include "zoo/spider/rest/controller.hpp"
+#include "zoo/spider/rest/status_result.hpp"
 #include "zoo/spider/listener.h"
 #include "zoo/spider/error_response.h"
 #include "zoo/spider/file_response.h"
@@ -13,8 +14,8 @@
 #include "zoo/spider/empty_response.h"
 #include "zoo/spider/binary_response.h"
 #include "zoo/spider/content_container.hpp"
-#include "zoo/spider/status_result.hpp"
 #include "zoo/spider/aliases.h"
+#include "zoo/spider/json_util.h"
 #include "zoo/spider/tag_invoke/uuid.h"
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/formatters.hpp"
@@ -156,7 +157,7 @@ auto make_status_result(T&& result)
 	return status_result<Status, T>{ std::move(result) };
 }
 
-class api_controller final : public controller2<Error>
+class api_controller final : public rest_controller<Error>
 {
 	struct exception : public exception_base
 	{
@@ -247,10 +248,10 @@ class api_controller final : public controller2<Error>
 	}
 
 public:
-	explicit api_controller(const std::shared_ptr<request_router2>& router = std::make_shared<request_router2>())
-	    : controller2{ router, openapi_settings{ .strip_ns = "myns::", .info_title = "Demo API", .info_version = "1.0" } }
+	explicit api_controller(const std::shared_ptr<rest_router>& router = std::make_shared<rest_router>())
+	    : rest_controller{ router, openapi_settings{ .strip_ns = "myns::", .info_title = "Demo API", .info_version = "1.0" } }
 	{
-		using p = controller2::p;
+		using p = rest_controller::p;
 
 		add_operation(operation{ .method       = verb::get,                          // HTTP method
 		                         .path         = path_spec{ "api" } / "v1" / "test", // Path spec
@@ -337,8 +338,9 @@ public:
 
 	std::string open_api() const
 	{
-		const auto jv = openapi_spec();
-		return boost::json::serialize(jv);
+		const auto& jv = oas().spec();
+		// return boost::json::serialize(jv);
+		return json_util::pretty_print(jv);
 	}
 };
 
@@ -357,20 +359,9 @@ void init_logging_to_stderr()
 {
 	auto stderr_logger = spdlog::stderr_color_mt("stderr");
 
-	// // 1. Create the specific stderr sink (thread-safe, with colors)
-	// auto stderr_sink = std::make_shared<spdlog::sinks::>();
-
-	// // 2. Create a new logger using only this sink
-	// //    We name it "stderr_logger" but it will act as the global default.
-	// auto stderr_logger = std::make_shared<spdlog::logger>("stderr_logger", stderr_sink);
-
-	// 3. Apply your desired settings to this specific logger
 	stderr_logger->set_level(spdlog::level::trace);
 	stderr_logger->set_pattern("%L [%Y-%m-%d %H:%M:%S.%f Δt=%iμs](%t) %^%v%$ [%s:%#]");
 
-	// 4. Set the new logger as the global default.
-	//    Any subsequent calls to SPDLOG_... macros will now use this logger,
-	//    which only writes to stderr.
 	spdlog::set_default_logger(stderr_logger);
 }
 

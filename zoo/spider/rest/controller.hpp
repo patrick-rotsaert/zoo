@@ -16,12 +16,12 @@
 #pragma once
 
 #include "zoo/spider/config.h"
-#include "zoo/spider/operation.h"
-#include "zoo/spider/handler.hpp"
+#include "zoo/spider/rest/operation.h"
+#include "zoo/spider/rest/handler.hpp"
+#include "zoo/spider/rest/openapi.hpp"
+#include "zoo/spider/rest/parameters.h"
+#include "zoo/spider/rest/router.h"
 #include "zoo/spider/concepts.hpp"
-#include "zoo/spider/openapi.hpp"
-#include "zoo/spider/parameters.h"
-#include "zoo/spider/request_router2.h"
 #include "zoo/spider/error_response.h"
 #include "zoo/spider/response_wrapper.hpp"
 #include "zoo/spider/json_response.h"
@@ -52,23 +52,28 @@ namespace zoo {
 namespace spider {
 
 template<IsValidErrorType DefaultErrorType>
-class controller2
+class rest_controller
 {
 public:
 	using p            = parameters::p;
 	using openapi_type = openapi<DefaultErrorType>;
 
-	explicit controller2(std::shared_ptr<request_router2> router, openapi_settings settings)
+	explicit rest_controller(std::shared_ptr<rest_router> router, openapi_settings settings)
 	    : router_{ std::move(router) }
 	    , oas_{ std::move(settings) }
 	{
 	}
 
-	virtual ~controller2() = default;
+	virtual ~rest_controller() = default;
 
-	const std::shared_ptr<request_router2>& router() const
+	const std::shared_ptr<rest_router>& router() const
 	{
 		return router_;
+	}
+
+	const openapi_type& oas() const
+	{
+		return oas_;
 	}
 
 protected:
@@ -114,11 +119,6 @@ protected:
 		                   });
 	}
 
-	const boost::json::object& openapi_spec() const
-	{
-		return oas_.spec();
-	}
-
 private:
 	template<typename T>
 	static response_wrapper make_response(T&& payload, http::status status)
@@ -157,8 +157,8 @@ private:
 		return json_response::create(req, status, std::move(payload));
 	}
 
-	std::shared_ptr<request_router2> router_;
-	openapi_type                     oas_;
+	std::shared_ptr<rest_router> router_;
+	openapi_type                 oas_;
 };
 
 } // namespace spider

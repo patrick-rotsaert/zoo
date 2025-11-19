@@ -7,8 +7,8 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <zoo/spider/pathspec.h>
-#include <zoo/spider/path.h>
+#include <zoo/spider/rest/pathspec.h>
+#include <zoo/spider/rest/path.h>
 
 namespace zoo {
 namespace spider {

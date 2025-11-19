@@ -12,9 +12,6 @@ add_zoo_library(spider
 		http_session.h
 		irequest_handler.cpp
 		request_router.cpp
-		request_router2.cpp
-		path.cpp
-		pathspec.cpp
 		json_response.cpp
 		file_response.cpp
 		buffer_response.cpp
@@ -26,10 +23,14 @@ add_zoo_library(spider
 		ifile_event_listener.cpp
 		noop_file_event_listener.cpp
 		controller.cpp
-		conversions.cpp
 		log_response.cpp
 		exception.cpp
 		exception.h
+		json_util.cpp
+		rest/conversions.cpp
+		rest/path.cpp
+		rest/pathspec.cpp
+		rest/router.cpp
 		tag_invoke/time_point.cpp
 		tag_invoke/date.cpp
 		tag_invoke/time_duration.cpp
@@ -41,9 +42,6 @@ add_zoo_library(spider
 		listener.h
 		irequest_handler.h
 		request_router.h
-		request_router2.h
-		path.h
-		pathspec.h
 		json_response.h
 		file_response.h
 		buffer_response.h
@@ -55,22 +53,33 @@ add_zoo_library(spider
 		noop_file_event_listener.h
 		dispatcher.hpp
 		controller.hpp
-		controller2.hpp
-		handler.hpp
-		conversions.h
-		parameters.h
-		openapi.hpp
 		log_response.h
+		json_util.h
+		rest/annotation.hpp
+		rest/concepts.hpp
+		rest/controller.hpp
+		rest/conversions.h
+		rest/handler.hpp
+		rest/openapi.hpp
+		rest/operation.h
+		rest/parameters.h
+		rest/pathfwd.h
+		rest/path.h
+		rest/pathspecfwd.h
+		rest/pathspec.h
+		rest/registry.hpp
+		rest/router.h
+		rest/status_result.hpp
+		rest/status_utility.hpp
 		tag_invoke/time_point.h
 		tag_invoke/date.h
 		tag_invoke/time_duration.h
 		tag_invoke/uuid.h
 		apilinktest.h
-		#//@@ TODO: add new required public header files
 	MSVC_PRIVATE_COMPILER_OPTIONS
 		/wd4702 # for boost\beast\core\impl\buffers_cat.hpp(186): warning C4702: unreachable code
 	UNIT_TEST_SOURCES
-		test/unit/test_pathspec.cpp
+		test/unit/rest/test_pathspec.cpp
 	PUBLIC_LIBRARIES
 		zoo::common
 		Boost::system

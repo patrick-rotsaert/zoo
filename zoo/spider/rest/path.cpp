@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "zoo/spider/path.h"
+#include "zoo/spider/rest/path.h"
 
 #include <boost/url/url_view.hpp>
 #include <boost/algorithm/string/split.hpp>

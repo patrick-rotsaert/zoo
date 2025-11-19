@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "zoo/spider/conversions.h"
+#include "zoo/spider/rest/conversions.h"
 #include "zoo/spider/aliases.h"
 
 #include <boost/beast/core/string.hpp>

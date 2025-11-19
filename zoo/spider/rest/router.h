@@ -8,37 +8,44 @@
 #pragma once
 
 #include "zoo/spider/config.h"
+#include "zoo/spider/rest/operation.h"
 #include "zoo/spider/irequest_handler.h"
-#include "zoo/spider/operation.h"
 #include "zoo/spider/aliases.h"
 
 #include <boost/beast/http/message_generator.hpp>
 #include <boost/url/url_view.hpp>
 
-#include <memory>
 #include <functional>
 
 namespace zoo {
 namespace spider {
 
-class ZOO_SPIDER_API request_router2 final : public irequest_handler
+class ZOO_SPIDER_API rest_router final : public irequest_handler
 {
-	class impl;
-	std::unique_ptr<impl> pimpl_;
-
 	using request_handler = std::function<message_generator(request&& req, url_view&& url, path_spec::param_map&& param)>;
 
 	message_generator handle_request(request&& req) override;
+	message_generator route_request(request&& req, url_view&& url, path&& p);
+
+	struct route final
+	{
+		operation       op;
+		request_handler handler;
+
+		route(operation op, request_handler handler);
+	};
+
+	std::vector<route> routes_;
 
 public:
-	request_router2();
-	~request_router2() noexcept override;
+	rest_router();
+	rest_router(rest_router&&);
+	rest_router(const rest_router&) = delete;
 
-	request_router2(request_router2&&);
-	request_router2& operator=(request_router2&&);
+	~rest_router() noexcept override;
 
-	request_router2(const request_router2&)            = delete;
-	request_router2& operator=(const request_router2&) = delete;
+	rest_router& operator=(rest_router&&);
+	rest_router& operator=(const rest_router&) = delete;
 
 	void add_route(operation op, request_handler handler);
 };

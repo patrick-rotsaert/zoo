@@ -1,3 +1,5 @@
+// OBSOLETE: Use ./rest/controller.hpp instead
+
 //
 // Copyright (C) 2022-2024 Patrick Rotsaert
 // Distributed under the Boost Software License, Version 1.0.

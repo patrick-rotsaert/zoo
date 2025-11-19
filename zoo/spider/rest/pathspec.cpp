@@ -5,8 +5,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "zoo/spider/pathspec.h"
-#include "zoo/spider/path.h"
+#include "zoo/spider/rest/pathspec.h"
+#include "zoo/spider/rest/path.h"
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>

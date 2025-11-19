@@ -8,8 +8,8 @@
 #pragma once
 
 #include "zoo/spider/config.h"
-#include "zoo/spider/parameters.h"
-#include "zoo/spider/conversions.h"
+#include "zoo/spider/rest/parameters.h"
+#include "zoo/spider/rest/conversions.h"
 #include "zoo/spider/concepts.hpp"
 #include "zoo/spider/exception.h"
 #include "zoo/common/misc/throw_exception.h"

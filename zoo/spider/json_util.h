@@ -7,20 +7,19 @@
 
 #pragma once
 
-#include "zoo/spider/pathspec.h"
-#include "zoo/spider/aliases.h"
+#include "zoo/spider/config.h"
 
-#include <string_view>
+#include <boost/json/value.hpp>
+
+#include <string>
 
 namespace zoo {
 namespace spider {
 
-struct operation final
+class ZOO_SPIDER_API json_util final
 {
-	verb             method;
-	path_spec        path;
-	std::string_view operation_id;
-	std::string_view summary;
+public:
+	static std::string pretty_print(const boost::json::value& in);
 };
 
 } // namespace spider
