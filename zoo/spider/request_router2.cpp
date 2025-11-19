@@ -45,6 +45,8 @@ class request_router2::impl final
 public:
 	message_generator route_request(request&& req, url_view&& url, path&& p)
 	{
+		auto found = false;
+
 		for (const auto& route : this->routes_)
 		{
 			if (route.op.method == req.method())
@@ -55,10 +57,20 @@ public:
 					return route.handler(std::move(req), std::move(url), std::move(param_map.value()));
 				}
 			}
+			else if (route.op.path.match(p).has_value())
+			{
+				found = true;
+			}
 		}
 
-		return not_found::create(req); //@@
-		                               // ZOO_THROW_EXCEPTION(not_found_exception{});
+		if (found)
+		{
+			return method_not_allowed::create(req); //@@
+		}
+		else
+		{
+			return not_found::create(req); //@@
+		}
 	}
 
 	message_generator route_request(request&& req)
