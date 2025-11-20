@@ -22,7 +22,6 @@
 #include "zoo/spider/rest/parameters.h"
 #include "zoo/spider/rest/router.h"
 #include "zoo/spider/concepts.hpp"
-#include "zoo/spider/error_response.h"
 #include "zoo/spider/response_wrapper.hpp"
 #include "zoo/spider/json_response.h"
 #include "zoo/spider/binary_response.h"
@@ -35,18 +34,8 @@
 #include "zoo/common/misc/is_variant.hpp"
 
 #include <boost/json.hpp>
-#include <boost/exception/get_error_info.hpp>
-#include <boost/exception/errinfo_nested_exception.hpp>
-
-#include <fmt/format.h>
 
 #include <type_traits>
-#include <concepts>
-
-#include <tuple>
-#include <string>
-#include <array>
-#include <iomanip>
 
 namespace zoo {
 namespace spider {
@@ -78,7 +67,7 @@ public:
 
 protected:
 	template<class Callback, typename... ArgDescriptors>
-	void add_operation(operation op, Callback callback, ArgDescriptors... descriptors)
+	void add_operation(rest_operation op, Callback callback, ArgDescriptors... descriptors)
 	{
 		oas_.add_operation(op, callback, descriptors...);
 

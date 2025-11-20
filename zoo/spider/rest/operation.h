@@ -15,7 +15,7 @@
 namespace zoo {
 namespace spider {
 
-struct operation final
+struct rest_operation final
 {
 	verb             method;
 	path_spec        path;

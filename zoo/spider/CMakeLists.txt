@@ -67,7 +67,6 @@ add_zoo_library(spider
 		rest/path.h
 		rest/pathspecfwd.h
 		rest/pathspec.h
-		rest/registry.hpp
 		rest/router.h
 		rest/status_result.hpp
 		rest/status_utility.hpp

@@ -29,10 +29,10 @@ class ZOO_SPIDER_API rest_router final : public irequest_handler
 
 	struct route final
 	{
-		operation       op;
+		rest_operation  op;
 		request_handler handler;
 
-		route(operation op, request_handler handler);
+		route(rest_operation op, request_handler handler);
 	};
 
 	std::vector<route> routes_;
@@ -47,7 +47,7 @@ public:
 	rest_router& operator=(rest_router&&);
 	rest_router& operator=(const rest_router&) = delete;
 
-	void add_route(operation op, request_handler handler);
+	void add_route(rest_operation op, request_handler handler);
 };
 
 } // namespace spider

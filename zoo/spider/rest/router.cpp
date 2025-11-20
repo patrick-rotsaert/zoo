@@ -26,7 +26,7 @@
 namespace zoo {
 namespace spider {
 
-rest_router::route::route(operation op, request_handler handler)
+rest_router::route::route(rest_operation op, request_handler handler)
     : op{ std::move(op) }
     , handler{ std::move(handler) }
 {
@@ -45,7 +45,7 @@ rest_router& rest_router::operator=(rest_router&&) = default;
 
 message_generator rest_router::handle_request(request&& req)
 {
-	ZOO_LOG(trace, "request:\n{}", fmt::streamed(req));
+	// ZOO_LOG(trace, "request:\n{}", fmt::streamed(req));//@@
 
 	auto url = boost::urls::parse_origin_form(req.target());
 	if (url.has_error())
@@ -87,7 +87,7 @@ message_generator rest_router::route_request(request&& req, url_view&& url, path
 	}
 }
 
-void rest_router::add_route(operation op, request_handler handler)
+void rest_router::add_route(rest_operation op, request_handler handler)
 {
 	routes_.emplace_back(std::move(op), std::move(handler));
 }

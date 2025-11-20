@@ -12,7 +12,6 @@
 #include "zoo/spider/rest/concepts.hpp"
 #include "zoo/spider/rest/status_utility.hpp"
 #include "zoo/spider/rest/annotation.hpp"
-#include "zoo/spider/rest/registry.hpp"
 #include "zoo/spider/concepts.hpp"
 #include "zoo/common/misc/is_optional.hpp"
 #include "zoo/common/misc/is_vector.hpp"
@@ -64,7 +63,7 @@ public:
 	}
 
 	template<class Callback, typename... ArgDescriptors>
-	void add_operation(operation op, Callback callback, ArgDescriptors... descriptors)
+	void add_operation(rest_operation op, Callback callback, ArgDescriptors... descriptors)
 	{
 		using namespace boost::json;
 
@@ -478,9 +477,9 @@ private:
 				schema["required"] = std::move(required);
 			}
 
-			if (auto example = openapi_type_example_registry::get_type_example<T>())
+			if constexpr (HasStaticExampleMethod<T>)
 			{
-				schema["example"] = std::move(example.value());
+				schema["example"] = boost::json::value_from(T::example());
 			}
 
 			add_components_schema(type_name, std::move(schema));
@@ -545,17 +544,22 @@ private:
 	template<typename T>
 	std::string get_type_name()
 	{
-		if (auto name = openapi_type_name_registry::get_type_name<T>())
+		if constexpr (HasStaticTypeNameMethod<T>)
 		{
-			return std::move(name.value());
+			return std::string{ T::type_name() };
 		}
-		auto type_name = demangled_type_name<T>();
-		if (!settings_.strip_ns.empty() && std::string_view{ type_name }.starts_with(settings_.strip_ns))
+		else
 		{
-			type_name = type_name.substr(settings_.strip_ns.length());
+			auto type_name = demangled_type_name<T>();
+			if (!settings_.strip_ns.empty() && std::string_view{ type_name }.starts_with(settings_.strip_ns))
+			{
+				type_name = type_name.substr(settings_.strip_ns.length());
+			}
+			boost::algorithm::replace_all(type_name, "::", "_");
+			boost::algorithm::replace_all(type_name, "<", "_");
+			boost::algorithm::replace_all(type_name, ">", "_");
+			return type_name;
 		}
-		boost::algorithm::replace_all(type_name, "::", "_");
-		return type_name;
 	}
 
 	openapi_settings    settings_;

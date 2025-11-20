@@ -28,6 +28,16 @@ concept IsValidErrorType = std::is_class_v<T> && boost::json::is_described_class
 };
 
 template<typename T>
+concept HasStaticExampleMethod = std::is_class_v<T> && boost::json::is_described_class<T>::value && requires {
+	{ T::example() } -> std::same_as<T>;
+};
+
+template<typename T>
+concept HasStaticTypeNameMethod = std::is_class_v<T> && boost::json::is_described_class<T>::value && requires {
+	{ T::type_name() } -> std::convertible_to<const std::string_view&>;
+};
+
+template<typename T>
 concept IsStatusResult = requires {
 	{ T::STATUS } -> std::convertible_to<http::status>;
 	typename T::value_type;

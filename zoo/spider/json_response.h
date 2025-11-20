@@ -10,11 +10,8 @@
 #include "zoo/spider/config.h"
 #include "zoo/spider/aliases.h"
 #include "zoo/spider/message.h"
-#include "zoo/spider/concepts.hpp" //@@
 
 #include <boost/json.hpp>
-
-#include <concepts> //@@
 
 namespace zoo {
 namespace spider {
