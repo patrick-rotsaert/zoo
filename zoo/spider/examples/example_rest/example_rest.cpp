@@ -9,6 +9,7 @@
 
 #include "zoo/spider/listener.h"
 #include "zoo/common/logging/logging.h"
+#include "zoo/common/misc/formatters.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/signal_set.hpp>
@@ -19,11 +20,48 @@
 #include <fmt/format.h>
 
 #include <thread>
+#include <atomic>
 
 namespace demo {
 
 using namespace zoo::spider;
 using namespace fmt::literals;
+
+class LoggingHandler : public irequest_handler
+{
+	std::shared_ptr<irequest_handler> handler_;
+	std::atomic<unsigned>             reqNum_;
+
+	response_wrapper handle_request(request&& req) override
+	{
+		// Log the request
+		const auto reqNum = ++reqNum_;
+		ZOO_LOG(trace, "[{}]>>>\n{}", reqNum, fmt::streamed(req));
+
+		// Get the response
+		auto res = handler_->handle_request(std::move(req));
+
+		// Log the response
+		std::visit(
+		    [&](const auto& arg) {
+			    using P = std::decay_t<decltype(arg)>;
+			    if constexpr (std::is_same_v<P, http::response<http::string_body>> || std::is_same_v<P, http::response<http::empty_body>>)
+			    {
+				    ZOO_LOG(trace, "[{}]<<<\n{}", reqNum, fmt::streamed(arg));
+			    }
+		    },
+		    res.value());
+
+		return res;
+	}
+
+public:
+	explicit LoggingHandler(std::shared_ptr<irequest_handler> handler)
+	    : handler_{ std::move(handler) }
+	    , reqNum_{}
+	{
+	}
+};
 
 } // namespace demo
 
@@ -41,7 +79,8 @@ int main(int argc, char* argv[])
 {
 	using namespace demo;
 
-	// Check command line arguments.
+	const auto logMessages = true;
+
 	if (argc != 4 && argc != 1)
 	{
 		fmt::print(stderr,
@@ -54,9 +93,11 @@ int main(int argc, char* argv[])
 
 	init_logging_to_stderr();
 
+	auto api = Controller{};
+
 	if (argc == 1)
 	{
-		std::cout << Controller{}.openApiSpec() << '\n';
+		std::cout << api.openApiSpec() << '\n';
 		return EXIT_SUCCESS;
 	}
 
@@ -66,14 +107,17 @@ int main(int argc, char* argv[])
 
 	zlog(info, "application started");
 
-	auto api = Controller{};
+	auto handler = api.router();
+	if (logMessages)
+	{
+		handler = std::make_shared<LoggingHandler>(std::move(handler));
+	}
 
-	// The io_context is required for all I/O
 	auto ioc = boost::asio::io_context{ threads };
 
 	// Create and launch a listening port
 	auto ec = error_code{};
-	listener::run(ioc, address, port, api.router(), ec);
+	listener::run(ioc, address, port, handler, ec);
 	if (ec)
 	{
 		// errors are already logged by listener, no need to repeat that here.

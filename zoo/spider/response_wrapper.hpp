@@ -54,20 +54,12 @@ public:
 	{
 		std::visit([&](auto&& arg) { arg.version(value); }, this->value_);
 	}
-};
 
-template<typename T>
-struct is_http_response : std::false_type
-{
+	const auto& value() const
+	{
+		return value_;
+	}
 };
-
-template<typename U>
-struct is_http_response<http::response<U>> : std::true_type
-{
-};
-
-template<typename T>
-inline constexpr bool is_http_response_v = is_http_response<T>::value;
 
 } // namespace spider
 } // namespace zoo

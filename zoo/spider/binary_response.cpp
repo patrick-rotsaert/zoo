@@ -1,5 +1,4 @@
 #include "zoo/spider/binary_response.h"
-#include "zoo/spider/log_response.h"
 
 #include <boost/beast/version.hpp>
 

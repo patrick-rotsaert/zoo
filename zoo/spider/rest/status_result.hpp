@@ -21,6 +21,11 @@ struct status_result
 
 	using value_type = std::decay_t<T>;
 	value_type result;
+
+	status_result(value_type&& result)
+	    : result{ std::move(result) }
+	{
+	}
 };
 
 } // namespace spider

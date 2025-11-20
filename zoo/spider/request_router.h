@@ -12,7 +12,6 @@
 #include "zoo/spider/aliases.h"
 #include "zoo/spider/concepts.hpp"
 
-#include <boost/beast/http/message_generator.hpp>
 #include <boost/url/url_view.hpp>
 #include <boost/json.hpp>
 #include <boost/regex.hpp>
@@ -33,13 +32,13 @@ class ZOO_SPIDER_API request_router final : public irequest_handler
 	friend impl; // allow impl to call private method route_request
 
 	using svmatch         = boost::match_results<string_view::const_iterator>;
-	using request_handler = std::function<message_generator(request&& req, url_view&& url, string_view path, const svmatch& match)>;
+	using request_handler = std::function<response_wrapper(request&& req, url_view&& url, string_view path, const svmatch& match)>;
 	template<ConvertibleFromBoostJson T>
 	using json_request_handler = std::function<
-	    message_generator(request&& req, url_view&& url, string_view path, const svmatch& match, boost::json::result<T>&& data)>;
+	    response_wrapper(request&& req, url_view&& url, string_view path, const svmatch& match, boost::json::result<T>&& data)>;
 
-	message_generator handle_request(request&& req) override;
-	message_generator route_request(request&& req, url_view&& url, string_view path);
+	response_wrapper handle_request(request&& req) override;
+	response_wrapper route_request(request&& req, url_view&& url, string_view path);
 
 public:
 	request_router();
@@ -66,7 +65,7 @@ public:
 		this->add_route(
 		    std::move(methods),
 		    std::move(pattern),
-		    [handler = std::move(handler)](request&& req, url_view&& url, string_view path, const svmatch& match) -> message_generator {
+		    [handler = std::move(handler)](request&& req, url_view&& url, string_view path, const svmatch& match) -> response_wrapper {
 			    using result = boost::json::result<T>;
 
 			    auto       ec = std::error_code{};

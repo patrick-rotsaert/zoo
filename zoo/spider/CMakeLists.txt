@@ -30,7 +30,6 @@ add_zoo_library(spider
 		rest/conversions.cpp
 		rest/path.cpp
 		rest/pathspec.cpp
-		rest/router.cpp
 		tag_invoke/time_point.cpp
 		tag_invoke/date.cpp
 		tag_invoke/time_duration.cpp
@@ -51,13 +50,14 @@ add_zoo_library(spider
 		response_wrapper.hpp
 		ifile_event_listener.h
 		noop_file_event_listener.h
-		dispatcher.hpp
 		controller.hpp
 		log_response.h
 		json_util.h
+		type_traits.h
 		rest/annotation.hpp
 		rest/concepts.hpp
 		rest/controller.hpp
+		rest/router.hpp
 		rest/conversions.h
 		rest/handler.hpp
 		rest/openapi.hpp
@@ -67,7 +67,6 @@ add_zoo_library(spider
 		rest/path.h
 		rest/pathspecfwd.h
 		rest/pathspec.h
-		rest/router.h
 		rest/status_result.hpp
 		rest/status_utility.hpp
 		tag_invoke/time_point.h

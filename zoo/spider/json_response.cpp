@@ -6,7 +6,6 @@
 //
 
 #include "zoo/spider/json_response.h"
-#include "zoo/spider/log_response.h"
 
 #include <boost/beast/version.hpp>
 
@@ -21,7 +20,7 @@ response spider::json_response::create_impl(const request& req, http::status sta
 	res.keep_alive(req.keep_alive());
 	res.body() = std::move(json);
 	res.prepare_payload();
-	return log_response(std::move(res));
+	return res;
 }
 
 response json_response::create_impl(http::status status, std::string&& json)
@@ -32,7 +31,7 @@ response json_response::create_impl(http::status status, std::string&& json)
 	res.set(http::field::content_type, "application/json");
 	res.body() = std::move(json);
 	res.prepare_payload();
-	return log_response(std::move(res));
+	return res;
 }
 
 } // namespace spider

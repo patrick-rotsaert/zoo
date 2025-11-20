@@ -19,14 +19,15 @@
 #include "zoo/spider/rest/operation.h"
 #include "zoo/spider/rest/handler.hpp"
 #include "zoo/spider/rest/openapi.hpp"
+#include "zoo/spider/rest/router.hpp"
 #include "zoo/spider/rest/parameters.h"
-#include "zoo/spider/rest/router.h"
 #include "zoo/spider/concepts.hpp"
 #include "zoo/spider/response_wrapper.hpp"
 #include "zoo/spider/json_response.h"
 #include "zoo/spider/binary_response.h"
 #include "zoo/spider/empty_response.h"
 #include "zoo/spider/exception.h"
+#include "zoo/spider/type_traits.h"
 
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/formatters.hpp"
@@ -46,16 +47,17 @@ class rest_controller
 public:
 	using p            = parameters::p;
 	using openapi_type = openapi<DefaultErrorType>;
+	using router_type  = rest_router<DefaultErrorType>;
 
-	explicit rest_controller(std::shared_ptr<rest_router> router, openapi_settings settings)
-	    : router_{ std::move(router) }
+	explicit rest_controller(openapi_settings settings)
+	    : router_{ std::make_shared<router_type>() }
 	    , oas_{ std::move(settings) }
 	{
 	}
 
 	virtual ~rest_controller() = default;
 
-	const std::shared_ptr<rest_router>& router() const
+	const std::shared_ptr<irequest_handler> router() const
 	{
 		return router_;
 	}
@@ -146,7 +148,7 @@ private:
 		return json_response::create(req, status, std::move(payload));
 	}
 
-	std::shared_ptr<rest_router> router_;
+	std::shared_ptr<router_type> router_;
 	openapi_type                 oas_;
 };
 

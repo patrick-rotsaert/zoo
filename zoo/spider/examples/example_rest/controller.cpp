@@ -7,8 +7,8 @@ namespace demo {
 
 using namespace zoo::spider;
 
-Controller::Controller(std::shared_ptr<rest_router> router)
-    : rest_controller{ std::move(router), openapi_settings{ .strip_ns = "demo::", .info_title = "Demo API", .info_version = "1.0" } }
+Controller::Controller()
+    : rest_controller{ openapi_settings{ .strip_ns = "demo::", .info_title = "Demo API", .info_version = "1.0" } }
 {
 	using p = rest_controller::p;
 

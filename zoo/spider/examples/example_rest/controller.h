@@ -17,7 +17,7 @@ namespace demo {
 class Controller final : public zoo::spider::rest_controller<Error>, public Operations
 {
 public:
-	explicit Controller(std::shared_ptr<zoo::spider::rest_router> router = std::make_shared<zoo::spider::rest_router>());
+	explicit Controller();
 
 	std::string openApiSpec() const;
 };

@@ -65,7 +65,8 @@ status_result<status::not_implemented, Error> Operations::fail(std::optional<boo
 	}
 	else
 	{
-		return make_status_result<status::not_implemented>(Error::create(42, "The error message"));
+		// return make_status_result<status::not_implemented>(Error::create(42, "The error message"));
+		return Error::create(42, "The error message");
 	}
 }
 

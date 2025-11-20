@@ -22,6 +22,8 @@ namespace spider {
 template<typename T>
 concept IsValidErrorType = std::is_class_v<T> && boost::json::is_described_class<T>::value && requires(const std::exception& e) {
 	{ T::create(e) } -> std::same_as<T>;
+} && requires(int ec, std::string m) {
+	{ T::create(ec, m) } -> std::same_as<T>;
 } && requires(const T& t) {
 	{ t.status() } -> std::same_as<http::status>;
 	{ t.status() } noexcept;

@@ -10,8 +10,6 @@
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/formatters.hpp"
 
-#include <boost/beast/http/message_generator.hpp>
-
 #include <boost/beast/http.hpp> //FIXME: include less code?
 #include <boost/url/parse.hpp>
 
@@ -41,7 +39,7 @@ class request_router::impl final
 	std::vector<route> routes_;
 
 public:
-	message_generator route_request(request&& req, url_view&& url, string_view path)
+	response_wrapper route_request(request&& req, url_view&& url, string_view path)
 	{
 		const auto pos = path.find_first_not_of('/');
 		if (pos != string_view::npos && pos > 0u)
@@ -64,7 +62,7 @@ public:
 		return not_found::create(req);
 	}
 
-	message_generator route_request(request&& req)
+	response_wrapper route_request(request&& req)
 	{
 		ZOO_LOG(trace, "request:\n{}", fmt::streamed(req));
 
@@ -109,12 +107,12 @@ request_router::request_router(request_router&&) = default;
 
 request_router& request_router::operator=(request_router&&) = default;
 
-message_generator request_router::route_request(request&& req, url_view&& url, string_view path)
+response_wrapper request_router::route_request(request&& req, url_view&& url, string_view path)
 {
 	return this->pimpl_->route_request(std::move(req), std::move(url), path);
 }
 
-message_generator request_router::handle_request(request&& req)
+response_wrapper request_router::handle_request(request&& req)
 {
 	return this->pimpl_->route_request(std::move(req));
 }

@@ -23,9 +23,9 @@ class ZOO_SPIDER_API file_response final
 	using response = http::response<http::basic_file_body<tracked_file>>;
 
 public:
-	static message_generator
+	static response_wrapper
 	create(const request& req, const fs::path& doc_root, string_view path, std::unique_ptr<ifile_event_listener>&& event_listener);
-	static message_generator create(const request& req, const fs::path& doc_root, string_view path);
+	static response_wrapper create(const request& req, const fs::path& doc_root, string_view path);
 
 	static response_wrapper create(const fs::path& doc_root, string_view path, std::unique_ptr<ifile_event_listener>&& event_listener);
 	static response_wrapper create(const fs::path& doc_root, string_view path);

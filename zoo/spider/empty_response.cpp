@@ -6,7 +6,6 @@
 //
 
 #include "zoo/spider/empty_response.h"
-#include "zoo/spider/log_response.h"
 
 #include <boost/beast/version.hpp>
 
@@ -19,7 +18,7 @@ empty_response::empty empty_response::create(const request& req, http::status st
 	res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
 	res.keep_alive(req.keep_alive());
 	res.prepare_payload();
-	return log_response(std::move(res));
+	return res;
 }
 
 empty_response::empty empty_response::create(http::status status)
@@ -28,7 +27,7 @@ empty_response::empty empty_response::create(http::status status)
 	res.result(status);
 	res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
 	res.prepare_payload();
-	return log_response(std::move(res));
+	return res;
 }
 
 } // namespace spider

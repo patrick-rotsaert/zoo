@@ -50,6 +50,20 @@ const std::vector<string_view>& path::segments() const
 	return segments_;
 }
 
+std::string path::to_string() const
+{
+	std::string result{};
+	for (const auto& segment : segments_)
+	{
+		if (!result.empty())
+		{
+			result.append("/");
+		}
+		result.append(segment);
+	}
+	return result;
+}
+
 path& path::operator/=(const path& p)
 {
 	segments_.insert(segments_.end(), p.segments_.cbegin(), p.segments_.cend());

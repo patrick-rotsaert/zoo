@@ -29,6 +29,7 @@ public:
 	path& operator=(const path&);
 
 	const std::vector<string_view>& segments() const;
+	std::string                     to_string() const;
 
 	path& operator/=(const path& p);
 	path  operator/(const path& p);
