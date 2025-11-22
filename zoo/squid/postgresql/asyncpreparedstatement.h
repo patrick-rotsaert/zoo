@@ -8,7 +8,9 @@
 #pragma once
 
 #include "zoo/squid/postgresql/asyncexec.h"
+#include "zoo/squid/postgresql/backendconnectionfwd.h"
 #include "zoo/squid/postgresql/detail/ipqapi.h"
+#include "zoo/squid/postgresql/detail/queryfwd.h"
 #include "zoo/squid/core/parameter.h"
 
 #include <boost/asio/io_context.hpp>
@@ -21,9 +23,6 @@
 namespace zoo {
 namespace squid {
 namespace postgresql {
-
-class backend_connection;
-class postgresql_query;
 
 class async_prepared_statement final
 {

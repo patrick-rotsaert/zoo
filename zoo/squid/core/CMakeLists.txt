@@ -25,13 +25,19 @@ add_zoo_library(squid_core
 		result.h
 		error.h
 		ibackendstatement.h
+		ibackendstatementfwd.h
 		ibackendconnection.h
+		ibackendconnectionfwd.h
 		ibackendconnectionfactory.h
+		ibackendconnectionfactoryfwd.h
 		connection.h
+		connectionfwd.h
 		connectionpool.h
+		connectionpoolfwd.h
 		basicstatement.h
 		statement.h
 		preparedstatement.h
+		preparedstatementfwd.h
 		transaction.h
 		types.h
 		detail/parameterbinder.h

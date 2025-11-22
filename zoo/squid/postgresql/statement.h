@@ -9,6 +9,7 @@
 
 #include "zoo/squid/postgresql/config.h"
 #include "zoo/squid/postgresql/detail/libpqfwd.h"
+#include "zoo/squid/postgresql/detail/ipqapifwd.h"
 #include "zoo/squid/core/ibackendstatement.h"
 
 #include <memory>
@@ -17,15 +18,13 @@ namespace zoo {
 namespace squid {
 namespace postgresql {
 
-class ipq_api;
-
 class ZOO_SQUID_POSTGRESQL_API statement final : public ibackend_statement
 {
 	class impl;
 	std::unique_ptr<impl> pimpl_;
 
 public:
-	statement(ipq_api *api, std::shared_ptr<PGconn> connection, std::string_view query, bool reuse_statement);
+	statement(ipq_api* api, std::shared_ptr<PGconn> connection, std::string_view query, bool reuse_statement);
 	~statement() noexcept;
 
 	statement(statement&&);
@@ -44,7 +43,7 @@ public:
 
 	std::uint64_t affected_rows() override;
 
-	static void execute(ipq_api *api, PGconn& connection, const std::string& query);
+	static void execute(ipq_api* api, PGconn& connection, const std::string& query);
 };
 
 } // namespace postgresql

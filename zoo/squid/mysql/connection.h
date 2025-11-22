@@ -8,13 +8,12 @@
 #pragma once
 
 #include "zoo/squid/mysql/config.h"
+#include "zoo/squid/mysql/backendconnectionfwd.h"
 #include "zoo/squid/core/connection.h"
 
 namespace zoo {
 namespace squid {
 namespace mysql {
-
-class backend_connection;
 
 // Convenience class to create a connection to an MySQL backend
 // This class should be used if access to the native connection handle (MYSQL) is needed.

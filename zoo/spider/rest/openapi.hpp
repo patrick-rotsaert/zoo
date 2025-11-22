@@ -185,7 +185,7 @@ public:
 	}
 
 private:
-	static std::string method_name(verb method) //@@ TODO: move to utility class
+	static std::string method_name(verb method)
 	{
 		auto        sv = to_string(method);
 		std::string name{ sv.begin(), sv.end() };
@@ -214,7 +214,7 @@ private:
 		}
 	}
 
-	static boost::json::object& ensure_object(boost::json::value& v) //@@ TODO: move to utility class
+	static boost::json::object& ensure_object(boost::json::value& v)
 	{
 		return v.is_object() ? v.as_object() : v.emplace_object();
 	}

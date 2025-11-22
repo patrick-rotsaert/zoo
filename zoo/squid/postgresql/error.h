@@ -9,6 +9,7 @@
 
 #include "zoo/squid/postgresql/config.h"
 #include "zoo/squid/postgresql/detail/libpqfwd.h"
+#include "zoo/squid/postgresql/detail/ipqapifwd.h"
 #include "zoo/squid/core/error.h"
 
 #include <optional>
@@ -17,8 +18,6 @@
 namespace zoo {
 namespace squid {
 namespace postgresql {
-
-class ipq_api;
 
 class ZOO_SQUID_POSTGRESQL_API error : public squid::error
 {

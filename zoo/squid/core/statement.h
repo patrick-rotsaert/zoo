@@ -9,13 +9,12 @@
 
 #include "zoo/squid/core/config.h"
 #include "zoo/squid/core/basicstatement.h"
+#include "zoo/squid/core/connectionfwd.h"
 
 #include <string_view>
 
 namespace zoo {
 namespace squid {
-
-class connection;
 
 /// This statement class is intended for one-off operations.
 /// Some backends, e.g. SQLite3, implement this with a prepared statement

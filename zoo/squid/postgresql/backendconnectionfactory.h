@@ -8,13 +8,12 @@
 #pragma once
 
 #include "zoo/squid/postgresql/config.h"
+#include "zoo/squid/postgresql/detail/ipqapifwd.h"
 #include "zoo/squid/core/ibackendconnectionfactory.h"
 
 namespace zoo {
 namespace squid {
 namespace postgresql {
-
-class ipq_api;
 
 class ZOO_SQUID_POSTGRESQL_API backend_connection_factory final : public ibackend_connection_factory
 {

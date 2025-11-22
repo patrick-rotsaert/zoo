@@ -9,13 +9,12 @@
 
 #include "zoo/squid/sqlite3/config.h"
 #include "zoo/squid/sqlite3/detail/sqlite3fwd.h"
+#include "zoo/squid/sqlite3/detail/isqliteapifwd.h"
 #include "zoo/squid/core/ibackendconnection.h"
 
 namespace zoo {
 namespace squid {
 namespace sqlite {
-
-class isqlite_api;
 
 class ZOO_SQUID_SQLITE_API backend_connection final : public ibackend_connection
 {

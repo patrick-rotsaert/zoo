@@ -8,6 +8,7 @@
 #pragma once
 
 #include "zoo/squid/mysql/detail/mysqlfwd.h"
+#include "zoo/squid/mysql/detail/queryfwd.h"
 #include "zoo/squid/core/ibackendstatement.h"
 
 #include <memory>
@@ -16,8 +17,6 @@
 namespace zoo {
 namespace squid {
 namespace mysql {
-
-class mysql_query;
 
 class statement final : public ibackend_statement
 {

@@ -25,9 +25,12 @@ add_zoo_library(squid_mysql
 		error.h
 		statement.h
 		backendconnection.h
+		backendconnectionfwd.h
 		backendconnectionfactory.h
 		connection.h
 		apilinktest.h
+		detail/mysqlfwd.h
+		detail/queryfwd.h
 	UNIT_TEST_SOURCES
 		test/unit/test_conversions.cpp
 		test/unit/test_query.cpp
