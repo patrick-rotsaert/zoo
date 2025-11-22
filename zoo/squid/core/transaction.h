@@ -8,11 +8,10 @@
 #pragma once
 
 #include "zoo/squid/core/config.h"
+#include "zoo/squid/core/connectionfwd.h"
 
 namespace zoo {
 namespace squid {
-
-class connection;
 
 class ZOO_SQUID_CORE_API transaction final
 {

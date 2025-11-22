@@ -7,14 +7,14 @@
 
 #pragma once
 
+#include "zoo/squid/postgresql/resultsetfwd.h"
+#include "zoo/squid/postgresql/tuplefwd.h"
+
 #include <iterator>
 
 namespace zoo {
 namespace squid {
 namespace postgresql {
-
-class resultset;
-class tuple;
 
 class resultset_iterator
 {

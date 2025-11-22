@@ -10,7 +10,11 @@
 #include "zoo/squid/postgresql/config.h"
 #include "zoo/squid/postgresql/asyncexec.h"
 #include "zoo/squid/postgresql/asyncprepare.h"
+#include "zoo/squid/postgresql/detail/asyncbackendfwd.h"
 #include "zoo/squid/postgresql/detail/libpqfwd.h"
+#include "zoo/squid/postgresql/detail/ipqapifwd.h"
+#include "zoo/squid/postgresql/detail/queryfwd.h"
+#include "zoo/squid/postgresql/detail/asyncbackendfwd.h"
 #include "zoo/squid/core/ibackendconnection.h"
 #include "zoo/squid/core/parameter.h"
 
@@ -22,10 +26,6 @@
 namespace zoo {
 namespace squid {
 namespace postgresql {
-
-class ipq_api;
-class async_backend;
-class postgresql_query;
 
 class ZOO_SQUID_POSTGRESQL_API backend_connection final : public ibackend_connection,
                                                           public std::enable_shared_from_this<backend_connection>

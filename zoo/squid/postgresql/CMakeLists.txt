@@ -40,18 +40,24 @@ add_zoo_library(squid_postgresql
 		error.h
 		statement.h
 		backendconnection.h
+		backendconnectionfwd.h
 		backendconnectionfactory.h
 		connection.h
 		resultset.h
+		resultsetfwd.h
 		resultsetdatafwd.h
 		resultsetiterator.h
 		tuple.h
+		tuplefwd.h
 		field.h
 		asyncexec.h
 		asyncprepare.h
 		asyncerror.h
 		asyncpreparedstatement.h
 		detail/libpqfwd.h
+		detail/ipqapifwd.h
+		detail/queryfwd.h
+		detail/asyncbackendfwd.h
 		apilinktest.h
 	MOCK_SOURCES
 		detail/pqapimock.cpp

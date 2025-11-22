@@ -13,9 +13,12 @@
 #include <boost/beast/http/empty_body.hpp>
 #include <boost/beast/http/string_body.hpp>
 #include <boost/beast/http/file_body.hpp>
+#include <boost/beast/http/buffer_body.hpp>
+#include <boost/beast/http/vector_body.hpp>
 #include <boost/beast/http/message_generator.hpp>
 
 #include <variant>
+#include <cstdint>
 
 namespace zoo {
 namespace spider {
@@ -25,6 +28,8 @@ class response_wrapper final
 	std::variant<http::response<http::basic_file_body<tracked_file>>,
 	             http::response<http::file_body>,
 	             http::response<http::string_body>,
+	             http::response<http::buffer_body>,
+	             http::response<http::vector_body<std::uint8_t>>,
 	             http::response<http::empty_body>>
 	    value_;
 
@@ -48,6 +53,11 @@ public:
 	void version(unsigned value)
 	{
 		std::visit([&](auto&& arg) { arg.version(value); }, this->value_);
+	}
+
+	const auto& value() const
+	{
+		return value_;
 	}
 };
 

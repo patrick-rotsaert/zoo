@@ -10,8 +10,8 @@
 #include "zoo/spider/config.h"
 #include "zoo/spider/irequest_handler.h"
 #include "zoo/spider/aliases.h"
+#include "zoo/spider/concepts.hpp"
 
-#include <boost/beast/http/message_generator.hpp>
 #include <boost/url/url_view.hpp>
 #include <boost/json.hpp>
 #include <boost/regex.hpp>
@@ -25,12 +25,6 @@
 namespace zoo {
 namespace spider {
 
-// FIXME: this should use a type trait like is_tag_invoked or similar,
-// but I did not yet find a way to do it.
-// Settle for is_described_class now.
-template<typename T>
-concept ConvertibleFromBoostJson = boost::json::is_described_class<T>::value;
-
 class ZOO_SPIDER_API request_router final : public irequest_handler
 {
 	class impl;
@@ -38,13 +32,13 @@ class ZOO_SPIDER_API request_router final : public irequest_handler
 	friend impl; // allow impl to call private method route_request
 
 	using svmatch         = boost::match_results<string_view::const_iterator>;
-	using request_handler = std::function<message_generator(request&& req, url_view&& url, string_view path, const svmatch& match)>;
+	using request_handler = std::function<response_wrapper(request&& req, url_view&& url, string_view path, const svmatch& match)>;
 	template<ConvertibleFromBoostJson T>
 	using json_request_handler = std::function<
-	    message_generator(request&& req, url_view&& url, string_view path, const svmatch& match, boost::json::result<T>&& data)>;
+	    response_wrapper(request&& req, url_view&& url, string_view path, const svmatch& match, boost::json::result<T>&& data)>;
 
-	message_generator handle_request(request&& req) override;
-	message_generator route_request(request&& req, url_view&& url, string_view path);
+	response_wrapper handle_request(request&& req) override;
+	response_wrapper route_request(request&& req, url_view&& url, string_view path);
 
 public:
 	request_router();
@@ -53,7 +47,7 @@ public:
 	request_router(request_router&&);
 	request_router& operator=(request_router&&);
 
-	request_router(const request_router&) = delete;
+	request_router(const request_router&)            = delete;
 	request_router& operator=(const request_router&) = delete;
 
 	void add_route(std::set<verb>&& methods, boost::regex&& pattern, request_handler&& handler);
@@ -71,7 +65,7 @@ public:
 		this->add_route(
 		    std::move(methods),
 		    std::move(pattern),
-		    [handler = std::move(handler)](request&& req, url_view&& url, string_view path, const svmatch& match) -> message_generator {
+		    [handler = std::move(handler)](request&& req, url_view&& url, string_view path, const svmatch& match) -> response_wrapper {
 			    using result = boost::json::result<T>;
 
 			    auto       ec = std::error_code{};

@@ -7,7 +7,6 @@
 
 #include "zoo/spider/error_response.h"
 #include "zoo/spider/message.h"
-#include "zoo/spider/log_response.h"
 
 #include <boost/beast/version.hpp>
 
@@ -127,7 +126,7 @@ response error_response_factory::create(const request& req, status status, const
 	res.keep_alive(req.keep_alive());
 	res.body() = html.value_or(stock_reply(status));
 	res.prepare_payload();
-	return log_response(std::move(res));
+	return res;
 }
 
 response error_response_factory::create(http::status status, const std::optional<string_view>& html)
@@ -138,7 +137,7 @@ response error_response_factory::create(http::status status, const std::optional
 	res.set(http::field::content_type, "text/html");
 	res.body() = html.value_or(stock_reply(status));
 	res.prepare_payload();
-	return log_response(std::move(res));
+	return res;
 }
 
 } // namespace spider

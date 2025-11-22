@@ -9,6 +9,7 @@
 
 #include "zoo/squid/sqlite3/config.h"
 #include "zoo/squid/sqlite3/detail/sqlite3fwd.h"
+#include "zoo/squid/sqlite3/detail/isqliteapifwd.h"
 #include "zoo/squid/core/error.h"
 
 #include <optional>
@@ -17,8 +18,6 @@
 namespace zoo {
 namespace squid {
 namespace sqlite {
-
-class isqlite_api;
 
 class ZOO_SQUID_SQLITE_API error : public squid::error
 {

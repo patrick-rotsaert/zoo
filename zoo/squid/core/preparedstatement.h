@@ -9,13 +9,12 @@
 
 #include "zoo/squid/core/config.h"
 #include "zoo/squid/core/basicstatement.h"
+#include "zoo/squid/core/connectionfwd.h"
 
 #include <string_view>
 
 namespace zoo {
 namespace squid {
-
-class connection;
 
 /// This statement class is intended for bulk operations, i.e. prepare the statement
 /// once and execute it many times with different parameter bindings.

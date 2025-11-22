@@ -42,6 +42,7 @@ using bad_request           = error_response<status::bad_request>;
 using not_found             = error_response<status::not_found>;
 using internal_server_error = error_response<status::internal_server_error>;
 using not_implemented       = error_response<status::not_implemented>;
+using method_not_allowed    = error_response<status::method_not_allowed>;
 
 } // namespace spider
 } // namespace zoo

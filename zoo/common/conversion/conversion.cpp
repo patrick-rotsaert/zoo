@@ -14,6 +14,8 @@
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/uuid/uuid_io.hpp>
+#include <boost/uuid/string_generator.hpp>
 
 #include <fmt/format.h>
 
@@ -471,6 +473,26 @@ boost::posix_time::time_duration string_to_boost_time_duration(std::string_view 
 	auto out = boost::posix_time::time_duration{};
 	string_to_boost_time_duration(in, out);
 	return out;
+}
+
+void uuid_to_string(const boost::uuids::uuid& in, std::string& out)
+{
+	out = boost::uuids::to_string(in);
+}
+
+std::string uuid_to_string(const boost::uuids::uuid& in)
+{
+	return boost::uuids::to_string(in);
+}
+
+void string_to_uuid(std::string_view in, boost::uuids::uuid& out)
+{
+	out = boost::uuids::string_generator()(in.begin(), in.end());
+}
+
+boost::uuids::uuid string_to_uuid(std::string_view in)
+{
+	return boost::uuids::string_generator()(in.begin(), in.end());
 }
 
 } // namespace conversion

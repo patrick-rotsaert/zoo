@@ -21,8 +21,6 @@ namespace spider {
 // Handles an HTTP server connection
 class ZOO_SPIDER_API http_session final : public std::enable_shared_from_this<http_session>
 {
-	static constexpr std::size_t queue_limit = 8; // max number of queued responses
-
 public:
 	static void run(tcp::socket&& socket, const std::shared_ptr<irequest_handler>& request_handler);
 };

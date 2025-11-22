@@ -10,6 +10,8 @@
 #include "zoo/squid/postgresql/config.h"
 #include "zoo/squid/postgresql/asyncexec.h"
 #include "zoo/squid/postgresql/asyncprepare.h"
+#include "zoo/squid/postgresql/backendconnectionfwd.h"
+#include "zoo/squid/postgresql/detail/ipqapifwd.h"
 #include "zoo/squid/core/connection.h"
 #include "zoo/squid/core/parameter.h"
 
@@ -22,9 +24,6 @@
 namespace zoo {
 namespace squid {
 namespace postgresql {
-
-class backend_connection;
-class ipq_api;
 
 // Convenience class to create a connection to a PostgreSQL backend
 // This class should be used if access to the native connection handle (PGconn) is needed.

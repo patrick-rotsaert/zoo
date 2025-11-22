@@ -10,6 +10,7 @@
 #include "zoo/spider/config.h"
 #include "zoo/spider/aliases.h"
 #include "zoo/spider/message.h"
+#include "zoo/spider/response_wrapper.hpp"
 
 namespace zoo {
 namespace spider {
@@ -25,7 +26,7 @@ public:
 	irequest_handler(irequest_handler&&)                 = default;
 	irequest_handler& operator=(irequest_handler&&)      = default;
 
-	virtual message_generator handle_request(request&& req) = 0;
+	virtual response_wrapper handle_request(request&& req) = 0;
 };
 
 } // namespace spider

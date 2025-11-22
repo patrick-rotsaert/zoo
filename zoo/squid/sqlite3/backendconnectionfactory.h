@@ -8,13 +8,12 @@
 #pragma once
 
 #include "zoo/squid/sqlite3/config.h"
+#include "zoo/squid/sqlite3/detail/isqliteapifwd.h"
 #include "zoo/squid/core/ibackendconnectionfactory.h"
 
 namespace zoo {
 namespace squid {
 namespace sqlite {
-
-class isqlite_api;
 
 class ZOO_SQUID_SQLITE_API backend_connection_factory final : public ibackend_connection_factory
 {

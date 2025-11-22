@@ -9,11 +9,9 @@
 #include "zoo/spider/error_response.h"
 #include "zoo/spider/tracked_file.h"
 #include "zoo/spider/ifile_event_listener.h"
-#include "zoo/spider/log_response.h"
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/formatters.hpp"
 
-#include <boost/beast/http/message_generator.hpp>
 #include <boost/beast/http/file_body.hpp>
 #include <boost/beast/version.hpp>
 #include <boost/filesystem/path.hpp>
@@ -74,8 +72,7 @@ beast::string_view mime_type(const boost::filesystem::path& path)
 }
 
 template<class FileBody, class CreateFile>
-message_generator
-create_impl(const request& req, const boost::filesystem::path& doc_root, beast::string_view path, CreateFile&& create_file)
+response_wrapper create_impl(const request& req, const boost::filesystem::path& doc_root, beast::string_view path, CreateFile&& create_file)
 {
 	const auto file_path = doc_root / std::string{ path };
 
@@ -121,7 +118,7 @@ create_impl(const request& req, const boost::filesystem::path& doc_root, beast::
 		res.set(http::field::content_type, mime_type(file_path));
 		res.content_length(size);
 		res.keep_alive(req.keep_alive());
-		return log_response(std::move(res));
+		return res;
 	}
 
 	auto res =
@@ -183,16 +180,16 @@ response_wrapper create_impl(const boost::filesystem::path& doc_root, beast::str
 
 } // namespace
 
-message_generator file_response::create(const request&                          req,
-                                        const boost::filesystem::path&          doc_root,
-                                        string_view                             path,
-                                        std::unique_ptr<ifile_event_listener>&& event_listener)
+response_wrapper file_response::create(const request&                          req,
+                                       const boost::filesystem::path&          doc_root,
+                                       string_view                             path,
+                                       std::unique_ptr<ifile_event_listener>&& event_listener)
 {
 	using tracked_file_body = http::basic_file_body<tracked_file>;
 	return create_impl<tracked_file_body>(req, doc_root, path, [&]() { return tracked_file_body::file_type{ std::move(event_listener) }; });
 }
 
-message_generator file_response::create(const request& req, const fs::path& doc_root, string_view path)
+response_wrapper file_response::create(const request& req, const fs::path& doc_root, string_view path)
 {
 	return create_impl<http::file_body>(req, doc_root, path, []() { return http::file_body::file_type{}; });
 }

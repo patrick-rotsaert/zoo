@@ -8,6 +8,8 @@
 #pragma once
 
 #include "zoo/squid/core/config.h"
+#include "zoo/squid/core/ibackendconnectionfwd.h"
+#include "zoo/squid/core/ibackendconnectionfactoryfwd.h"
 
 #include <memory>
 #include <string_view>
@@ -15,9 +17,6 @@
 
 namespace zoo {
 namespace squid {
-
-class ibackend_connection;
-class ibackend_connection_factory;
 
 class ZOO_SQUID_CORE_API connection_pool final
 {
@@ -33,7 +32,7 @@ public:
 	connection_pool(connection_pool&&);
 	connection_pool& operator=(connection_pool&&);
 
-	connection_pool(const connection_pool&) = delete;
+	connection_pool(const connection_pool&)            = delete;
 	connection_pool& operator=(const connection_pool&) = delete;
 
 	/// Acquire a backend connection

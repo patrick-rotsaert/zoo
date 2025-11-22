@@ -36,5 +36,26 @@ struct ZOO_SPIDER_API exception_base : virtual boost::exception, virtual std::ex
 	const char* what() const noexcept override;
 };
 
+template<http::status Status>
+struct ZOO_SPIDER_API exception : virtual exception_base
+{
+	exception() noexcept
+	    : exception_base{}
+	{
+		*this << ex_status{ Status };
+	}
+
+	explicit exception(const std::string& mesg) noexcept
+	    : exception_base{ mesg }
+	{
+		*this << ex_status{ Status };
+	}
+};
+
+using bad_request_exception           = exception<status::bad_request>;
+using not_found_exception             = exception<status::not_found>;
+using internal_server_error_exception = exception<status::internal_server_error>;
+using not_implemented_exception       = exception<status::not_implemented>;
+
 } // namespace spider
 } // namespace zoo

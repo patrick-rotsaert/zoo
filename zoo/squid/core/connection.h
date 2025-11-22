@@ -9,6 +9,10 @@
 
 #include "zoo/squid/core/config.h"
 #include "zoo/squid/core/error.h"
+#include "zoo/squid/core/ibackendconnectionfwd.h"
+#include "zoo/squid/core/ibackendconnectionfactoryfwd.h"
+#include "zoo/squid/core/connectionpoolfwd.h"
+#include "zoo/squid/core/preparedstatementfwd.h"
 
 #include <memory>
 #include <string_view>
@@ -23,11 +27,6 @@ class ZOO_SQUID_CORE_API no_connection_available : public error
 public:
 	no_connection_available();
 };
-
-class ibackend_connection;
-class ibackend_connection_factory;
-class connection_pool;
-class prepared_statement;
 
 class ZOO_SQUID_CORE_API connection
 {

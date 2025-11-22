@@ -8,14 +8,13 @@
 #pragma once
 
 #include "zoo/squid/core/config.h"
+#include "zoo/squid/core/ibackendconnectionfwd.h"
 
 #include <memory>
 #include <string_view>
 
 namespace zoo {
 namespace squid {
-
-class ibackend_connection;
 
 /// Interface for a backend connection factory
 class ZOO_SQUID_CORE_API ibackend_connection_factory

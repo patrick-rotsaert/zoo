@@ -9,16 +9,15 @@
 
 #include "zoo/squid/postgresql/resultsetdatafwd.h"
 #include "zoo/squid/postgresql/resultsetiterator.h"
+#include "zoo/squid/postgresql/tuplefwd.h"
 #include "zoo/squid/postgresql/detail/libpqfwd.h"
+#include "zoo/squid/postgresql/detail/ipqapifwd.h"
 
 #include <memory>
 
 namespace zoo {
 namespace squid {
 namespace postgresql {
-
-class ipq_api; //@@
-class tuple;   //@@
 
 class resultset final
 {

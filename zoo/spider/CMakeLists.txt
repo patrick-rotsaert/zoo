@@ -14,6 +14,8 @@ add_zoo_library(spider
 		request_router.cpp
 		json_response.cpp
 		file_response.cpp
+		buffer_response.cpp
+		binary_response.cpp
 		error_response.cpp
 		empty_response.cpp
 		tracked_file.cpp
@@ -24,9 +26,14 @@ add_zoo_library(spider
 		log_response.cpp
 		exception.cpp
 		exception.h
+		json_util.cpp
+		rest/conversions.cpp
+		rest/path.cpp
+		rest/pathspec.cpp
 		tag_invoke/time_point.cpp
 		tag_invoke/date.cpp
 		tag_invoke/time_duration.cpp
+		tag_invoke/uuid.cpp
 		apilinktest.cpp
 	PUBLIC_HEADERS
 		aliases.h
@@ -36,20 +43,41 @@ add_zoo_library(spider
 		request_router.h
 		json_response.h
 		file_response.h
+		buffer_response.h
+		binary_response.h
 		error_response.h
 		empty_response.h
 		response_wrapper.hpp
 		ifile_event_listener.h
 		noop_file_event_listener.h
-		dispatcher.hpp
 		controller.hpp
 		log_response.h
+		json_util.h
+		type_traits.h
+		rest/annotation.hpp
+		rest/concepts.hpp
+		rest/controller.hpp
+		rest/router.hpp
+		rest/conversions.h
+		rest/handler.hpp
+		rest/openapi.hpp
+		rest/operation.h
+		rest/parameters.h
+		rest/pathfwd.h
+		rest/path.h
+		rest/pathspecfwd.h
+		rest/pathspec.h
+		rest/status_result.hpp
+		rest/status_utility.hpp
 		tag_invoke/time_point.h
 		tag_invoke/date.h
 		tag_invoke/time_duration.h
+		tag_invoke/uuid.h
 		apilinktest.h
 	MSVC_PRIVATE_COMPILER_OPTIONS
 		/wd4702 # for boost\beast\core\impl\buffers_cat.hpp(186): warning C4702: unreachable code
+	UNIT_TEST_SOURCES
+		test/unit/rest/test_pathspec.cpp
 	PUBLIC_LIBRARIES
 		zoo::common
 		Boost::system

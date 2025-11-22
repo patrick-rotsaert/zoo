@@ -36,9 +36,12 @@ add_zoo_library(squid_sqlite
 		error.h
 		statement.h
 		backendconnection.h
+		backendconnectionfwd.h
 		backendconnectionfactory.h
 		connection.h
 		apilinktest.h
+		detail/sqlite3fwd.h
+		detail/isqliteapifwd.h
 	PUBLIC_LIBRARIES
 		SQLite::SQLite3
 		zoo::squid_core

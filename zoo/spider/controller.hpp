@@ -1,3 +1,5 @@
+// OBSOLETE: Use ./rest/controller.hpp instead
+
 //
 // Copyright (C) 2022-2024 Patrick Rotsaert
 // Distributed under the Boost Software License, Version 1.0.
@@ -146,14 +148,14 @@ private:
 				ZOO_THROW_EXCEPTION(std::invalid_argument{ "Callback must be provided by a class derived from controller" });
 			}
 
-			this->callback_ = [controller, method](Args... args) { return (controller->*method)(args...); };
+			callback_ = [controller, method](Args... args) { return (controller->*method)(args...); };
 
 			if constexpr (sizeof...(descriptors) > 0)
 			{
 				auto i = size_t{ 0 };
 				for (auto name : { parameter_descriptor{ descriptors }... })
 				{
-					this->descriptors_[i++] = name;
+					descriptors_[i++] = name;
 				}
 			}
 
@@ -163,11 +165,11 @@ private:
 		template<std::size_t... I>
 		void validate_descriptors(std::index_sequence<I...>)
 		{
-			((validate_descriptor<typename std::tuple_element_t<I, ArgsTuple>>(this->descriptors_[I])), ...);
+			((validate_descriptor<typename std::tuple_element_t<I, ArgsTuple>>(descriptors_[I])), ...);
 		}
 
 		template<typename T>
-		void validate_descriptor(const parameter_descriptor& descriptor)
+		static void validate_descriptor(const parameter_descriptor& descriptor)
 		{
 			auto ok = false;
 			if constexpr (std::is_same_v<T, request>)
@@ -207,8 +209,7 @@ private:
 			catch (const argument_error& e)
 			{
 				// The type `argument_error` is private, so we're sure that the throw site is in the arguments collection.
-				// All other exception types will not be catched.
-				// Set the http status in the exception
+				// Set the appropriate http status in the exception.
 				e << ex_status{ status::bad_request };
 				throw;
 			}
@@ -217,14 +218,14 @@ private:
 		template<typename ArgsTuple>
 		ResultType invoke(ArgsTuple&& args)
 		{
-			return std::apply(this->callback_, std::forward<ArgsTuple>(args));
+			return std::apply(callback_, std::forward<ArgsTuple>(args));
 		}
 
 		template<std::size_t... I>
 		ArgsTuple collect_arguments(const parameter_sources& sources, std::index_sequence<I...>)
 		{
 			return std::make_tuple(collect_argument<typename std::tuple_element_t<I, ArgsTuple>>(
-			    sources, this->descriptors_[I], static_cast<typename std::tuple_element_t<I, ArgsTuple>*>(0))...);
+			    sources, descriptors_[I], static_cast<typename std::tuple_element_t<I, ArgsTuple>*>(0))...);
 		}
 
 		template<typename T>
@@ -430,37 +431,36 @@ protected:
 		// I would have preferred to use a unique_ptr, but then the handler would need to be
 		// move-captured, thus making the lambda non-copyable and std::function would fail to create.
 		auto h = std::make_shared<handler<Callback>>(this, callback, descriptors...);
-		this->router_->add_route(
-		    std::move(methods),
-		    std::move(pattern),
-		    [handler = h, this](request&& req, url_view&& url, string_view path, const svmatch& match) -> response_wrapper {
-			    try
-			    {
-				    auto res = handler->call(parameter_sources{ req, url, path, match });
-				    res.version(req.version());
-				    res.keep_alive(req.keep_alive());
-				    return res;
-			    }
-			    catch (const std::exception& e)
-			    {
-				    if (this->exception_handler_)
-				    {
-					    return this->exception_handler_->handle(e, req);
-				    }
-				    else
-				    {
-					    ZOO_LOG(err, "{}", e.what());
-					    if (const auto status = boost::get_error_info<ex_status>(e))
-					    {
-						    return error_response_factory::create(req, *status);
-					    }
-					    else
-					    {
-						    return internal_server_error::create(req);
-					    }
-				    }
-			    }
-		    });
+		router_->add_route(std::move(methods),
+		                   std::move(pattern),
+		                   [handler = h, this](request&& req, url_view&& url, string_view path, const svmatch& match) -> response_wrapper {
+			                   try
+			                   {
+				                   auto res = handler->call(parameter_sources{ req, url, path, match });
+				                   res.version(req.version());
+				                   res.keep_alive(req.keep_alive());
+				                   return res;
+			                   }
+			                   catch (const std::exception& e)
+			                   {
+				                   if (exception_handler_)
+				                   {
+					                   return exception_handler_->handle(e, req);
+				                   }
+				                   else
+				                   {
+					                   ZOO_LOG(err, "{}", e.what());
+					                   if (const auto status = boost::get_error_info<ex_status>(e))
+					                   {
+						                   return error_response_factory::create(req, *status);
+					                   }
+					                   else
+					                   {
+						                   return internal_server_error::create(req);
+					                   }
+				                   }
+			                   }
+		                   });
 	}
 };
 
