@@ -16,7 +16,7 @@ if(WIN32)
 	list(APPEND EXTRA_PUBLIC_LIBRARIES bcrypt)
 endif()
 
-add_zoo_library(common
+add_zoo_library(zoocommon
 	SOURCES
 		conversion/conversion.cpp
 		lockfile/lockfile.cpp

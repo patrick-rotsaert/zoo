@@ -42,7 +42,7 @@ add_zoo_library(tui
 		keycode.h
 		keymodifier.h
 	PUBLIC_LIBRARIES
-		zoo::common
+		zoo::zoocommon
 		fmt::fmt
 	PRIVATE_INCLUDE_DIRS
 		${CMAKE_CURRENT_BINARY_DIR}

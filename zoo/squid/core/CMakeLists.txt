@@ -50,7 +50,7 @@ add_zoo_library(squid_core
 		test/unit/test_parameter.cpp
 		test/unit/test_result.cpp
 	PUBLIC_LIBRARIES
-		zoo::common
+		zoo::zoocommon
 	FIND_PACKAGE_COMPONENT
 		squid
 )

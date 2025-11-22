@@ -24,7 +24,7 @@
 // clang-format on
 namespace zoo {
 
-class ZOO_COMMON_API version final
+class ZOO_ZOOCOMMON_API version final
 {
 	static int number(); // returns ZOO_VERSION_NUMBER
 

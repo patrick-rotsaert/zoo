@@ -12,7 +12,7 @@
 
 namespace zoo {
 
-class ZOO_COMMON_API uuid final
+class ZOO_ZOOCOMMON_API uuid final
 {
 public:
 	static boost::uuids::uuid generate();

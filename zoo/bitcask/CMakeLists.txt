@@ -29,7 +29,7 @@ add_zoo_library(bitcask
 	UNIT_TEST_SOURCES
 		test/unit/test_bitcask.cpp
 	PUBLIC_LIBRARIES
-		zoo::common
+		zoo::zoocommon
 		fmt::fmt
 	FIND_PACKAGE_COMPONENT
 		bitcask

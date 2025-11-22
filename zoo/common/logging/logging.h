@@ -19,7 +19,7 @@
 namespace zoo {
 namespace logging {
 
-class ZOO_COMMON_API logging final
+class ZOO_ZOOCOMMON_API logging final
 {
 public:
 	static std::unique_ptr<ibackend> backend;

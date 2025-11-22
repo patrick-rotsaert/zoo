@@ -15,7 +15,7 @@
 namespace zoo {
 namespace lockfile {
 
-class ZOO_COMMON_API lockfile final
+class ZOO_ZOOCOMMON_API lockfile final
 {
 	class impl;
 	std::unique_ptr<impl> pimpl_;

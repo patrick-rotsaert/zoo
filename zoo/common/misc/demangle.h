@@ -13,6 +13,6 @@
 
 namespace zoo {
 
-std::string ZOO_COMMON_API demangle(const char* name);
+std::string ZOO_ZOOCOMMON_API demangle(const char* name);
 
 } // namespace zoo

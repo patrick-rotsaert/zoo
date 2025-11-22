@@ -1,5 +1,5 @@
 #include "apilinktest.h"
 
-void zoo::common::api_link_test()
+void zoo::zoocommon::api_link_test()
 {
 }

@@ -79,7 +79,7 @@ add_zoo_library(spider
 	UNIT_TEST_SOURCES
 		test/unit/rest/test_pathspec.cpp
 	PUBLIC_LIBRARIES
-		zoo::common
+		zoo::zoocommon
 		Boost::system
 		Boost::url
 		Boost::filesystem

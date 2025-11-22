@@ -18,7 +18,7 @@
 namespace zoo {
 namespace logging {
 
-class ZOO_COMMON_API ibackend
+class ZOO_ZOOCOMMON_API ibackend
 {
 public:
 	ibackend();

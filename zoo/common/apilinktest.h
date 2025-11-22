@@ -3,9 +3,9 @@
 #include "zoo/common/config.h"
 
 namespace zoo {
-namespace common {
+namespace zoocommon {
 
-void ZOO_COMMON_API api_link_test();
+void ZOO_ZOOCOMMON_API api_link_test();
 
 }
 } // namespace zoo

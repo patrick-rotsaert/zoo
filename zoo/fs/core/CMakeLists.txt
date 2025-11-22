@@ -48,7 +48,7 @@ add_zoo_library(fs_core
 		test/unit/mock_file.cpp
 		test/unit/mock_file.h
 	PUBLIC_LIBRARIES
-		zoo::common
+		zoo::zoocommon
 		Boost::filesystem
 	PRIVATE_LIBRARIES
 		fmt::fmt

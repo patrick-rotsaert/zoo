@@ -13,6 +13,6 @@
 
 namespace zoo {
 
-std::string ZOO_COMMON_API quoted_c(std::string_view data);
+std::string ZOO_ZOOCOMMON_API quoted_c(std::string_view data);
 
 } // namespace zoo

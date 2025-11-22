@@ -13,7 +13,7 @@
 namespace zoo {
 namespace logging {
 
-class ZOO_COMMON_API spdlog_backend final : public ibackend
+class ZOO_ZOOCOMMON_API spdlog_backend final : public ibackend
 {
 public:
 	spdlog_backend();
