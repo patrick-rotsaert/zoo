@@ -31,10 +31,24 @@ public:
 
 	static constexpr std::string_view CONTENT_TYPE = ContentType.value;
 
+	explicit content_container() = default;
+
+	content_container(content_container&& other)
+	    : value_{ std::move(other.value_) }
+	    , content_type_{ other.content_type_ }
+	    , content_{ other.content_ }
+	{
+		if (value_)
+		{
+			content_type_ = value_->content_type;
+			content_      = value_->content;
+		}
+	}
+
 	static content_container create(std::string content_type, string_type content)
 	{
 		content_container cont{};
-		cont.value_        = value{ std::move(content_type), std::move(content) };
+		cont.value_.emplace(std::move(content_type), std::move(content));
 		cont.content_type_ = cont.value_->content_type;
 		cont.content_      = cont.value_->content;
 		return cont;

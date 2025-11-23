@@ -8,6 +8,7 @@
 #pragma once
 
 #include "zoo/spider/aliases.h"
+#include "zoo/spider/concepts.hpp"
 #include "zoo/common/misc/byte_string.h"
 
 #include <boost/json/conversion.hpp>

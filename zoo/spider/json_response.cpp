@@ -12,7 +12,7 @@
 namespace zoo {
 namespace spider {
 
-response spider::json_response::create_impl(const request& req, http::status status, std::string&& json)
+response json_response::create_impl(const request& req, http::status status, std::string&& json)
 {
 	auto res = response{ status, req.version() };
 	res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
@@ -32,6 +32,21 @@ response json_response::create_impl(http::status status, std::string&& json)
 	res.body() = std::move(json);
 	res.prepare_payload();
 	return res;
+}
+
+response json_response::create(const request& req, http::status status, const boost::json::object& data)
+{
+	return create_impl(req, status, boost::json::serialize(data));
+}
+
+response json_response::create(const request& req, http::status status, const boost::json::value& data)
+{
+	return create_impl(req, status, boost::json::serialize(data));
+}
+
+response json_response::create(http::status status, const boost::json::value& data)
+{
+	return create_impl(status, boost::json::serialize(data));
 }
 
 } // namespace spider

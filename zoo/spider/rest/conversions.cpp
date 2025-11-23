@@ -13,6 +13,11 @@
 namespace zoo {
 namespace spider {
 
+std::string_view conversions::from_string_view(std::string_view in, const std::string_view* const)
+{
+	return in;
+}
+
 std::string conversions::from_string_view(std::string_view in, const std::string* const)
 {
 	return std::string{ in };

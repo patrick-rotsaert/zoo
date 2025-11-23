@@ -45,6 +45,10 @@ public:
 	{
 		return create_impl(status, boost::json::serialize(boost::json::value_from(std::move(data))));
 	}
+
+	static response create(const request& req, http::status status, const boost::json::object& data);
+	static response create(const request& req, http::status status, const boost::json::value& data);
+	static response create(http::status status, const boost::json::value& data);
 };
 
 } // namespace spider

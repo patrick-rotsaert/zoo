@@ -24,18 +24,57 @@ struct parameters final
 	{
 		std::string_view name;
 		std::string_view description;
+
+		explicit named_parameter(std::string_view name, std::string_view description)
+		    : name{ name }
+		    , description{ description }
+		{
+		}
+
+		explicit named_parameter(std::string_view name)
+		    : name{ name }
+		    , description{}
+		{
+		}
 	};
 
-	struct path_parameter final : named_parameter
+	struct path_parameter final : public named_parameter
 	{
+		explicit path_parameter(std::string_view name)
+		    : named_parameter{ name }
+		{
+		}
+
+		explicit path_parameter(std::string_view name, std::string_view description)
+		    : named_parameter{ name, description }
+		{
+		}
 	};
 
-	struct query_parameter final : named_parameter
+	struct query_parameter final : public named_parameter
 	{
+		explicit query_parameter(std::string_view name)
+		    : named_parameter{ name }
+		{
+		}
+
+		explicit query_parameter(std::string_view name, std::string_view description)
+		    : named_parameter{ name, description }
+		{
+		}
 	};
 
-	struct header_parameter final : named_parameter
+	struct header_parameter final : public named_parameter
 	{
+		explicit header_parameter(std::string_view name)
+		    : named_parameter{ name }
+		{
+		}
+
+		explicit header_parameter(std::string_view name, std::string_view description)
+		    : named_parameter{ name, description }
+		{
+		}
 	};
 
 	struct json_body final

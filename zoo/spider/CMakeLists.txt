@@ -33,6 +33,8 @@ add_zoo_library(spider
 		tag_invoke/time_point.cpp
 		tag_invoke/date.cpp
 		tag_invoke/time_duration.cpp
+		tag_invoke/ptime.cpp
+		tag_invoke/greg_date.cpp
 		tag_invoke/uuid.cpp
 		apilinktest.cpp
 	PUBLIC_HEADERS
@@ -72,6 +74,8 @@ add_zoo_library(spider
 		tag_invoke/time_point.h
 		tag_invoke/date.h
 		tag_invoke/time_duration.h
+		tag_invoke/ptime.h
+		tag_invoke/greg_date.h
 		tag_invoke/uuid.h
 		apilinktest.h
 	MSVC_PRIVATE_COMPILER_OPTIONS

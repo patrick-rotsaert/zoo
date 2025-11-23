@@ -63,7 +63,7 @@ public:
 	}
 
 	template<class Callback, typename... ArgDescriptors>
-	void add_operation(rest_operation op, Callback callback, ArgDescriptors... descriptors)
+	void add_operation(rest_operation op, Callback, ArgDescriptors... descriptors)
 	{
 		using namespace boost::json;
 

@@ -34,6 +34,7 @@ public:
 	using date        = conversion::date;
 	using time_of_day = conversion::time_of_day;
 
+	static std::string_view                 from_string_view(std::string_view in, const std::string_view* const tag);
 	static std::string                      from_string_view(std::string_view in, const std::string* const tag);
 	static bool                             from_string_view(std::string_view in, const bool* const tag);
 	static boost::gregorian::date           from_string_view(std::string_view in, const boost::gregorian::date* const tag);
