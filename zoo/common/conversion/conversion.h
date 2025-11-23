@@ -74,8 +74,8 @@ date ZOO_ZOOCOMMON_API string_to_date(std::string_view in);
 void ZOO_ZOOCOMMON_API        string_to_time_of_day(std::string_view in, time_of_day& out);
 time_of_day ZOO_ZOOCOMMON_API string_to_time_of_day(std::string_view in);
 
-void ZOO_ZOOCOMMON_API        time_point_to_string(const time_point& in, std::string& out, const char date_time_separator);
-std::string ZOO_ZOOCOMMON_API time_point_to_string(const time_point& in, const char date_time_separator);
+void ZOO_ZOOCOMMON_API        time_point_to_string(const time_point& in, std::string& out, const char date_time_separator, bool zulu);
+std::string ZOO_ZOOCOMMON_API time_point_to_string(const time_point& in, const char date_time_separator, bool zulu);
 
 void ZOO_ZOOCOMMON_API        time_point_to_iso8601(const time_point& in, std::string& out);
 std::string ZOO_ZOOCOMMON_API time_point_to_iso8601(const time_point& in);
@@ -92,8 +92,11 @@ std::string ZOO_ZOOCOMMON_API time_of_day_to_string(const time_of_day& in);
 void ZOO_ZOOCOMMON_API                     string_to_boost_ptime(std::string_view in, boost::posix_time::ptime& out);
 boost::posix_time::ptime ZOO_ZOOCOMMON_API string_to_boost_ptime(std::string_view in);
 
-void ZOO_ZOOCOMMON_API        boost_ptime_to_string(const boost::posix_time::ptime& in, std::string& out, const char date_time_separator);
-std::string ZOO_ZOOCOMMON_API boost_ptime_to_string(const boost::posix_time::ptime& in, const char date_time_separator);
+void ZOO_ZOOCOMMON_API        boost_ptime_to_string(const boost::posix_time::ptime& in,
+                                                    std::string&                    out,
+                                                    const char                      date_time_separator,
+                                                    bool                            zulu);
+std::string ZOO_ZOOCOMMON_API boost_ptime_to_string(const boost::posix_time::ptime& in, const char date_time_separator, bool zulu);
 
 void ZOO_ZOOCOMMON_API        boost_ptime_to_iso8601(const boost::posix_time::ptime& in, std::string& out);
 std::string ZOO_ZOOCOMMON_API boost_ptime_to_iso8601(const boost::posix_time::ptime& in);

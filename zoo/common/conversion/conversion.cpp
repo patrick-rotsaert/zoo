@@ -245,7 +245,7 @@ time_of_day string_to_time_of_day(std::string_view in)
 	return result;
 }
 
-void time_point_to_string(const time_point& in, std::string& out, const char date_time_separator)
+void time_point_to_string(const time_point& in, std::string& out, const char date_time_separator, bool zulu)
 {
 	// TODO: use std::format when it becomes available in libstdc++
 	using namespace std::chrono;
@@ -276,33 +276,37 @@ void time_point_to_string(const time_point& in, std::string& out, const char dat
 		                  static_cast<long>(time.minutes().count()),
 		                  static_cast<long>(time.seconds().count()));
 	}
+	if (zulu)
+	{
+		out.append("Z");
+	}
 }
 
-std::string time_point_to_string(const time_point& in, const char date_time_separator)
+std::string time_point_to_string(const time_point& in, const char date_time_separator, bool zulu)
 {
 	auto result = std::string{};
-	time_point_to_string(in, result, date_time_separator);
+	time_point_to_string(in, result, date_time_separator, zulu);
 	return result;
 }
 
 void time_point_to_iso8601(const time_point& in, std::string& out)
 {
-	return time_point_to_string(in, out, 'T');
+	return time_point_to_string(in, out, 'T', true);
 }
 
 std::string time_point_to_iso8601(const time_point& in)
 {
-	return time_point_to_string(in, 'T');
+	return time_point_to_string(in, 'T', true);
 }
 
 void time_point_to_sql(const time_point& in, std::string& out)
 {
-	return time_point_to_string(in, out, ' ');
+	return time_point_to_string(in, out, ' ', false);
 }
 
 std::string time_point_to_sql(const time_point& in)
 {
-	return time_point_to_string(in, ' ');
+	return time_point_to_string(in, ' ', false);
 }
 
 void date_to_string(const date& in, std::string& out)
@@ -345,42 +349,46 @@ std::string time_of_day_to_string(const time_of_day& in)
 	return result;
 }
 
-void boost_ptime_to_string(const boost::posix_time::ptime& in, std::string& out, const char date_time_separator)
+void boost_ptime_to_string(const boost::posix_time::ptime& in, std::string& out, const char date_time_separator, bool zulu)
 {
-	out = boost_ptime_to_string(in, date_time_separator);
+	out = boost_ptime_to_string(in, date_time_separator, zulu);
 }
 
-std::string boost_ptime_to_string(const boost::posix_time::ptime& in, const char date_time_separator)
+std::string boost_ptime_to_string(const boost::posix_time::ptime& in, const char date_time_separator, bool zulu)
 {
 	auto tmp = boost::posix_time::to_iso_extended_string(in);
 	// Expected format of tmp is YYYY-MM-DDTHH:MM:SS[.fffffffff]
-	// Format to return is YYYY-MM-DD HH:MM:SS.fffffffff
-	// So just replace the 'T' with a space.
+	// Format to return is YYYY-MM-DDXHH:MM:SS.fffffffff
+	// So just replace the 'T' with the separator.
 	if (date_time_separator != 'T' && tmp.length() >= 19u && tmp[10u] == 'T')
 	{
 		tmp[10u] = date_time_separator;
+	}
+	if (zulu)
+	{
+		tmp.append("Z");
 	}
 	return tmp;
 }
 
 void boost_ptime_to_iso8601(const boost::posix_time::ptime& in, std::string& out)
 {
-	return boost_ptime_to_string(in, out, 'T');
+	return boost_ptime_to_string(in, out, 'T', true);
 }
 
 std::string boost_ptime_to_iso8601(const boost::posix_time::ptime& in)
 {
-	return boost_ptime_to_string(in, 'T');
+	return boost_ptime_to_string(in, 'T', true);
 }
 
 void boost_ptime_to_sql(const boost::posix_time::ptime& in, std::string& out)
 {
-	return boost_ptime_to_string(in, out, ' ');
+	return boost_ptime_to_string(in, out, ' ', false);
 }
 
 std::string boost_ptime_to_sql(const boost::posix_time::ptime& in)
 {
-	return boost_ptime_to_string(in, ' ');
+	return boost_ptime_to_string(in, ' ', false);
 }
 
 void boost_date_to_string(const boost::gregorian::date& in, std::string& out)
