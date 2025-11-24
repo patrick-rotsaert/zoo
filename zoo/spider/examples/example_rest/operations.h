@@ -25,12 +25,9 @@ namespace demo {
 class Operations
 {
 public:
-	std::vector<Customer> listCustomers(std::string api_key);
+	std::vector<Customer> listCustomers();
 
-	Customer getCustomer(std::uint64_t                       id,
-	                     const std::optional<std::string>&   serial,
-	                     const boost::optional<std::string>& api_key,
-	                     std::optional<Status>);
+	Customer getCustomer(std::uint64_t id, const std::optional<std::string>& serial, std::optional<Status>);
 
 	auto postCustomer(const Customer& c)
 	{

@@ -8,19 +8,22 @@
 #pragma once
 
 #include "zoo/spider/rest/pathspec.h"
+#include "zoo/spider/rest/security.h"
 #include "zoo/spider/aliases.h"
 
 #include <string_view>
+#include <optional>
 
 namespace zoo {
 namespace spider {
 
 struct rest_operation final
 {
-	verb             method;
-	path_spec        path;
-	std::string_view operation_id;
-	std::string_view summary;
+	verb                    method;
+	path_spec               path;
+	std::string_view        operation_id;
+	std::string_view        summary;
+	std::optional<security> sec;
 };
 
 } // namespace spider

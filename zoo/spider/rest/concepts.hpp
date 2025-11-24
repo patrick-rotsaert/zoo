@@ -16,6 +16,7 @@
 #include <concepts>
 #include <stdexcept>
 #include <string_view>
+#include <vector>
 
 namespace zoo {
 namespace spider {
@@ -28,6 +29,11 @@ concept IsValidErrorType = std::is_class_v<T> && boost::json::is_described_class
 } && requires(const T& t) {
 	{ t.status() } -> std::same_as<http::status>;
 	{ t.status() } noexcept;
+};
+
+template<typename T>
+concept IsValidErrorTypeWithMultipleErrors = IsValidErrorType<T> && requires(int ec, std::vector<std::string> errors) {
+	{ T::create(ec, errors) } -> std::same_as<T>;
 };
 
 template<typename T>

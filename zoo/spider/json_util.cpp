@@ -56,11 +56,15 @@ void pretty_print_impl(std::ostream& os, boost::json::value const& jv, std::stri
 
 	case json::kind::array:
 	{
-		os << "[\n";
-		indent->append(INDENT, ' ');
 		auto const& arr = jv.get_array();
-		if (!arr.empty())
+		if (arr.empty())
 		{
+			os << "[]";
+		}
+		else
+		{
+			os << "[\n";
+			indent->append(INDENT, ' ');
 			auto it = arr.begin();
 			for (;;)
 			{
@@ -72,10 +76,10 @@ void pretty_print_impl(std::ostream& os, boost::json::value const& jv, std::stri
 				}
 				os << ",\n";
 			}
+			os << "\n";
+			indent->resize(indent->size() - INDENT);
+			os << *indent << "]";
 		}
-		os << "\n";
-		indent->resize(indent->size() - INDENT);
-		os << *indent << "]";
 		break;
 	}
 

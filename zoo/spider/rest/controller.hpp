@@ -21,6 +21,7 @@
 #include "zoo/spider/rest/openapi.hpp"
 #include "zoo/spider/rest/router.hpp"
 #include "zoo/spider/rest/parameters.h"
+#include "zoo/spider/rest/security.h"
 #include "zoo/spider/concepts.hpp"
 #include "zoo/spider/response_wrapper.hpp"
 #include "zoo/spider/json_response.h"
@@ -35,8 +36,12 @@
 #include "zoo/common/misc/is_variant.hpp"
 
 #include <boost/json.hpp>
+#include <boost/algorithm/string/join.hpp>
 
 #include <type_traits>
+#include <map>
+#include <vector>
+#include <expected>
 
 namespace zoo {
 namespace spider {
@@ -51,6 +56,7 @@ public:
 
 	explicit rest_controller(openapi_settings settings)
 	    : router_{ std::make_shared<router_type>() }
+	    , global_security_{}
 	    , oas_{ std::move(settings) }
 	{
 	}
@@ -79,35 +85,46 @@ protected:
 		// This is why the handler is created as a shared_ptr, rather than a unique_ptr.
 		// I would have preferred to use a unique_ptr, but then the handler would need to be
 		// move-captured, thus making the lambda non-copyable and std::function would fail to create.
-		const auto method = op.method;
-		auto       h      = std::make_shared<handler<Callback>>(this, callback, descriptors...);
-		router_->add_route(std::move(op),
-		                   [method, handler = h, this](request&& req, url_view&& url, path_spec::param_map&& param) -> response_wrapper {
-			                   try
-			                   {
-				                   if constexpr (std::is_void_v<ResultType>)
-				                   {
-					                   handler->call(parameter_sources{ req, url, param });
-					                   auto res = empty_response::create(status::no_content);
-					                   res.version(req.version());
-					                   res.keep_alive(req.keep_alive());
-					                   return res;
-				                   }
-				                   else
-				                   {
-					                   auto res = make_response(handler->call(parameter_sources{ req, url, param }),
-					                                            status_utility::success_status_for_method(method));
-					                   res.version(req.version());
-					                   res.keep_alive(req.keep_alive());
-					                   return res;
-				                   }
-			                   }
-			                   catch (const std::exception& e)
-			                   {
-				                   ZOO_LOG(err, "{}", e.what());
-				                   return make_error_response(e, req);
-			                   }
-		                   });
+		auto   h       = std::make_shared<handler<Callback>>(this, callback, descriptors...);
+		auto&& handler = [sec = op.sec, method = op.method, handler = h, this](
+		                     request&& req, url_view&& url, path_spec::param_map&& param) -> response_wrapper {
+			try
+			{
+				if (auto verified = verify_security(sec.value_or(global_security_), req, url); !verified)
+				{
+					return make_unauthorized_error_response(std::move(verified.error()), req);
+				}
+				if constexpr (std::is_void_v<ResultType>)
+				{
+					handler->call(parameter_sources{ req, url, param });
+					auto res = empty_response::create(status::no_content);
+					res.version(req.version());
+					res.keep_alive(req.keep_alive());
+					return res;
+				}
+				else
+				{
+					auto res = make_response(handler->call(parameter_sources{ req, url, param }),
+					                         status_utility::success_status_for_method(method));
+					res.version(req.version());
+					res.keep_alive(req.keep_alive());
+					return res;
+				}
+			}
+			catch (const std::exception& e)
+			{
+				ZOO_LOG(err, "{}", e.what());
+				return make_error_response(e, req);
+			}
+		};
+
+		router_->add_route(op, handler);
+	}
+
+	void set_global_security(security sec)
+	{
+		oas_.set_global_security(sec);
+		global_security_ = std::move(sec);
 	}
 
 private:
@@ -148,7 +165,53 @@ private:
 		return json_response::create(req, status, std::move(payload));
 	}
 
+	static response make_unauthorized_error_response(std::vector<std::string> errors, const request& req)
+	{
+		constexpr auto status = status::unauthorized;
+		constexpr auto ec     = static_cast<int>(status);
+		if constexpr (IsValidErrorTypeWithMultipleErrors<DefaultErrorType>)
+		{
+			return json_response::create(req, status, DefaultErrorType::create(ec, std::move(errors)));
+		}
+		else
+		{
+			return json_response::create(req, status, DefaultErrorType::create(ec, boost::algorithm::join(errors, "\n")));
+		}
+	}
+
+	static std::expected<void, std::vector<std::string>> verify_security(const security& sec, request& req, const url_view& url)
+	{
+		if (sec.empty())
+		{
+			return {};
+		}
+		std::vector<std::string> errors;
+		// Note: The outer vector entries in `sec` are combined using logic OR.
+		//       The inner map entries are combined using logic AND.
+		for (const auto& map : sec)
+		{
+			auto success = true;
+			for (const auto& pair : map)
+			{
+				const auto& scheme = *pair.first;
+				const auto& scopes = pair.second;
+				if (auto verified = scheme.verify(req, url, scopes); !verified)
+				{
+					errors.push_back(std::move(verified.error()));
+					success = false;
+					break;
+				}
+			}
+			if (success)
+			{
+				return {};
+			}
+		}
+		return std::unexpected(std::move(errors));
+	}
+
 	std::shared_ptr<router_type> router_;
+	security                     global_security_;
 	openapi_type                 oas_;
 };
 

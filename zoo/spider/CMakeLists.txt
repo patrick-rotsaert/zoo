@@ -30,6 +30,8 @@ add_zoo_library(spider
 		rest/conversions.cpp
 		rest/path.cpp
 		rest/pathspec.cpp
+		rest/isecurityscheme.cpp
+		rest/apikeyauthorization.cpp
 		tag_invoke/time_point.cpp
 		tag_invoke/date.cpp
 		tag_invoke/time_duration.cpp
@@ -71,6 +73,9 @@ add_zoo_library(spider
 		rest/pathspec.h
 		rest/status_result.hpp
 		rest/status_utility.hpp
+		rest/isecurityscheme.h
+		rest/security.h
+		rest/apikeyauthorization.h
 		tag_invoke/time_point.h
 		tag_invoke/date.h
 		tag_invoke/time_duration.h

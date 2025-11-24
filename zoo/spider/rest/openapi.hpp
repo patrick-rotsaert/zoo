@@ -12,7 +12,7 @@
 #include "zoo/spider/rest/concepts.hpp"
 #include "zoo/spider/rest/status_utility.hpp"
 #include "zoo/spider/rest/annotation.hpp"
-#include "zoo/spider/concepts.hpp"
+#include "zoo/spider/rest/security.h"
 #include "zoo/common/misc/is_optional.hpp"
 #include "zoo/common/misc/is_vector.hpp"
 #include "zoo/common/misc/is_variant.hpp"
@@ -177,6 +177,11 @@ public:
 		auto& paths_object                  = ensure_object(spec_["paths"]);
 		auto& path_object                   = ensure_object(paths_object["/" + op.path.to_string()]);
 		path_object[method_name(op.method)] = std::move(operation);
+	}
+
+	void set_global_security(const security& sec)
+	{
+		spec_["security"] = security_array(sec);
 	}
 
 	const boost::json::object& spec() const
@@ -559,6 +564,34 @@ private:
 			boost::algorithm::replace_all(type_name, "<", "_");
 			boost::algorithm::replace_all(type_name, ">", "_");
 			return type_name;
+		}
+	}
+
+	boost::json::array security_array(const security& sec)
+	{
+		boost::json::array a;
+		for (const auto& map : sec)
+		{
+			boost::json::object o;
+			for (const auto& pair : map)
+			{
+				const auto& scheme = *pair.first;
+				const auto& scopes = pair.second;
+				add_components_security_scheme(scheme);
+				o[scheme.scheme_name()] = boost::json::value_from(scopes);
+			}
+			a.emplace_back(std::move(o));
+		}
+		return a;
+	}
+
+	void add_components_security_scheme(const isecurityscheme& scheme)
+	{
+		auto& components = ensure_object(spec_["components"]);
+		auto& schemes    = ensure_object(components["securitySchemes"]);
+		if (!schemes.contains(scheme.scheme_name()))
+		{
+			schemes[scheme.scheme_name()] = scheme.scheme();
 		}
 	}
 

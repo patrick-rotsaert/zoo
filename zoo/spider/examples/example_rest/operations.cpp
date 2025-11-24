@@ -17,29 +17,14 @@ struct exception : public exception_base
 
 } // namespace
 
-std::vector<Customer> Operations::listCustomers(std::string api_key)
+std::vector<Customer> Operations::listCustomers()
 {
-	if (api_key != "the_api_key")
-	{
-		ZOO_THROW_EXCEPTION(exception{} << exception::mesg{ "Bad API key" } << exception::status{ status::unauthorized });
-	}
 	return { Customer{ 42, "The Customer Inc", { Status::available, Status::cancelled } } };
 }
 
-Customer Operations::getCustomer(std::uint64_t                       id,
-                                 const std::optional<std::string>&   serial,
-                                 const boost::optional<std::string>& api_key,
-                                 std::optional<Status>)
+Customer Operations::getCustomer(std::uint64_t id, const std::optional<std::string>& serial, std::optional<Status>)
 {
-	zlog(debug, "get customer id={}, serial={}, api_key={}", id, serial, api_key);
-	if (!api_key)
-	{
-		ZOO_THROW_EXCEPTION(exception{} << exception::mesg{ "An API key is required" } << exception::status{ status::unauthorized });
-	}
-	else if (api_key.value() != "the_api_key")
-	{
-		ZOO_THROW_EXCEPTION(exception{} << exception::mesg{ "Bad API key" } << exception::status{ status::unauthorized });
-	}
+	zlog(debug, "get customer id={}, serial={}", id, serial);
 	return Customer{ id, "The Customer Inc" };
 }
 

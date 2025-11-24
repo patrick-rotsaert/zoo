@@ -1,6 +1,7 @@
 #include "controller.h"
 #include "operations.h"
 
+#include "zoo/spider/rest/apikeyauthorization.h"
 #include "zoo/spider/json_util.h"
 
 namespace demo {
@@ -10,16 +11,17 @@ using namespace zoo::spider;
 Controller::Controller()
     : rest_controller{ openapi_settings{ .strip_ns = "demo::", .info_title = "Demo API", .info_version = "1.0" } }
 {
+	set_global_security({ {
+	    { std::make_shared<api_key_authorization>("ApiKeyAuth", api_key_authorization::source::header, "X-Api-Key", "123456"), {} },
+	} });
+
 	using p = rest_controller::p;
 
 	add_operation(rest_operation{ .method       = verb::get,
 	                              .path         = path_spec{ "api" } / "v1" / "customers",
 	                              .operation_id = "listCustomers",
 	                              .summary      = "Get a list of customers" },
-	              &Operations::listCustomers,
-	              p::header{ "x-api-key", "The API Key" }
-
-	);
+	              &Operations::listCustomers);
 
 	add_operation(rest_operation{ .method       = verb::get,
 	                              .path         = path_spec{ "api" } / "v1" / "customers" / "{id}",
@@ -28,7 +30,6 @@ Controller::Controller()
 	              &Operations::getCustomer,
 	              p::path{ "id" },
 	              p::query{ "serial" },
-	              p::header{ "x-api-key" },
 	              p::query{ "status" });
 
 	add_operation(rest_operation{ .method       = verb::post,
