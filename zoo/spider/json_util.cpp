@@ -31,11 +31,15 @@ void pretty_print_impl(std::ostream& os, boost::json::value const& jv, std::stri
 	{
 	case json::kind::object:
 	{
-		os << "{\n";
-		indent->append(INDENT, ' ');
 		auto const& obj = jv.get_object();
-		if (!obj.empty())
+		if (obj.empty())
 		{
+			os << "{}";
+		}
+		else
+		{
+			os << "{\n";
+			indent->append(INDENT, ' ');
 			auto it = obj.begin();
 			for (;;)
 			{
@@ -47,10 +51,10 @@ void pretty_print_impl(std::ostream& os, boost::json::value const& jv, std::stri
 				}
 				os << ",\n";
 			}
+			os << "\n";
+			indent->resize(indent->size() - INDENT);
+			os << *indent << "}";
 		}
-		os << "\n";
-		indent->resize(indent->size() - INDENT);
-		os << *indent << "}";
 		break;
 	}
 

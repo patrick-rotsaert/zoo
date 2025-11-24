@@ -83,6 +83,10 @@ public:
 		{
 			operation["summary"] = op.summary;
 		}
+		if (op.sec)
+		{
+			operation["security"] = security_array(op.sec.value());
+		}
 
 		{
 			array parameters;
