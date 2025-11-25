@@ -47,6 +47,8 @@ public:
 	             >
 	test(bool found);
 
+	html_container testBasicAuth(std::string_view userName);
+
 private:
 	Customer createCustomer(const Customer& c);
 };

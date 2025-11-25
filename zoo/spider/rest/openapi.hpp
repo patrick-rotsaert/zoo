@@ -209,7 +209,7 @@ private:
 		{
 			return get_content_type<typename T::value_type>();
 		}
-		else if constexpr (IsBinaryContentContainer<T>)
+		else if constexpr (IsBinaryContentContainer<T> || IsStringContentContainer<T>)
 		{
 			return T::CONTENT_TYPE;
 		}
@@ -240,7 +240,7 @@ private:
 		{
 			return add_response<typename T::value_type>(responses, T::STATUS);
 		}
-		else if constexpr (IsBinaryContentContainer<T>)
+		else if constexpr (IsBinaryContentContainer<T> || IsStringContentContainer<T>)
 		{
 			responses[std::to_string(static_cast<int>(status))] = {
 				{ "description", http::obsolete_reason(status) },
@@ -277,7 +277,7 @@ private:
 				    {
 					    map[V::STATUS][get_content_type<V>()].push_back(value_schema<typename V::value_type>());
 				    }
-				    else if constexpr (IsBinaryContentContainer<V> || ConvertibleToBoostJson<V>)
+				    else if constexpr (IsBinaryContentContainer<V> || IsStringContentContainer<V> || ConvertibleToBoostJson<V>)
 				    {
 					    map[status][get_content_type<V>()].push_back(value_schema<V>());
 				    }
@@ -418,6 +418,10 @@ private:
 		{
 			schema["type"]   = "string";
 			schema["format"] = "binary";
+		}
+		else if constexpr (IsStringContentContainer<T>)
+		{
+			schema["type"] = "string";
 		}
 		else
 		{

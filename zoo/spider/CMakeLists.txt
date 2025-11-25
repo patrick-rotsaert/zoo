@@ -16,6 +16,7 @@ add_zoo_library(spider
 		file_response.cpp
 		buffer_response.cpp
 		binary_response.cpp
+		string_response.cpp
 		error_response.cpp
 		empty_response.cpp
 		tracked_file.cpp
@@ -32,6 +33,7 @@ add_zoo_library(spider
 		rest/pathspec.cpp
 		rest/isecurityscheme.cpp
 		rest/apikeyauthorization.cpp
+		rest/basicauthorization.cpp
 		tag_invoke/time_point.cpp
 		tag_invoke/date.cpp
 		tag_invoke/time_duration.cpp
@@ -49,6 +51,7 @@ add_zoo_library(spider
 		file_response.h
 		buffer_response.h
 		binary_response.h
+		string_response.h
 		error_response.h
 		empty_response.h
 		response_wrapper.hpp
@@ -76,6 +79,7 @@ add_zoo_library(spider
 		rest/isecurityscheme.h
 		rest/security.h
 		rest/apikeyauthorization.h
+		rest/basicauthorization.h
 		tag_invoke/time_point.h
 		tag_invoke/date.h
 		tag_invoke/time_duration.h

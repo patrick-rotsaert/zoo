@@ -16,6 +16,7 @@
 #include <string_view>
 #include <string>
 #include <vector>
+#include <optional>
 #include <expected>
 
 namespace zoo {
@@ -38,6 +39,8 @@ public:
 
 	virtual std::expected<void, std::string>
 	verify(request& req, const url_view& url, const std::vector<std::string_view>& scopes) const = 0;
+
+	virtual std::optional<std::string> challenge() const = 0;
 };
 
 } // namespace spider

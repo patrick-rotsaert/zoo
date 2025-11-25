@@ -65,5 +65,16 @@ concept IsBinaryContentContainer = requires {
 	{ t.content() } noexcept;
 };
 
+template<typename T>
+concept IsStringContentContainer = requires {
+	{ T::CONTENT_TYPE } -> std::convertible_to<const std::string_view&>;
+} && requires(const T& t) {
+	{ t.content_type() } -> std::same_as<std::string_view>;
+	{ t.content_type() } noexcept;
+} && requires(const T& t) {
+	{ t.content() } -> std::same_as<std::string_view>;
+	{ t.content() } noexcept;
+};
+
 } // namespace spider
 } // namespace zoo

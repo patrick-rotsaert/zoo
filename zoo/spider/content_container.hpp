@@ -89,6 +89,7 @@ using string_content_container = content_container<ContentType, char>;
 template<compile_time_string ContentType>
 using binary_content_container = content_container<ContentType, unsigned char>;
 
+using html_container  = string_content_container<"text/html"_cts>;
 using image_container = binary_content_container<"image/*"_cts>;
 
 } // namespace spider

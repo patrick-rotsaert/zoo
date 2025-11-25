@@ -30,6 +30,7 @@ public:
 	std::string_view                 scheme_name() const override;
 	boost::json::object              scheme() const override;
 	std::expected<void, std::string> verify(request& req, const url_view& url, const std::vector<std::string_view>& scopes) const override;
+	std::optional<std::string>       challenge() const override;
 
 private:
 	std::string_view scheme_name_;

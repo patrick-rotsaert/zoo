@@ -5,6 +5,10 @@
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/throw_exception.h"
 #include "zoo/common/misc/formatters.hpp"
+#include "zoo/common/misc/quoted_c.h"
+#include "zoo/common/misc/rlws.hpp"
+
+#include <fmt/format.h>
 
 namespace demo {
 
@@ -75,6 +79,20 @@ Operations::test(bool found)
 	{
 		return make_status_result<status::not_found>(std::string{ "FAIL" });
 	}
+}
+
+html_container Operations::testBasicAuth(std::string_view userName)
+{
+	zlog(info, "user name is {}", zoo::quoted_c(userName));
+	return html_container::create(std::string{ html_container::CONTENT_TYPE },
+	                              fmt::format(R"(
+		<html>
+		 <body>
+		  <h1>Hi, {}</h1>
+		 </body>
+		</html>
+		)"_rlws,
+	                                          userName));
 }
 
 } // namespace demo

@@ -26,6 +26,7 @@
 #include "zoo/spider/response_wrapper.hpp"
 #include "zoo/spider/json_response.h"
 #include "zoo/spider/binary_response.h"
+#include "zoo/spider/string_response.h"
 #include "zoo/spider/empty_response.h"
 #include "zoo/spider/exception.h"
 #include "zoo/spider/type_traits.h"
@@ -92,7 +93,7 @@ protected:
 			{
 				if (auto verified = verify_security(sec.value_or(global_security_), req, url); !verified)
 				{
-					return make_unauthorized_error_response(std::move(verified.error()), req);
+					return std::move(verified.error());
 				}
 				if constexpr (std::is_void_v<ResultType>)
 				{
@@ -152,6 +153,10 @@ private:
 		{
 			return binary_response::create(status, payload.content_type(), payload.content());
 		}
+		else if constexpr (IsStringContentContainer<T>)
+		{
+			return string_response::create(status, payload.content_type(), payload.content());
+		}
 		else
 		{
 			return json_response::create(status, std::move(payload));
@@ -179,13 +184,14 @@ private:
 		}
 	}
 
-	static std::expected<void, std::vector<std::string>> verify_security(const security& sec, request& req, const url_view& url)
+	static std::expected<void, response> verify_security(const security& sec, request& req, const url_view& url)
 	{
 		if (sec.empty())
 		{
 			return {};
 		}
 		std::vector<std::string> errors;
+		std::vector<std::string> challenges;
 		// Note: The outer vector entries in `sec` are combined using logic OR.
 		//       The inner map entries are combined using logic AND.
 		for (const auto& map : sec)
@@ -197,8 +203,12 @@ private:
 				const auto& scopes = pair.second;
 				if (auto verified = scheme.verify(req, url, scopes); !verified)
 				{
-					errors.push_back(std::move(verified.error()));
 					success = false;
+					errors.push_back(std::move(verified.error()));
+					if (const auto challenge = scheme.challenge())
+					{
+						challenges.push_back(std::move(challenge.value()));
+					}
 					break;
 				}
 			}
@@ -207,7 +217,12 @@ private:
 				return {};
 			}
 		}
-		return std::unexpected(std::move(errors));
+		auto rsp = make_unauthorized_error_response(std::move(errors), req);
+		for (const auto& challenge : challenges)
+		{
+			rsp.set("WWW-Authenticate", challenge);
+		}
+		return std::unexpected(std::move(rsp));
 	}
 
 	std::shared_ptr<router_type> router_;

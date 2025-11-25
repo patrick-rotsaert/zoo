@@ -94,5 +94,10 @@ api_key_authorization::verify(request& req, const url_view& url, const std::vect
 	}
 }
 
+std::optional<std::string> api_key_authorization::challenge() const
+{
+	return std::nullopt;
+}
+
 } // namespace spider
 } // namespace zoo

@@ -2,6 +2,7 @@
 #include "operations.h"
 
 #include "zoo/spider/rest/apikeyauthorization.h"
+#include "zoo/spider/rest/basicauthorization.h"
 #include "zoo/spider/json_util.h"
 
 namespace demo {
@@ -61,6 +62,22 @@ Controller::Controller()
 	    rest_operation{ .method = verb::get, .path = path_spec{ "api" } / "v1" / "test", .operation_id = "test", .summary = "Just a test" },
 	    &Operations::test,
 	    p::query{ "found" });
+
+	const auto userNameHeader = "X-Username";
+
+	add_operation(
+	    rest_operation{
+	        .method       = verb::get,
+	        .path         = path_spec{ "api" } / "v1" / "basic",
+	        .operation_id = "testBasicAuth",
+	        .summary      = "Test basic authentication",
+	        .sec          = security{ {
+                { std::make_shared<basic_authorization>(
+                      "BasicAuth", [](std::string_view u, std::string_view p) { return u == "foo" && p == "bar"; }, "Demo", userNameHeader),
+	                       {} },
+            } } },
+	    &Operations::testBasicAuth,
+	    p::header{ userNameHeader });
 }
 
 std::string Controller::openApiSpec() const
