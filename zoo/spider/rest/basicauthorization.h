@@ -19,25 +19,24 @@ namespace spider {
 
 class ZOO_SPIDER_API basic_authorization : public isecurityscheme
 {
-	using verification_callback = std::function<bool(std::string_view u, std::string_view p)>;
+	using verification_callback = std::function<std::expected<auth_data, std::string>(std::string_view user, std::string_view pass)>;
 
 public:
-	explicit basic_authorization(std::string_view                scheme_name,
-	                             verification_callback           callback,
-	                             std::string                     challenge_realm,
-	                             std::optional<std::string_view> inject_username_header = std::nullopt);
+	explicit basic_authorization(std::string_view scheme_name, verification_callback callback, std::string challenge_realm);
 	~basic_authorization() override;
 
-	std::string_view                 scheme_name() const override;
-	boost::json::object              scheme() const override;
-	std::expected<void, std::string> verify(request& req, const url_view& url, const std::vector<std::string_view>& scopes) const override;
-	std::optional<std::string>       challenge() const override;
+	std::string_view    scheme_name() const override;
+	boost::json::object scheme() const override;
+
+	std::expected<auth_data, auth_error>
+	verify(request& req, const url_view& url, const std::vector<std::string_view>& scopes) const override;
 
 private:
-	std::string_view                scheme_name_;
-	verification_callback           callback_;
-	std::string                     challenge_realm_;
-	std::optional<std::string_view> inject_username_header_;
+	auth_error make_verification_error(std::string message) const;
+
+	std::string_view      scheme_name_;
+	verification_callback callback_;
+	std::string           challenge_realm_;
 };
 
 } // namespace spider

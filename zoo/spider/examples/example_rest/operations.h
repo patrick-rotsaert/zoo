@@ -8,9 +8,11 @@
 #pragma once
 
 #include "data.h"
+#include "auth.h"
 
 #include "zoo/spider/aliases.h"
 #include "zoo/spider/rest/status_result.hpp"
+#include "zoo/spider/rest/auth.h"
 #include "zoo/spider/content_container.hpp"
 
 #include <boost/optional/optional.hpp>
@@ -47,7 +49,11 @@ public:
 	             >
 	test(bool found);
 
-	html_container testBasicAuth(std::string_view userName);
+	html_container testBasicAuth(const BasicAuthData& auth);
+
+	html_container testBearerAuth(const BearerAuthData& auth);
+
+	std::string login(const std::string& user);
 
 private:
 	Customer createCustomer(const Customer& c);

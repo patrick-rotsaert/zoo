@@ -91,13 +91,18 @@ protected:
 		                     request&& req, url_view&& url, path_spec::param_map&& param) -> response_wrapper {
 			try
 			{
-				if (auto verified = verify_security(sec.value_or(global_security_), req, url); !verified)
+				auth_map auth{};
+				if (auto verified = verify_security(sec.value_or(global_security_), req, url); verified)
+				{
+					auth = std::move(verified.value());
+				}
+				else
 				{
 					return std::move(verified.error());
 				}
 				if constexpr (std::is_void_v<ResultType>)
 				{
-					handler->call(parameter_sources{ req, url, param });
+					handler->call(parameter_sources{ req, url, param, auth });
 					auto res = empty_response::create(status::no_content);
 					res.version(req.version());
 					res.keep_alive(req.keep_alive());
@@ -105,7 +110,7 @@ protected:
 				}
 				else
 				{
-					auto res = make_response(handler->call(parameter_sources{ req, url, param }),
+					auto res = make_response(handler->call(parameter_sources{ req, url, param, auth }),
 					                         status_utility::success_status_for_method(method));
 					res.version(req.version());
 					res.keep_alive(req.keep_alive());
@@ -184,14 +189,15 @@ private:
 		}
 	}
 
-	static std::expected<void, response> verify_security(const security& sec, request& req, const url_view& url)
+	static std::expected<auth_map, response> verify_security(const security& sec, request& req, const url_view& url)
 	{
 		if (sec.empty())
 		{
 			return {};
 		}
-		std::vector<std::string> errors;
-		std::vector<std::string> challenges;
+		auth_map                 auth{};
+		std::vector<std::string> errors{};
+		std::vector<challenge>   challenges{};
 		// Note: The outer vector entries in `sec` are combined using logic OR.
 		//       The inner map entries are combined using logic AND.
 		for (const auto& map : sec)
@@ -201,26 +207,30 @@ private:
 			{
 				const auto& scheme = *pair.first;
 				const auto& scopes = pair.second;
-				if (auto verified = scheme.verify(req, url, scopes); !verified)
+				if (auto verified = scheme.verify(req, url, scopes); verified)
 				{
-					success = false;
-					errors.push_back(std::move(verified.error()));
-					if (const auto challenge = scheme.challenge())
-					{
-						challenges.push_back(std::move(challenge.value()));
-					}
+					auth[scheme.scheme_name()] = std::move(verified.value());
+				}
+				else
+				{
+					success    = false;
+					auto error = std::move(verified.error());
+					errors.push_back(std::move(error.message));
+					challenges.insert(challenges.end(),
+					                  std::make_move_iterator(error.challenges.begin()),
+					                  std::make_move_iterator(error.challenges.end()));
 					break;
 				}
 			}
 			if (success)
 			{
-				return {};
+				return auth;
 			}
 		}
 		auto rsp = make_unauthorized_error_response(std::move(errors), req);
 		for (const auto& challenge : challenges)
 		{
-			rsp.set("WWW-Authenticate", challenge);
+			rsp.set("WWW-Authenticate", www_authenticate::encode(challenge));
 		}
 		return std::unexpected(std::move(rsp));
 	}

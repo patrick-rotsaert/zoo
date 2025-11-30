@@ -9,6 +9,7 @@
 
 #include "zoo/spider/config.h"
 #include "zoo/spider/message.h"
+#include "zoo/spider/rest/auth.h"
 
 #include <boost/json.hpp>
 #include <boost/url/url_view.hpp>
@@ -37,10 +38,8 @@ public:
 	virtual std::string_view    scheme_name() const = 0;
 	virtual boost::json::object scheme() const      = 0;
 
-	virtual std::expected<void, std::string>
+	virtual std::expected<auth_data, auth_error>
 	verify(request& req, const url_view& url, const std::vector<std::string_view>& scopes) const = 0;
-
-	virtual std::optional<std::string> challenge() const = 0;
 };
 
 } // namespace spider

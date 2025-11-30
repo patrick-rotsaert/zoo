@@ -3,6 +3,7 @@
 
 #include "zoo/spider/rest/apikeyauthorization.h"
 #include "zoo/spider/rest/basicauthorization.h"
+#include "zoo/spider/rest/bearerauthorization.h"
 #include "zoo/spider/json_util.h"
 
 namespace demo {
@@ -12,8 +13,28 @@ using namespace zoo::spider;
 Controller::Controller()
     : rest_controller{ openapi_settings{ .strip_ns = "demo::", .info_title = "Demo API", .info_version = "1.0" } }
 {
+	auto apiKeyAuth = std::make_shared<api_key_authorization>("ApiKeyAuth", api_key_authorization::source::header, "X-Api-Key", "123456");
+
+	auto basicAuth = std::make_shared<basic_authorization>(
+	    "BasicAuth",
+	    [](std::string_view u, std::string_view p) -> std::expected<auth_data, std::string> {
+		    if (u == "me" && p == "pass")
+		    {
+			    auto auth      = std::make_unique<BasicAuthData>();
+			    auth->userName = u;
+			    return auth;
+		    }
+		    else
+		    {
+			    return std::unexpected(std::string{ "Invalid user name / password" });
+		    }
+	    },
+	    "Demo");
+
+	auto bearerAuth = std::make_shared<bearer_authorization>("BearerAuth", &BearerAuthData::verify, "Demo");
+
 	set_global_security({ {
-	    { std::make_shared<api_key_authorization>("ApiKeyAuth", api_key_authorization::source::header, "X-Api-Key", "123456"), {} },
+	    { apiKeyAuth, {} },
 	} });
 
 	using p = rest_controller::p;
@@ -63,21 +84,28 @@ Controller::Controller()
 	    &Operations::test,
 	    p::query{ "found" });
 
-	const auto userNameHeader = "X-Username";
+	add_operation(rest_operation{ .method       = verb::get,
+	                              .path         = path_spec{ "api" } / "v1" / "basic",
+	                              .operation_id = "testBasicAuth",
+	                              .summary      = "Test basic authentication",
+	                              .sec          = security{ { { basicAuth, {} }, { apiKeyAuth, {} } } } },
+	              &Operations::testBasicAuth,
+	              p::auth{ basicAuth->scheme_name() });
+
+	add_operation(rest_operation{ .method       = verb::get,
+	                              .path         = path_spec{ "api" } / "v1" / "bearer",
+	                              .operation_id = "testBearerAuth",
+	                              .summary      = "Test bearer authentication\n"
+	                                              "Use the login endpoint to get a token",
+	                              .sec          = security{ { { bearerAuth, {} }, { apiKeyAuth, {} } } } },
+	              &Operations::testBearerAuth,
+	              p::auth{ bearerAuth->scheme_name() });
 
 	add_operation(
 	    rest_operation{
-	        .method       = verb::get,
-	        .path         = path_spec{ "api" } / "v1" / "basic",
-	        .operation_id = "testBasicAuth",
-	        .summary      = "Test basic authentication",
-	        .sec          = security{ {
-                { std::make_shared<basic_authorization>(
-                      "BasicAuth", [](std::string_view u, std::string_view p) { return u == "foo" && p == "bar"; }, "Demo", userNameHeader),
-	                       {} },
-            } } },
-	    &Operations::testBasicAuth,
-	    p::header{ userNameHeader });
+	        .method = verb::get, .path = path_spec{ "api" } / "v1" / "login", .operation_id = "login", .summary = "Get a bearer token" },
+	    &Operations::login,
+	    p::query{ "userName" });
 }
 
 std::string Controller::openApiSpec() const

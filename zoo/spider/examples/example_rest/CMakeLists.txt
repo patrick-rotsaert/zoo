@@ -6,7 +6,7 @@
 #
 
 set(TARGET spider_example_rest)
-add_zoo_executable(${TARGET} example_rest.cpp controller.cpp operations.cpp data.cpp test_png_image.cpp)
+add_zoo_executable(${TARGET} example_rest.cpp controller.cpp operations.cpp data.cpp test_png_image.cpp auth.cpp)
 
 target_compile_features(${TARGET} PRIVATE cxx_std_23)
-target_link_libraries(${TARGET} PRIVATE zoo::spider)
+target_link_libraries(${TARGET} PRIVATE zoo::spider Boost::serialization)

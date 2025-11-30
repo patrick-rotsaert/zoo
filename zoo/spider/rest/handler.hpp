@@ -110,6 +110,10 @@ private:
 			    {
 				    ok = true;
 			    }
+			    else if constexpr (std::is_same_v<P, p::auth>)
+			    {
+				    ok = std::is_base_of_v<auth_data_base, T>;
+			    }
 			    else if constexpr (std::is_same_v<P, p::json>)
 			    {
 				    ok = ConvertibleFromBoostJson<T>;
@@ -172,6 +176,10 @@ private:
 			    {
 				    return collect_header_argument(sources, param, tag);
 			    }
+			    else if constexpr (std::is_same_v<P, p::auth> && std::is_base_of_v<auth_data_base, T>)
+			    {
+				    return collect_auth_argument(sources, param, tag);
+			    }
 			    else if constexpr (std::is_same_v<P, p::json> && ConvertibleFromBoostJson<T>)
 			    {
 				    try
@@ -223,6 +231,22 @@ private:
 			ZOO_THROW_EXCEPTION(argument_error{ fmt::format("Query parameter '{}' is required", param.name) });
 		}
 		return collect_string_argument(param.name, (*it).value, tag);
+	}
+
+	template<typename T>
+	static T collect_auth_argument(const parameter_sources& sources, const p::auth& param, const T* const tag)
+	{
+		const auto it = sources.auth.find(param.name);
+		if (it == sources.auth.end())
+		{
+			ZOO_THROW_EXCEPTION(argument_error{ fmt::format("Security scheme '{}' has not been verified", param.name) });
+		}
+		const auto& ptr = it->second;
+		if (!ptr)
+		{
+			return T{};
+		}
+		return std::cref(dynamic_cast<const T&>(*ptr));
 	}
 
 	template<typename T>

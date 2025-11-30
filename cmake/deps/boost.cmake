@@ -9,7 +9,7 @@ include_guard(GLOBAL)
 
 include(${PROJECT_SOURCE_DIR}/cmake/vars.cmake)
 
-set(_boost_libs date_time system filesystem thread url json regex)
+set(_boost_libs date_time system filesystem thread url json regex serialization)
 
 set(_found_all_boost_targets ON)
 foreach(lib ${_boost_libs})

@@ -8,6 +8,7 @@
 #pragma once
 
 #include "zoo/spider/rest/pathspec.h"
+#include "zoo/spider/rest/auth.h"
 #include "zoo/spider/message.h"
 
 #include <boost/url/url_view.hpp>
@@ -89,6 +90,11 @@ struct parameters final
 	{
 	};
 
+	struct auth_parameter final
+	{
+		std::string_view name;
+	};
+
 	struct p final
 	{
 		using path    = path_parameter;
@@ -97,9 +103,10 @@ struct parameters final
 		using json    = json_body;
 		using request = request_parameter;
 		using url     = url_parameter;
+		using auth    = auth_parameter;
 	};
 
-	using descriptor = std::variant<p::path, p::query, p::header, p::json, p::request, p::url>;
+	using descriptor = std::variant<p::path, p::query, p::header, p::json, p::request, p::url, p::auth>;
 };
 
 struct parameter_sources final
@@ -107,6 +114,7 @@ struct parameter_sources final
 	const request&              req;
 	const url_view&             url;
 	const path_spec::param_map& param;
+	const auth_map&             auth;
 };
 
 } // namespace spider

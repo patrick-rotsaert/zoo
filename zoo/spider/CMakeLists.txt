@@ -34,6 +34,9 @@ add_zoo_library(spider
 		rest/isecurityscheme.cpp
 		rest/apikeyauthorization.cpp
 		rest/basicauthorization.cpp
+		rest/bearerauthorization.cpp
+		rest/base64.cpp
+		rest/auth.cpp
 		tag_invoke/time_point.cpp
 		tag_invoke/date.cpp
 		tag_invoke/time_duration.cpp
@@ -80,6 +83,9 @@ add_zoo_library(spider
 		rest/security.h
 		rest/apikeyauthorization.h
 		rest/basicauthorization.h
+		rest/bearerauthorization.h
+		rest/base64.h
+		rest/auth.h
 		tag_invoke/time_point.h
 		tag_invoke/date.h
 		tag_invoke/time_duration.h

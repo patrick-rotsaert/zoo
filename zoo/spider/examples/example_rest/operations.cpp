@@ -9,6 +9,7 @@
 #include "zoo/common/misc/rlws.hpp"
 
 #include <fmt/format.h>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 namespace demo {
 
@@ -81,9 +82,9 @@ Operations::test(bool found)
 	}
 }
 
-html_container Operations::testBasicAuth(std::string_view userName)
+html_container Operations::testBasicAuth(const BasicAuthData& auth)
 {
-	zlog(info, "user name is {}", zoo::quoted_c(userName));
+	zlog(info, "user name is {}", zoo::quoted_c(auth.userName));
 	return html_container::create(std::string{ html_container::CONTENT_TYPE },
 	                              fmt::format(R"(
 		<html>
@@ -92,7 +93,30 @@ html_container Operations::testBasicAuth(std::string_view userName)
 		 </body>
 		</html>
 		)"_rlws,
-	                                          userName));
+	                                          auth.userName));
+}
+
+html_container Operations::testBearerAuth(const BearerAuthData& auth)
+{
+	zlog(info, "user name is {}", zoo::quoted_c(auth.userName));
+	return html_container::create(std::string{ html_container::CONTENT_TYPE },
+	                              fmt::format(R"(
+		<html>
+		 <body>
+		  <h1>Hello, {}</h1>
+		 </body>
+		</html>
+		)"_rlws,
+	                                          auth.userName));
+}
+
+std::string Operations::login(const std::string& user)
+{
+	zlog(debug, "user = {}", zoo::quoted_c(user));
+	BearerAuthData data{};
+	data.userName = user;
+	data.exp      = boost::posix_time::second_clock::universal_time() + boost::posix_time::minutes{ 1 };
+	return data.asToken();
 }
 
 } // namespace demo

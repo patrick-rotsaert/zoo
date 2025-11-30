@@ -48,7 +48,7 @@ public:
 	explicit openapi(openapi_settings settings)
 	    : settings_{ std::move(settings) }
 	    , spec_{}
-	    , default_response_ref_{}
+	    , have_global_security_{}
 	{
 		using namespace boost::json;
 
@@ -56,10 +56,6 @@ public:
 		spec_["info"]    = { { "title", settings_.info_title }, { "version", settings_.info_version } };
 
 		ensure_object(spec_["paths"]); // make sure paths appears before components
-
-		object default_response = { { "description", "An unexpected error response." },
-			                        { "content", { { "application/json", { { "schema", value_schema<DefaultErrorType>() } } } } } };
-		default_response_ref_   = add_components_response("default", default_response);
 	}
 
 	template<class Callback, typename... ArgDescriptors>
@@ -131,11 +127,7 @@ public:
 								        { "content", { { "application/json", { { "schema", value_schema<ArgType>() } } } } }
 							        };
 						        }
-						        else if constexpr (std::is_same_v<P, p::request>)
-						        {
-							        return;
-						        }
-						        else if constexpr (std::is_same_v<P, p::url>)
+						        else if constexpr (std::is_same_v<P, p::request> || std::is_same_v<P, p::url> || std::is_same_v<P, p::auth>)
 						        {
 							        return;
 						        }
@@ -173,7 +165,16 @@ public:
 
 			add_response<ResultType>(responses, status_utility::success_status_for_method(op.method));
 
-			responses["default"] = { { "$ref", default_response_ref_ } };
+			if ((op.sec && !is_empty_security(op.sec.value())) || have_global_security_)
+			{
+				const auto unauthorized = std::to_string(static_cast<int>(status::unauthorized));
+				if (!responses.contains(unauthorized))
+				{
+					responses[unauthorized] = { { "$ref", get_unauthorized_response_ref() } };
+				}
+			}
+
+			responses["default"] = { { "$ref", get_default_response_ref() } };
 
 			operation["responses"] = std::move(responses);
 		}
@@ -185,7 +186,8 @@ public:
 
 	void set_global_security(const security& sec)
 	{
-		spec_["security"] = security_array(sec);
+		spec_["security"]     = security_array(sec);
+		have_global_security_ = !is_empty_security(sec);
 	}
 
 	const boost::json::object& spec() const
@@ -194,6 +196,18 @@ public:
 	}
 
 private:
+	static bool is_empty_security(const security& sec)
+	{
+		for (const auto& map : sec)
+		{
+			if (!map.empty())
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
 	static std::string method_name(verb method)
 	{
 		auto        sv = to_string(method);
@@ -527,6 +541,38 @@ private:
 		return fmt::format("#/components/schemas/{}", type_name);
 	}
 
+	std::string get_unauthorized_response_ref()
+	{
+		const auto type_name = "unauthorized";
+		if (components_response_exists(type_name))
+		{
+			return components_response_ref(type_name);
+		}
+		else
+		{
+			boost::json::object response = { { "description", "Authorization information is missing or invalid." },
+				                             { "content",
+				                               { { "application/json", { { "schema", value_schema<DefaultErrorType>() } } } } } };
+			return add_components_response(type_name, std::move(response));
+		}
+	}
+
+	std::string get_default_response_ref()
+	{
+		const auto type_name = "default";
+		if (components_response_exists(type_name))
+		{
+			return components_response_ref(type_name);
+		}
+		else
+		{
+			boost::json::object response = { { "description", "An unexpected error occurred." },
+				                             { "content",
+				                               { { "application/json", { { "schema", value_schema<DefaultErrorType>() } } } } } };
+			return add_components_response(type_name, std::move(response));
+		}
+	}
+
 	std::string add_components_response(std::string_view type_name, boost::json::object response)
 	{
 		auto& components     = ensure_object(spec_["components"]);
@@ -605,7 +651,7 @@ private:
 
 	openapi_settings    settings_;
 	boost::json::object spec_;
-	std::string         default_response_ref_;
+	bool                have_global_security_;
 };
 
 } // namespace spider

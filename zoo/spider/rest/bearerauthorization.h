@@ -11,21 +11,19 @@
 #include "zoo/spider/rest/isecurityscheme.h"
 
 #include <string>
+#include <optional>
+#include <functional>
 
 namespace zoo {
 namespace spider {
 
-class ZOO_SPIDER_API api_key_authorization : public isecurityscheme
+class ZOO_SPIDER_API bearer_authorization : public isecurityscheme
 {
-public:
-	enum class source
-	{
-		header,
-		query
-	};
+	using verification_callback = std::function<std::expected<auth_data, auth_error>(const bearer_authorization&, std::string_view token)>;
 
-	explicit api_key_authorization(std::string_view scheme_name, source in, std::string_view name, std::string key);
-	~api_key_authorization() override;
+public:
+	explicit bearer_authorization(std::string_view scheme_name, verification_callback callback, std::string challenge_realm);
+	~bearer_authorization() override;
 
 	std::string_view    scheme_name() const override;
 	boost::json::object scheme() const override;
@@ -33,11 +31,12 @@ public:
 	std::expected<auth_data, auth_error>
 	verify(request& req, const url_view& url, const std::vector<std::string_view>& scopes) const override;
 
+	auth_error make_verification_error(std::string message, std::vector<std::pair<std::string_view, std::string>> auth_params) const;
+
 private:
-	std::string_view scheme_name_;
-	source           in_;
-	std::string_view name_;
-	std::string      key_;
+	std::string_view      scheme_name_;
+	verification_callback callback_;
+	std::string           challenge_realm_;
 };
 
 } // namespace spider
