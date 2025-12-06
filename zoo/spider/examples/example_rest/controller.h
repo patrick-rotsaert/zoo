@@ -20,6 +20,9 @@ public:
 	explicit Controller();
 
 	std::string openApiSpec() const;
+
+private:
+	response getOpenApi(const request& req);
 };
 
 } // namespace demo

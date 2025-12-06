@@ -40,6 +40,14 @@ Controller::Controller()
 	using p = rest_controller::p;
 
 	add_operation(rest_operation{ .method       = verb::get,
+	                              .path         = path_spec{ "api/v1" },
+	                              .operation_id = "getOpenApi",
+	                              .summary      = "Get the Open API specification.",
+	                              .sec          = security{} },
+	              &Controller::getOpenApi,
+	              p::request{});
+
+	add_operation(rest_operation{ .method       = verb::get,
 	                              .path         = path_spec{ "api" } / "v1" / "customers",
 	                              .operation_id = "listCustomers",
 	                              .summary      = "Get a list of customers" },
@@ -113,6 +121,11 @@ std::string Controller::openApiSpec() const
 	const auto& jv = oas().spec();
 	// return boost::json::serialize(jv);
 	return json_util::pretty_print(jv);
+}
+
+response Controller::getOpenApi(const request& req)
+{
+	return json_response::create(req, status::ok, oas().spec());
 }
 
 } // namespace demo

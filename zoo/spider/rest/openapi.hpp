@@ -165,7 +165,7 @@ public:
 
 			add_response<ResultType>(responses, status_utility::success_status_for_method(op.method));
 
-			if ((op.sec && !is_empty_security(op.sec.value())) || have_global_security_)
+			if ((op.sec && !is_empty_security(op.sec.value())) || (!op.sec && have_global_security_))
 			{
 				const auto unauthorized = std::to_string(static_cast<int>(status::unauthorized));
 				if (!responses.contains(unauthorized))
