@@ -1,4 +1,4 @@
-#include "zoo/spider/buffer_response.h"
+#include "zoo/spider/messages/buffer_response.h"
 
 #include <boost/beast/version.hpp>
 

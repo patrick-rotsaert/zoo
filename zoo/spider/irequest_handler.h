@@ -9,8 +9,8 @@
 
 #include "zoo/spider/config.h"
 #include "zoo/spider/aliases.h"
-#include "zoo/spider/message.h"
-#include "zoo/spider/response_wrapper.hpp"
+#include "zoo/spider/messages/message.h"
+#include "zoo/spider/messages/response_wrapper.hpp"
 
 namespace zoo {
 namespace spider {

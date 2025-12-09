@@ -7,27 +7,27 @@
 
 add_zoo_library(spider
 	SOURCES
+		apilinktest.cpp
 		listener.cpp
 		http_session.cpp
 		http_session.h
 		irequest_handler.cpp
 		request_router.cpp
-		json_response.cpp
-		file_response.cpp
-		buffer_response.cpp
-		binary_response.cpp
-		string_response.cpp
-		error_response.cpp
-		empty_response.cpp
-		tracked_file.cpp
-		tracked_file.h
-		ifile_event_listener.cpp
-		noop_file_event_listener.cpp
 		controller.cpp
-		log_response.cpp
 		exception.cpp
 		exception.h
 		json_util.cpp
+		messages/json_response.cpp
+		messages/file_response.cpp
+		messages/buffer_response.cpp
+		messages/binary_response.cpp
+		messages/string_response.cpp
+		messages/error_response.cpp
+		messages/empty_response.cpp
+		messages/tracked_file.cpp
+		messages/ifile_event_listener.cpp
+		messages/noop_file_event_listener.cpp
+		messages/log_response.cpp
 		rest/conversions.cpp
 		rest/path.cpp
 		rest/pathspec.cpp
@@ -43,27 +43,29 @@ add_zoo_library(spider
 		tag_invoke/ptime.cpp
 		tag_invoke/greg_date.cpp
 		tag_invoke/uuid.cpp
-		apilinktest.cpp
 	PUBLIC_HEADERS
+		apilinktest.h
 		aliases.h
-		message.h
 		listener.h
 		irequest_handler.h
 		request_router.h
-		json_response.h
-		file_response.h
-		buffer_response.h
-		binary_response.h
-		string_response.h
-		error_response.h
-		empty_response.h
-		response_wrapper.hpp
-		ifile_event_listener.h
-		noop_file_event_listener.h
 		controller.hpp
-		log_response.h
 		json_util.h
 		type_traits.h
+		messages/message.h
+		messages/json_response.h
+		messages/file_response.h
+		messages/buffer_response.h
+		messages/binary_response.h
+		messages/string_response.h
+		messages/error_response.h
+		messages/empty_response.h
+		messages/response_wrapper.hpp
+		messages/ifile_event_listener.h
+		messages/noop_file_event_listener.h
+		messages/tracked_file.h
+		messages/log_response.h
+		messages/content_container.hpp
 		rest/annotation.hpp
 		rest/concepts.hpp
 		rest/controller.hpp
@@ -92,7 +94,6 @@ add_zoo_library(spider
 		tag_invoke/ptime.h
 		tag_invoke/greg_date.h
 		tag_invoke/uuid.h
-		apilinktest.h
 	MSVC_PRIVATE_COMPILER_OPTIONS
 		/wd4702 # for boost\beast\core\impl\buffers_cat.hpp(186): warning C4702: unreachable code
 	UNIT_TEST_SOURCES

@@ -9,7 +9,7 @@
 
 #include "zoo/spider/rest/pathspec.h"
 #include "zoo/spider/rest/auth.h"
-#include "zoo/spider/message.h"
+#include "zoo/spider/messages/message.h"
 
 #include <boost/url/url_view.hpp>
 

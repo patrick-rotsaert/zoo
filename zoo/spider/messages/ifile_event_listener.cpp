@@ -5,18 +5,13 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "zoo/spider/ifile_event_listener.h"
+#include "zoo/spider/messages/ifile_event_listener.h"
 
 namespace zoo {
 namespace spider {
 
-ifile_event_listener::ifile_event_listener()
-{
-}
-
-ifile_event_listener::~ifile_event_listener()
-{
-}
+ifile_event_listener::ifile_event_listener()  = default;
+ifile_event_listener::~ifile_event_listener() = default;
 
 } // namespace spider
 } // namespace zoo

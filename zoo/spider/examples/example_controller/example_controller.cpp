@@ -7,12 +7,12 @@
 
 #include "zoo/spider/controller.hpp"
 #include "zoo/spider/listener.h"
-#include "zoo/spider/error_response.h"
-#include "zoo/spider/file_response.h"
-#include "zoo/spider/json_response.h"
-#include "zoo/spider/empty_response.h"
-#include "zoo/spider/noop_file_event_listener.h"
 #include "zoo/spider/aliases.h"
+#include "zoo/spider/messages/error_response.h"
+#include "zoo/spider/messages/file_response.h"
+#include "zoo/spider/messages/json_response.h"
+#include "zoo/spider/messages/empty_response.h"
+#include "zoo/spider/messages/noop_file_event_listener.h"
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/formatters.hpp"
 

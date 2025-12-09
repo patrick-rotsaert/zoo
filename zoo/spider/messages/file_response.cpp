@@ -5,10 +5,10 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "zoo/spider/file_response.h"
-#include "zoo/spider/error_response.h"
-#include "zoo/spider/tracked_file.h"
-#include "zoo/spider/ifile_event_listener.h"
+#include "zoo/spider/messages/file_response.h"
+#include "zoo/spider/messages/error_response.h"
+#include "zoo/spider/messages/tracked_file.h"
+#include "zoo/spider/messages/ifile_event_listener.h"
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/formatters.hpp"
 

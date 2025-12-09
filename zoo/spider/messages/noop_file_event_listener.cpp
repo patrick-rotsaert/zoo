@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "zoo/spider/noop_file_event_listener.h"
+#include "zoo/spider/messages/noop_file_event_listener.h"
 
 namespace zoo {
 namespace spider {

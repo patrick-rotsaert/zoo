@@ -9,7 +9,7 @@
 
 #include "zoo/spider/config.h"
 #include "zoo/spider/aliases.h"
-#include "zoo/spider/message.h"
+#include "zoo/spider/messages/message.h"
 #include "zoo/common/misc/byte_string.h"
 
 #include <boost/beast/http/buffer_body.hpp>

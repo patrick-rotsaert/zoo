@@ -19,9 +19,9 @@
 
 #include "zoo/spider/config.h"
 #include "zoo/spider/request_router.h"
-#include "zoo/spider/error_response.h"
-#include "zoo/spider/response_wrapper.hpp"
 #include "zoo/spider/exception.h"
+#include "zoo/spider/messages/error_response.h"
+#include "zoo/spider/messages/response_wrapper.hpp"
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/formatters.hpp"
 #include "zoo/common/misc/demangled_type_name.hpp"

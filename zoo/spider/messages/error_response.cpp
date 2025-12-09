@@ -5,8 +5,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "zoo/spider/error_response.h"
-#include "zoo/spider/message.h"
+#include "zoo/spider/messages/error_response.h"
+#include "zoo/spider/messages/message.h"
 
 #include <boost/beast/version.hpp>
 

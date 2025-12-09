@@ -69,6 +69,12 @@ Futhermore, the server exposes a basic REST API.
   && echo
   ```
 
+## REST
+
+Some modules were forked in the [rest/](rest) subdirectory.
+These modules were tailored specifically to build REST APIs and generate an OpenAPI 3.0 specification at runtime.
+See the example code in [example_rest](examples/example_rest).
+
 ## Motivation
 
 While using Boost Beast in some projects, I found myself copying considerable amounts of code from one project to the next.

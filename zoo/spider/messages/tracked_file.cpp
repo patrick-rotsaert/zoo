@@ -5,8 +5,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "zoo/spider/tracked_file.h"
-#include "zoo/spider/ifile_event_listener.h"
+#include "zoo/spider/messages/tracked_file.h"
+#include "zoo/spider/messages/ifile_event_listener.h"
 #include "zoo/common/logging/logging.h"
 
 namespace zoo {

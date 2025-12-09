@@ -1,11 +1,12 @@
-#include "zoo/spider/string_response.h"
+#include "zoo/spider/messages/binary_response.h"
 
 #include <boost/beast/version.hpp>
 
 namespace zoo {
 namespace spider {
 
-response string_response::create(const request& req, http::status status, std::string_view content_type, std::string_view body)
+binary_response::response
+binary_response::create(const request& req, http::status status, std::string_view content_type, byte_string_view body)
 {
 	auto res = response{ status, req.version() };
 	res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
@@ -16,7 +17,7 @@ response string_response::create(const request& req, http::status status, std::s
 	return res;
 }
 
-response string_response::create(http::status status, std::string_view content_type, std::string_view body)
+binary_response::response binary_response::create(http::status status, std::string_view content_type, byte_string_view body)
 {
 	auto res = response{};
 	res.result(status);
@@ -27,7 +28,8 @@ response string_response::create(http::status status, std::string_view content_t
 	return res;
 }
 
-response string_response::create(const request& req, http::status status, std::string_view content_type, std::string body)
+binary_response::response
+binary_response::create(const request& req, http::status status, std::string_view content_type, std::vector<std::uint8_t> body)
 {
 	auto res = response{ status, req.version() };
 	res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
@@ -38,7 +40,7 @@ response string_response::create(const request& req, http::status status, std::s
 	return res;
 }
 
-response string_response::create(http::status status, std::string_view content_type, std::string body)
+binary_response::response binary_response::create(http::status status, std::string_view content_type, std::vector<std::uint8_t> body)
 {
 	auto res = response{};
 	res.result(status);

@@ -11,7 +11,7 @@
 #include "zoo/spider/aliases.h"
 #include "zoo/spider/irequest_handler.h"
 #include "zoo/spider/exception.h"
-#include "zoo/spider/json_response.h"
+#include "zoo/spider/messages/json_response.h"
 #include "zoo/spider/rest/concepts.hpp"
 #include "zoo/spider/rest/operation.h"
 #include "zoo/spider/rest/path.h"

@@ -13,7 +13,7 @@
 #include "zoo/spider/aliases.h"
 #include "zoo/spider/rest/status_result.hpp"
 #include "zoo/spider/rest/auth.h"
-#include "zoo/spider/content_container.hpp"
+#include "zoo/spider/messages/content_container.hpp"
 
 #include <boost/optional/optional.hpp>
 

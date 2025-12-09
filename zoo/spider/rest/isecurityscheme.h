@@ -8,7 +8,7 @@
 #pragma once
 
 #include "zoo/spider/config.h"
-#include "zoo/spider/message.h"
+#include "zoo/spider/messages/message.h"
 #include "zoo/spider/rest/auth.h"
 
 #include <boost/json.hpp>

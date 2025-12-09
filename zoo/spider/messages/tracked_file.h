@@ -8,8 +8,8 @@
 #pragma once
 
 #include "zoo/spider/config.h"
-#include "zoo/spider/ifile_event_listener.h"
 #include "zoo/spider/aliases.h"
+#include "zoo/spider/messages/ifile_event_listener.h"
 
 #include <boost/beast/core/file.hpp>
 

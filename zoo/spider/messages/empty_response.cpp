@@ -5,7 +5,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "zoo/spider/empty_response.h"
+#include "zoo/spider/messages/empty_response.h"
 
 #include <boost/beast/version.hpp>
 

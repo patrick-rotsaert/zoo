@@ -6,7 +6,7 @@
 //
 
 #include "zoo/spider/request_router.h"
-#include "zoo/spider/error_response.h"
+#include "zoo/spider/messages/error_response.h"
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/formatters.hpp"
 

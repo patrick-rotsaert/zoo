@@ -8,7 +8,7 @@
 #pragma once
 
 #include "zoo/spider/aliases.h"
-#include "zoo/spider/tracked_file.h"
+#include "zoo/spider/messages/tracked_file.h"
 
 #include <boost/beast/http/empty_body.hpp>
 #include <boost/beast/http/string_body.hpp>
