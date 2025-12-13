@@ -9,7 +9,6 @@
 
 #include "zoo/spider/listener.h"
 #include "zoo/common/logging/logging.h"
-#include "zoo/common/misc/formatters.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/signal_set.hpp>
