@@ -48,13 +48,13 @@ public:
 	std::optional<param_map> match(const path& p) const;
 
 	path_spec& operator/=(const segment& s);
-	path_spec  operator/(const segment& s);
+	path_spec  operator/(const segment& s) const;
 
 	path_spec& operator/=(const path_spec& s);
-	path_spec  operator/(const path_spec& s);
+	path_spec  operator/(const path_spec& s) const;
 
 	path_spec& operator/=(string_view s);
-	path_spec  operator/(string_view s);
+	path_spec  operator/(string_view s) const;
 
 	bool operator==(const path_spec& other) const;
 	bool operator!=(const path_spec& other) const;

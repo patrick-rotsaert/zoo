@@ -234,7 +234,7 @@ private:
 	}
 
 	template<typename T>
-	static T collect_auth_argument(const parameter_sources& sources, const p::auth& param, const T* const tag)
+	static T collect_auth_argument(const parameter_sources& sources, const p::auth& param, const T* const)
 	{
 		const auto it = sources.auth.find(param.name);
 		if (it == sources.auth.end())
