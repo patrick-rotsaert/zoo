@@ -9,6 +9,7 @@
 
 #include "zoo/common/config.h"
 #include "zoo/common/misc/throw_exception.h"
+#include "zoo/common/misc/byte_string.h"
 
 #include <boost/date_time/gregorian/greg_date.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
@@ -121,6 +122,9 @@ std::string ZOO_ZOOCOMMON_API uuid_to_string(const boost::uuids::uuid& in);
 
 void ZOO_ZOOCOMMON_API               string_to_uuid(std::string_view in, boost::uuids::uuid& out);
 boost::uuids::uuid ZOO_ZOOCOMMON_API string_to_uuid(std::string_view in);
+
+void ZOO_ZOOCOMMON_API        string_to_byte_string(std::string_view in, byte_string& out);
+byte_string ZOO_ZOOCOMMON_API string_to_byte_string(std::string_view in);
 
 } // namespace conversion
 } // namespace zoo

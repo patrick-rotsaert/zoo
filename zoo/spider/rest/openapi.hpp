@@ -16,6 +16,7 @@
 #include "zoo/common/misc/is_optional.hpp"
 #include "zoo/common/misc/is_vector.hpp"
 #include "zoo/common/misc/is_variant.hpp"
+#include "zoo/common/misc/byte_string.h"
 #include "zoo/common/logging/logging.h"
 
 #include <boost/json.hpp>
@@ -384,6 +385,11 @@ private:
 		if constexpr (std::is_same_v<T, std::string> || std::is_same_v<T, std::string_view>)
 		{
 			schema["type"] = "string";
+		}
+		else if constexpr (std::is_same_v<T, byte_string> || std::is_same_v<T, byte_string_view>)
+		{
+			schema["type"]   = "string";
+			schema["format"] = "byte";
 		}
 		else if constexpr (std::is_same_v<T, bool>)
 		{
