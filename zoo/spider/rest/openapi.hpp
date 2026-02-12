@@ -163,7 +163,8 @@ public:
 								        { "content", { { "application/json", { { "schema", value_schema<ArgType>() } } } } }
 							        };
 						        }
-						        else if constexpr (std::is_same_v<P, p::request> || std::is_same_v<P, p::url> || std::is_same_v<P, p::auth>)
+						        else if constexpr (std::is_same_v<P, p::request> || std::is_same_v<P, p::url> ||
+						                           std::is_same_v<P, p::auth> || std::is_same_v<P, p::today>)
 						        {
 							        return;
 						        }

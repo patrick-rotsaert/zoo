@@ -126,6 +126,10 @@ private:
 			    {
 				    ok = std::is_same_v<T, url_view>;
 			    }
+			    else if constexpr (std::is_same_v<P, p::today>)
+			    {
+				    ok = std::is_same_v<T, boost::gregorian::date>;
+			    }
 			    else
 			    {
 				    static_assert(false, "non-exhaustive visitor!");
@@ -200,6 +204,10 @@ private:
 			    else if constexpr (std::is_same_v<P, p::url> && std::is_same_v<T, url_view>)
 			    {
 				    return std::cref(sources.url);
+			    }
+			    else if constexpr (std::is_same_v<P, p::today> && std::is_same_v<T, boost::gregorian::date>)
+			    {
+				    return boost::gregorian::day_clock::local_day();
 			    }
 			    return T{};
 		    },
