@@ -99,6 +99,10 @@ struct parameters final
 	{
 	};
 
+	struct now_boost_ptime final
+	{
+	};
+
 	struct p final
 	{
 		using path    = path_parameter;
@@ -109,9 +113,10 @@ struct parameters final
 		using url     = url_parameter;
 		using auth    = auth_parameter;
 		using today   = today_boost_gregorian;
+		using now     = now_boost_ptime;
 	};
 
-	using descriptor = std::variant<p::path, p::query, p::header, p::json, p::request, p::url, p::auth, p::today>;
+	using descriptor = std::variant<p::path, p::query, p::header, p::json, p::request, p::url, p::auth, p::today, p::now>;
 };
 
 struct parameter_sources final

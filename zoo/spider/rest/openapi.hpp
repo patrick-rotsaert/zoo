@@ -164,7 +164,7 @@ public:
 							        };
 						        }
 						        else if constexpr (std::is_same_v<P, p::request> || std::is_same_v<P, p::url> ||
-						                           std::is_same_v<P, p::auth> || std::is_same_v<P, p::today>)
+						                           std::is_same_v<P, p::auth> || std::is_same_v<P, p::today> || std::is_same_v<P, p::now>)
 						        {
 							        return;
 						        }
