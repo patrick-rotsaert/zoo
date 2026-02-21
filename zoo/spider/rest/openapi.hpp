@@ -16,6 +16,7 @@
 #include "zoo/common/misc/is_optional.hpp"
 #include "zoo/common/misc/is_vector.hpp"
 #include "zoo/common/misc/is_variant.hpp"
+#include "zoo/common/misc/byte_string.h"
 #include "zoo/common/logging/logging.h"
 
 #include <boost/json.hpp>
@@ -30,6 +31,8 @@
 #include <limits>
 #include <map>
 #include <unordered_map>
+#include <typeindex>
+#include <typeinfo>
 
 namespace zoo {
 namespace spider {
@@ -39,6 +42,39 @@ struct openapi_settings
 	std::string_view strip_ns;
 	std::string_view info_title;
 	std::string_view info_version;
+};
+
+class openapi_type_map final
+{
+	using map_type = std::unordered_map<std::type_index, std::string_view>;
+
+public:
+	template<typename T>
+	static void map_type_name(std::string_view type_name)
+	{
+		map()[std::type_index{ typeid(T) }] = type_name;
+	}
+
+	template<typename T>
+	static boost::optional<std::string_view> get_type_name()
+	{
+		const auto it = map().find(std::type_index{ typeid(T) });
+		if (it == map().end())
+		{
+			return boost::none;
+		}
+		else
+		{
+			return it->second;
+		}
+	}
+
+private:
+	static map_type& map()
+	{
+		static map_type _{};
+		return _;
+	}
 };
 
 template<IsValidErrorType DefaultErrorType>
@@ -127,7 +163,8 @@ public:
 								        { "content", { { "application/json", { { "schema", value_schema<ArgType>() } } } } }
 							        };
 						        }
-						        else if constexpr (std::is_same_v<P, p::request> || std::is_same_v<P, p::url> || std::is_same_v<P, p::auth>)
+						        else if constexpr (std::is_same_v<P, p::request> || std::is_same_v<P, p::url> ||
+						                           std::is_same_v<P, p::auth> || std::is_same_v<P, p::today> || std::is_same_v<P, p::now>)
 						        {
 							        return;
 						        }
@@ -349,6 +386,11 @@ private:
 		if constexpr (std::is_same_v<T, std::string> || std::is_same_v<T, std::string_view>)
 		{
 			schema["type"] = "string";
+		}
+		else if constexpr (std::is_same_v<T, byte_string> || std::is_same_v<T, byte_string_view>)
+		{
+			schema["type"]   = "string";
+			schema["format"] = "byte";
 		}
 		else if constexpr (std::is_same_v<T, bool>)
 		{
@@ -607,18 +649,21 @@ private:
 		{
 			return std::string{ T::type_name() };
 		}
-		else
+
+		if (const auto type_name = openapi_type_map::get_type_name<T>(); type_name)
 		{
-			auto type_name = demangled_type_name<T>();
-			if (!settings_.strip_ns.empty() && std::string_view{ type_name }.starts_with(settings_.strip_ns))
-			{
-				type_name = type_name.substr(settings_.strip_ns.length());
-			}
-			boost::algorithm::replace_all(type_name, "::", "_");
-			boost::algorithm::replace_all(type_name, "<", "_");
-			boost::algorithm::replace_all(type_name, ">", "_");
-			return type_name;
+			return std::string{ type_name.value() };
 		}
+
+		auto type_name = demangled_type_name<T>();
+		if (!settings_.strip_ns.empty() && std::string_view{ type_name }.starts_with(settings_.strip_ns))
+		{
+			type_name = type_name.substr(settings_.strip_ns.length());
+		}
+		boost::algorithm::replace_all(type_name, "::", "_");
+		boost::algorithm::replace_all(type_name, "<", "_");
+		boost::algorithm::replace_all(type_name, ">", "_");
+		return type_name;
 	}
 
 	boost::json::array security_array(const security& sec)

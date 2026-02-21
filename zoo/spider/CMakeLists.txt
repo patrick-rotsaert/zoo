@@ -43,6 +43,7 @@ add_zoo_library(spider
 		tag_invoke/ptime.cpp
 		tag_invoke/greg_date.cpp
 		tag_invoke/uuid.cpp
+		tag_invoke/byte_string.cpp
 	PUBLIC_HEADERS
 		apilinktest.h
 		aliases.h
@@ -94,6 +95,7 @@ add_zoo_library(spider
 		tag_invoke/ptime.h
 		tag_invoke/greg_date.h
 		tag_invoke/uuid.h
+		tag_invoke/byte_string.h
 	MSVC_PRIVATE_COMPILER_OPTIONS
 		/wd4702 # for boost\beast\core\impl\buffers_cat.hpp(186): warning C4702: unreachable code
 	UNIT_TEST_SOURCES

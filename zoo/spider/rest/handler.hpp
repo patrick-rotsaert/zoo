@@ -20,6 +20,8 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+
 #include <type_traits>
 #include <string>
 #include <variant>
@@ -126,6 +128,14 @@ private:
 			    {
 				    ok = std::is_same_v<T, url_view>;
 			    }
+			    else if constexpr (std::is_same_v<P, p::today>)
+			    {
+				    ok = std::is_same_v<T, boost::gregorian::date>;
+			    }
+			    else if constexpr (std::is_same_v<P, p::now>)
+			    {
+				    ok = std::is_same_v<T, boost::posix_time::ptime>;
+			    }
 			    else
 			    {
 				    static_assert(false, "non-exhaustive visitor!");
@@ -201,6 +211,14 @@ private:
 			    {
 				    return std::cref(sources.url);
 			    }
+			    else if constexpr (std::is_same_v<P, p::today> && std::is_same_v<T, boost::gregorian::date>)
+			    {
+				    return boost::gregorian::day_clock::local_day();
+			    }
+			    else if constexpr (std::is_same_v<P, p::now> && std::is_same_v<T, boost::posix_time::ptime>)
+			    {
+				    return boost::posix_time::microsec_clock::universal_time();
+			    }
 			    return T{};
 		    },
 		    descriptor);
@@ -234,7 +252,7 @@ private:
 	}
 
 	template<typename T>
-	static T collect_auth_argument(const parameter_sources& sources, const p::auth& param, const T* const tag)
+	static T collect_auth_argument(const parameter_sources& sources, const p::auth& param, const T* const)
 	{
 		const auto it = sources.auth.find(param.name);
 		if (it == sources.auth.end())

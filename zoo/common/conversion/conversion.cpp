@@ -503,5 +503,17 @@ boost::uuids::uuid string_to_uuid(std::string_view in)
 	return boost::uuids::string_generator()(in.begin(), in.end());
 }
 
+void string_to_byte_string(std::string_view in, byte_string& out)
+{
+	out.assign(reinterpret_cast<const byte_string::value_type*>(in.data()), in.length());
+}
+
+byte_string string_to_byte_string(std::string_view in)
+{
+	auto out = byte_string{};
+	string_to_byte_string(in, out);
+	return out;
+}
+
 } // namespace conversion
 } // namespace zoo

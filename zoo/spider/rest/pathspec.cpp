@@ -125,7 +125,7 @@ path_spec& path_spec::operator/=(const segment& s)
 	return *this;
 }
 
-path_spec path_spec::operator/(const segment& s)
+path_spec path_spec::operator/(const segment& s) const
 {
 	auto p = *this;
 	p /= s;
@@ -138,7 +138,7 @@ path_spec& path_spec::operator/=(const path_spec& s)
 	return *this;
 }
 
-path_spec path_spec::operator/(const path_spec& s)
+path_spec path_spec::operator/(const path_spec& s) const
 {
 	auto p = *this;
 	p /= s;
@@ -150,7 +150,7 @@ path_spec& path_spec::operator/=(string_view s)
 	return (*this /= path_spec{ s });
 }
 
-path_spec path_spec::operator/(string_view s)
+path_spec path_spec::operator/(string_view s) const
 {
 	return (*this / path_spec{ s });
 }
