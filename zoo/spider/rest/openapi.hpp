@@ -14,6 +14,7 @@
 #include "zoo/spider/rest/annotation.hpp"
 #include "zoo/spider/rest/security.h"
 #include "zoo/common/misc/is_optional.hpp"
+#include "zoo/common/misc/is_shared_ptr.hpp"
 #include "zoo/common/misc/is_vector.hpp"
 #include "zoo/common/misc/is_variant.hpp"
 #include "zoo/common/misc/byte_string.h"
@@ -379,7 +380,13 @@ private:
 	}
 
 	template<typename T>
-	std::enable_if_t<!is_optional_v<T>, boost::json::object> value_schema()
+	std::enable_if_t<is_shared_ptr_v<T>, boost::json::object> value_schema()
+	{
+		return value_schema<typename T::element_type>();
+	}
+
+	template<typename T>
+	std::enable_if_t<!is_optional_v<T> && !is_shared_ptr_v<T>, boost::json::object> value_schema()
 	{
 		boost::json::object schema;
 
@@ -514,6 +521,9 @@ private:
 
 		if (!components_schema_exists(type_name))
 		{
+			// Create a placeholder to break recursion
+			add_components_schema(type_name, boost::json::object{ { "type", "object" } });
+
 			boost::json::object schema;
 
 			schema["type"] = "object";
@@ -524,7 +534,7 @@ private:
 			boost::mp11::mp_for_each<boost::describe::describe_members<T, boost::describe::mod_any_access>>([&](auto D) {
 				T* helper{};
 				using U = std::decay_t<decltype(helper->*D.pointer)>;
-				if constexpr (!is_optional_v<U>)
+				if constexpr (!is_optional_v<U> && !is_shared_ptr_v<U>)
 				{
 					required.emplace_back(D.name);
 				}
@@ -551,6 +561,7 @@ private:
 				schema["example"] = boost::json::value_from(T::example());
 			}
 
+			// Overwrite the placeholder with the fully realized schema
 			add_components_schema(type_name, std::move(schema));
 		}
 
