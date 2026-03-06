@@ -84,6 +84,9 @@ std::string ZOO_ZOOCOMMON_API time_point_to_iso8601(const time_point& in);
 void ZOO_ZOOCOMMON_API        time_point_to_sql(const time_point& in, std::string& out);
 std::string ZOO_ZOOCOMMON_API time_point_to_sql(const time_point& in);
 
+void ZOO_ZOOCOMMON_API                     time_point_to_boost_ptime(const time_point& in, boost::posix_time::ptime& out);
+boost::posix_time::ptime ZOO_ZOOCOMMON_API time_point_to_boost_ptime(const time_point& in);
+
 void ZOO_ZOOCOMMON_API        date_to_string(const date& in, std::string& out);
 std::string ZOO_ZOOCOMMON_API date_to_string(const date& in);
 
@@ -104,6 +107,9 @@ std::string ZOO_ZOOCOMMON_API boost_ptime_to_iso8601(const boost::posix_time::pt
 
 void ZOO_ZOOCOMMON_API        boost_ptime_to_sql(const boost::posix_time::ptime& in, std::string& out);
 std::string ZOO_ZOOCOMMON_API boost_ptime_to_sql(const boost::posix_time::ptime& in);
+
+void ZOO_ZOOCOMMON_API       boost_ptime_to_timepoint(const boost::posix_time::ptime& in, time_point& out);
+time_point ZOO_ZOOCOMMON_API boost_ptime_to_timepoint(const boost::posix_time::ptime& in);
 
 void ZOO_ZOOCOMMON_API                   string_to_boost_date(std::string_view in, boost::gregorian::date& out);
 boost::gregorian::date ZOO_ZOOCOMMON_API string_to_boost_date(std::string_view in);
