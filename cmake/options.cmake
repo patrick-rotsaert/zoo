@@ -24,6 +24,7 @@ option(ZOO_WITH_TUI "Build TUI library" "${ZOO_IS_TOP_LEVEL}")
 option(ZOO_SQUID_WITH_POSTGRESQL "Include Squid PostgreSQL backend" ON)
 option(ZOO_SQUID_WITH_MYSQL "Include Squid MySQL backend" ON)
 option(ZOO_SQUID_WITH_SQLITE3 "Include Squid SQLite3 backend" ON)
+option(ZOO_LOGGING_NO_PRETTY_FUNCTION "Do not use __PRETTY_FUNCTION__ in logging source location." OFF)
 
 # Logging verbosity of the library
 set(LOGGING_LEVELS trace debug info warn err critical off) # Values are as in zoo/common/logging/log_level.h

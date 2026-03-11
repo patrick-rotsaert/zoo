@@ -16,6 +16,12 @@ if(WIN32)
 	list(APPEND EXTRA_PUBLIC_LIBRARIES bcrypt)
 endif()
 
+set(PUBLIC_DEFINITIONS)
+
+if (ZOO_LOGGING_NO_PRETTY_FUNCTION)
+	list(APPEND PUBLIC_DEFINITIONS ZOO_LOGGING_NO_PRETTY_FUNCTION)
+endif()
+
 add_zoo_library(zoocommon
 	SOURCES
 		conversion/conversion.cpp
@@ -42,6 +48,7 @@ add_zoo_library(zoocommon
 		logging/spdlog_backend.h
 		logging/logging.h
 		logging/log_level.h
+		logging/sourcelocation.h
 		misc/formatters.hpp
 		misc/synchronized_queue.hpp
 		misc/always_false.hpp
@@ -61,6 +68,8 @@ add_zoo_library(zoocommon
 		spdlog::spdlog
 		Boost::boost
 		${EXTRA_PUBLIC_LIBRARIES}
+	PUBLIC_DEFINITIONS
+		${PUBLIC_DEFINITIONS}
 	PUBLIC_INCLUDE_DIRS
 		${PROJECT_BINARY_DIR} # for configured headers, see below
 	FIND_PACKAGE_COMPONENT

@@ -65,6 +65,7 @@ function(add_zoo_library TARGET)
 		UNIT_TEST_SOURCES
 		MOCK_SOURCES
 		PRIVATE_DEFINITIONS
+		PUBLIC_DEFINITIONS
 		PRIVATE_INCLUDE_DIRS
 		PUBLIC_INCLUDE_DIRS
 		PRIVATE_LIBRARIES
@@ -171,6 +172,9 @@ function(add_zoo_library TARGET)
 		# Set compiler definitions
 		if(P_PRIVATE_DEFINITIONS)
 			target_compile_definitions(${TARGET} PRIVATE ${P_PRIVATE_DEFINITIONS})
+		endif()
+		if(P_PUBLIC_DEFINITIONS)
+			target_compile_definitions(${TARGET} PUBLIC ${P_PUBLIC_DEFINITIONS})
 		endif()
 
 		if(BUILD_SHARED_LIBS)
