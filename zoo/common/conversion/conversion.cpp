@@ -309,6 +309,24 @@ std::string time_point_to_sql(const time_point& in)
 	return time_point_to_string(in, ' ', false);
 }
 
+void time_point_to_boost_ptime(const time_point& in, boost::posix_time::ptime& out)
+{
+	using duration_t = std::chrono::nanoseconds;
+	using rep_t      = duration_t::rep;
+	rep_t d          = std::chrono::duration_cast<duration_t>(in.time_since_epoch()).count();
+	rep_t sec        = d / 1000000000;
+	rep_t nsec       = d % 1000000000;
+	out              = boost::posix_time::from_time_t(0) + boost::posix_time::seconds{ static_cast<long>(sec) } +
+	      boost::posix_time::microseconds{ (nsec + 500) / 1000 };
+}
+
+boost::posix_time::ptime time_point_to_boost_ptime(const time_point& in)
+{
+	boost::posix_time::ptime out{};
+	time_point_to_boost_ptime(in, out);
+	return out;
+}
+
 void date_to_string(const date& in, std::string& out)
 {
 	out = fmt::format(
@@ -389,6 +407,21 @@ void boost_ptime_to_sql(const boost::posix_time::ptime& in, std::string& out)
 std::string boost_ptime_to_sql(const boost::posix_time::ptime& in)
 {
 	return boost_ptime_to_string(in, ' ', false);
+}
+
+void boost_ptime_to_timepoint(const boost::posix_time::ptime& in, time_point& out)
+{
+	const auto timeSinceEpoch = in - boost::posix_time::from_time_t(0);
+	const auto t              = std::chrono::system_clock::from_time_t(timeSinceEpoch.total_seconds());
+	const auto nsec           = timeSinceEpoch.fractional_seconds() * (1000000000 / timeSinceEpoch.ticks_per_second());
+	out                       = t + std::chrono::nanoseconds(nsec);
+}
+
+time_point boost_ptime_to_timepoint(const boost::posix_time::ptime& in)
+{
+	time_point out{};
+	boost_ptime_to_timepoint(in, out);
+	return out;
 }
 
 void boost_date_to_string(const boost::gregorian::date& in, std::string& out)

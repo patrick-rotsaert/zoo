@@ -192,15 +192,25 @@ private:
 			    }
 			    else if constexpr (std::is_same_v<P, p::json> && ConvertibleFromBoostJson<T>)
 			    {
+				    boost::json::value parsed;
 				    try
 				    {
-					    return boost::json::value_to<T>(boost::json::parse(sources.req.body()));
+					    parsed = boost::json::parse(sources.req.body());
 				    }
 				    catch (const std::exception& e)
 				    {
-					    ZOO_THROW_EXCEPTION(argument_error{ fmt::format(
-					                            "Could not convert request body to type {}: {}", demangled_type_name<T>(), e.what()) }
+					    ZOO_THROW_EXCEPTION(argument_error{ fmt::format("Could not parse request body as json") }
 					                        << boost::errinfo_nested_exception{ boost::current_exception() });
+				    }
+				    try
+				    {
+					    return boost::json::value_to<T>(parsed);
+				    }
+				    catch (const std::exception& e)
+				    {
+					    ZOO_THROW_EXCEPTION(
+					        argument_error{ fmt::format("Could not decode request body as type {}", demangled_type_name<T>()) }
+					        << boost::errinfo_nested_exception{ boost::current_exception() });
 				    }
 			    }
 			    else if constexpr (std::is_same_v<P, p::request> && std::is_same_v<T, request>)

@@ -119,7 +119,7 @@ protected:
 			}
 			catch (const std::exception& e)
 			{
-				ZOO_LOG(err, "{}", e.what());
+				ZOO_LOG(err, "{}", boost::diagnostic_information(e));
 				return make_error_response(e, req);
 			}
 		};

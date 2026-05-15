@@ -8,6 +8,7 @@
 #pragma once
 
 #include "zoo/common/logging/ibackend.h"
+#include "zoo/common/logging/sourcelocation.h"
 #include "zoo/common/config.h"
 
 #include <fmt/format.h>
@@ -40,7 +41,7 @@ public:
 		if (backend)                                                                                                                       \
 		{                                                                                                                                  \
 			backend->log_message(                                                                                                          \
-			    std::chrono::system_clock::now(), BOOST_CURRENT_LOCATION, ::zoo::logging::log_level::lvl, fmt::format(__VA_ARGS__));       \
+			    std::chrono::system_clock::now(), ZOO_CURRENT_LOCATION, ::zoo::logging::log_level::lvl, fmt::format(__VA_ARGS__));         \
 		}                                                                                                                                  \
 	} while (false)
 
