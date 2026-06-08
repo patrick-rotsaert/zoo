@@ -45,21 +45,23 @@ struct openapi_settings
 	std::string_view info_version;
 };
 
+template<typename ValueType>
 class openapi_type_map final
 {
-	using map_type = std::unordered_map<std::type_index, std::string_view>;
+	using key_type = std::type_index;
+	using map_type = std::unordered_map<key_type, ValueType>;
 
 public:
 	template<typename T>
-	static void map_type_name(std::string_view type_name)
+	static void emplace(const ValueType& value)
 	{
-		map()[std::type_index{ typeid(T) }] = type_name;
+		map()[key_type{ typeid(T) }] = value;
 	}
 
 	template<typename T>
-	static boost::optional<std::string_view> get_type_name()
+	static boost::optional<ValueType> get_value()
 	{
-		const auto it = map().find(std::type_index{ typeid(T) });
+		const auto it = map().find(key_type{ typeid(T) });
 		if (it == map().end())
 		{
 			return boost::none;
@@ -77,6 +79,9 @@ private:
 		return _;
 	}
 };
+
+using openapi_type_name_map    = openapi_type_map<std::string_view>;
+using openapi_value_schema_map = openapi_type_map<boost::json::object>;
 
 template<IsValidErrorType DefaultErrorType>
 class openapi final
@@ -488,6 +493,11 @@ private:
 		}
 		else
 		{
+			if (const auto custom_schema = openapi_value_schema_map::get_value<T>(); custom_schema)
+			{
+				return custom_schema.value();
+			}
+
 			zlog(warn, "Unsupported value type {}", demangled_type_name<T>());
 		}
 
@@ -661,7 +671,7 @@ private:
 			return std::string{ T::type_name() };
 		}
 
-		if (const auto type_name = openapi_type_map::get_type_name<T>(); type_name)
+		if (const auto type_name = openapi_type_name_map::get_value<T>(); type_name)
 		{
 			return std::string{ type_name.value() };
 		}
