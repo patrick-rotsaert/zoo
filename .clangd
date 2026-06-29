@@ -1,0 +1,13 @@
+# Fallback compilation-database location for clangd.
+#
+# In VS Code the workspace setting
+#   "clangd.arguments": ["--compile-commands-dir=${command:cmake.buildDirectory}"]
+# points clangd at the build directory of the *active* CMake configure preset,
+# and that command-line flag takes precedence over this file.
+#
+# This entry is the fallback for editors / sessions where that variable is not
+# available (e.g. before CMake Tools has resolved a preset, or other clangd
+# front-ends). The path is relative to this file (the project root); adjust it
+# to the build directory of the preset you configure.
+CompileFlags:
+  CompilationDatabase: out/build/linux-x64-gcc-static

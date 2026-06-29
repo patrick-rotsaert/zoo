@@ -1,18 +1,20 @@
 #include "zoo/tui/asiotimer.h"
 
-#include <boost/asio/deadline_timer.hpp>
+#include <boost/asio/steady_timer.hpp>
+
+#include <chrono>
 
 namespace zoo {
 namespace tui {
 
 class asio_timer::impl
 {
-	boost::asio::deadline_timer deadline_;
-	bool                        cancelled_;
+	boost::asio::steady_timer deadline_;
+	bool                      cancelled_;
 
 	void set_deadline(int msec)
 	{
-		this->deadline_.expires_from_now(boost::posix_time::milliseconds{ msec });
+		this->deadline_.expires_after(std::chrono::milliseconds{ msec });
 	}
 
 public:
@@ -33,7 +35,7 @@ public:
 			{
 				if (!this->cancelled_)
 				{
-					if (this->deadline_.expires_at() <= boost::asio::deadline_timer::traits_type::now())
+					if (this->deadline_.expiry() <= std::chrono::steady_clock::now())
 					{
 						work();
 					}

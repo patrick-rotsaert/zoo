@@ -13,6 +13,7 @@
 #include <fmt/format.h>
 #include <fmt/chrono.h>
 #include <chrono>
+#include <ctime>
 
 namespace zoo {
 namespace fs {
@@ -23,6 +24,19 @@ bool path_ends_with_path_separator(const fspath& path)
 {
 	constexpr auto separators = std::string_view{ R"~(\/)~" };
 	return separators.find(path.string().back()) != separators.npos;
+}
+
+// fmt::localtime was removed in newer fmt releases (std::localtime is not thread-safe),
+// so convert to local calendar time ourselves. fmt::gmtime is still provided.
+std::tm to_local_tm(std::time_t time)
+{
+	std::tm tm{};
+#if defined(_WIN32)
+	::localtime_s(&tm, &time);
+#else
+	::localtime_r(&time, &tm);
+#endif
+	return tm;
 }
 
 } // namespace
@@ -41,7 +55,7 @@ fspath make_dest_path(iaccess& source_access, const source& source, iaccess& des
 		if (mtime)
 		{
 			const auto tm = dest.expand_time_placeholders.value() == destination::time_expansion::LOCAL
-			                    ? fmt::localtime(std::chrono::system_clock::to_time_t(mtime.value()))
+			                    ? to_local_tm(std::chrono::system_clock::to_time_t(mtime.value()))
 			                    : fmt::gmtime(std::chrono::system_clock::to_time_t(mtime.value()));
 			new_path      = fmt::format(fmt::runtime(new_path.string()), tm);
 		}

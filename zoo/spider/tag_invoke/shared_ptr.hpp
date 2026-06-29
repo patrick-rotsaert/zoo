@@ -8,8 +8,9 @@
 #pragma once
 
 #include <boost/json/conversion.hpp>
-#include <boost/json/detail/value_from.hpp>
-#include <boost/json/detail/value_to.hpp>
+#include <boost/json/value.hpp>
+#include <boost/json/value_from.hpp>
+#include <boost/json/value_to.hpp>
 
 #include <type_traits>
 #include <memory>

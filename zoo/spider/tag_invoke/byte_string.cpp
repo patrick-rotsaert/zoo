@@ -8,6 +8,8 @@
 #include "zoo/spider/tag_invoke/byte_string.h"
 #include "zoo/spider/rest/base64.h"
 
+#include <boost/json/value.hpp>
+
 namespace boost::json {
 
 void ZOO_SPIDER_API tag_invoke(const boost::json::value_from_tag&, boost::json::value& out, const zoo::byte_string& in)

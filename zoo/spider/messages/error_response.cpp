@@ -84,9 +84,7 @@ std::map<status, std::string> make_stock_reply_map()
 	map[status::precondition_required]              = make_stock_reply(status::precondition_required);
 	map[status::too_many_requests]                  = make_stock_reply(status::too_many_requests);
 	map[status::request_header_fields_too_large]    = make_stock_reply(status::request_header_fields_too_large);
-	map[status::connection_closed_without_response] = make_stock_reply(status::connection_closed_without_response);
 	map[status::unavailable_for_legal_reasons]      = make_stock_reply(status::unavailable_for_legal_reasons);
-	map[status::client_closed_request]              = make_stock_reply(status::client_closed_request);
 	map[status::internal_server_error]              = make_stock_reply(status::internal_server_error);
 	map[status::not_implemented]                    = make_stock_reply(status::not_implemented);
 	map[status::bad_gateway]                        = make_stock_reply(status::bad_gateway);
@@ -98,7 +96,6 @@ std::map<status, std::string> make_stock_reply_map()
 	map[status::loop_detected]                      = make_stock_reply(status::loop_detected);
 	map[status::not_extended]                       = make_stock_reply(status::not_extended);
 	map[status::network_authentication_required]    = make_stock_reply(status::network_authentication_required);
-	map[status::network_connect_timeout_error]      = make_stock_reply(status::network_connect_timeout_error);
 	return map;
 }
 

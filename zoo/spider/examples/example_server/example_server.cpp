@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
 	    });
 	api_router->add_json_route<customer>(verb::post,
 	                                     boost::regex{ R"~(^customer/?$)~" },
-	                                     [&](auto&& req, auto&& url, auto path, const auto& match, boost::json::result<customer>&& data) {
+	                                     [&](auto&& req, auto&& url, auto path, const auto& match, boost::system::result<customer>&& data) {
 		                                     if (data.has_error())
 		                                     {
 			                                     zlog(debug, "post customer error: {}", data.error());

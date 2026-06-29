@@ -11,6 +11,7 @@
 #include "zoo/squid/postgresql/detail/statementname.h"
 #include "zoo/common/logging/logging.h"
 
+#include <boost/asio/bind_executor.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/io_context_strand.hpp>
 #include <boost/asio/posix/stream_descriptor.hpp>
@@ -213,7 +214,7 @@ protected:
 				{
 					this->release_stream();
 
-					const auto null = this->api_->getResult(conn);
+					[[maybe_unused]] const auto null = this->api_->getResult(conn);
 					assert(null == nullptr);
 				}
 
@@ -250,8 +251,9 @@ protected:
 	{
 		if (!this->waiting_read)
 		{
-			this->stream_.async_wait(boost::asio::posix::stream_descriptor::wait_read,
-			                         this->strand_.wrap(std::bind(&async_operation::on_read_ready, this->self(), std::placeholders::_1)));
+			this->stream_.async_wait(
+			    boost::asio::posix::stream_descriptor::wait_read,
+			    boost::asio::bind_executor(this->strand_, std::bind(&async_operation::on_read_ready, this->self(), std::placeholders::_1)));
 			this->waiting_read = true;
 		}
 	}
@@ -260,8 +262,9 @@ protected:
 	{
 		if (!this->waiting_write)
 		{
-			this->stream_.async_wait(boost::asio::posix::stream_descriptor::wait_write,
-			                         this->strand_.wrap(std::bind(&async_operation::on_write_ready, this->self(), std::placeholders::_1)));
+			this->stream_.async_wait(
+			    boost::asio::posix::stream_descriptor::wait_write,
+			    boost::asio::bind_executor(this->strand_, std::bind(&async_operation::on_write_ready, this->self(), std::placeholders::_1)));
 			this->waiting_write = true;
 		}
 	}

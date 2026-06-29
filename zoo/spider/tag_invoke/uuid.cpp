@@ -8,6 +8,8 @@
 #include "zoo/spider/tag_invoke/uuid.h"
 #include "zoo/common/conversion/conversion.h"
 
+#include <boost/json/value.hpp>
+
 namespace boost::uuids {
 
 void tag_invoke(const boost::json::value_from_tag&, boost::json::value& out, const uuid& in)

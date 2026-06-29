@@ -8,6 +8,8 @@
 #include "zoo/spider/tag_invoke/ptime.h"
 #include "zoo/common/conversion/conversion.h"
 
+#include <boost/json/value.hpp>
+
 namespace boost::posix_time {
 
 void tag_invoke(const boost::json::value_from_tag&, boost::json::value& out, const ptime& in)

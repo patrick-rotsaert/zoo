@@ -21,6 +21,11 @@
             "cacheVariables": {
                 "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
                 "CMAKE_C_COMPILER_LAUNCHER": "ccache"
+            },
+            "environment": {
+                "CCACHE_BASEDIR": "${sourceDir}",
+                "CCACHE_NOHASHDIR": "true",
+                "CCACHE_SLOPPINESS": "pch_defines,time_macros"
             }
         },
         {
@@ -35,7 +40,7 @@
         {
             "name": "linux",
             "hidden": true,
-            "generator": "Ninja",
+            "generator": "Ninja Multi-Config",
             "condition": {
                 "type": "equals",
                 "lhs": "${hostSystemName}",
@@ -46,21 +51,7 @@
             "name": "vcpkg",
             "hidden": true,
             "cacheVariables": {
-                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake"
-            }
-        },
-        {
-            "name": "debug",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        },
-        {
-            "name": "release",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
             }
         },
         {
@@ -121,182 +112,197 @@
             }
         },
         {
-            "name": "vc142-x64-shared-debug",
-            "displayName": "VS2019 x64 Shared Debug",
+            "name": "vc142-x64-shared",
+            "displayName": "VS2019 x64 Shared",
             "inherits": [
                 "core",
                 "vc142-x64",
                 "shared",
-                "debug",
                 "vcpkg"
             ]
         },
         {
-            "name": "vc142-x64-static-debug",
-            "displayName": "VS2019 x64 Static Debug",
+            "name": "vc142-x64-static",
+            "displayName": "VS2019 x64 Static",
             "inherits": [
                 "core",
                 "vc142-x64",
                 "static",
-                "debug",
                 "vcpkg"
             ]
+        },
+        {
+            "name": "vc142-x86-shared",
+            "displayName": "VS2019 x86 Shared",
+            "inherits": [
+                "core",
+                "vc142-x86",
+                "shared",
+                "vcpkg"
+            ]
+        },
+        {
+            "name": "vc142-x86-static",
+            "displayName": "VS2019 x86 Static",
+            "inherits": [
+                "core",
+                "vc142-x86",
+                "static",
+                "vcpkg"
+            ]
+        },
+        {
+            "name": "linux-x64-gcc-shared",
+            "displayName": "Linux x64 GCC Shared",
+            "inherits": [
+                "linux",
+                "core",
+                "ccache",
+                "gcc",
+                "shared"
+            ]
+        },
+        {
+            "name": "linux-x64-gcc-static",
+            "displayName": "Linux x64 GCC Static",
+            "inherits": [
+                "linux",
+                "core",
+                "ccache",
+                "gcc",
+                "static"
+            ]
+        },
+        {
+            "name": "linux-x64-gcc-shared-vcpkg",
+            "displayName": "Linux x64 GCC Shared Vcpkg",
+            "inherits": [
+                "linux",
+                "core",
+                "ccache",
+                "gcc",
+                "vcpkg-x64-linux-shared"
+            ]
+        },
+        {
+            "name": "linux-x64-gcc-static-vcpkg",
+            "displayName": "Linux x64 GCC Static Vcpkg",
+            "inherits": [
+                "linux",
+                "core",
+                "ccache",
+                "gcc",
+                "static",
+                "vcpkg"
+            ]
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "debug",
+            "hidden": true,
+            "configuration": "Debug"
+        },
+        {
+            "name": "release",
+            "hidden": true,
+            "configuration": "Release"
+        },
+        {
+            "name": "vc142-x64-shared-debug",
+            "displayName": "VS2019 x64 Shared Debug",
+            "configurePreset": "vc142-x64-shared",
+            "inherits": "debug"
         },
         {
             "name": "vc142-x64-shared-release",
             "displayName": "VS2019 x64 Shared Release",
-            "inherits": [
-                "core",
-                "vc142-x64",
-                "shared",
-                "release",
-                "vcpkg"
-            ]
+            "configurePreset": "vc142-x64-shared",
+            "inherits": "release"
+        },
+        {
+            "name": "vc142-x64-static-debug",
+            "displayName": "VS2019 x64 Static Debug",
+            "configurePreset": "vc142-x64-static",
+            "inherits": "debug"
         },
         {
             "name": "vc142-x64-static-release",
             "displayName": "VS2019 x64 Static Release",
-            "inherits": [
-                "core",
-                "vc142-x64",
-                "static",
-                "release",
-                "vcpkg"
-            ]
+            "configurePreset": "vc142-x64-static",
+            "inherits": "release"
         },
         {
             "name": "vc142-x86-shared-debug",
             "displayName": "VS2019 x86 Shared Debug",
-            "inherits": [
-                "core",
-                "vc142-x86",
-                "shared",
-                "debug",
-                "vcpkg"
-            ]
-        },
-        {
-            "name": "vc142-x86-static-debug",
-            "displayName": "VS2019 x86 Static Debug",
-            "inherits": [
-                "core",
-                "vc142-x86",
-                "static",
-                "debug",
-                "vcpkg"
-            ]
+            "configurePreset": "vc142-x86-shared",
+            "inherits": "debug"
         },
         {
             "name": "vc142-x86-shared-release",
             "displayName": "VS2019 x86 Shared Release",
-            "inherits": [
-                "core",
-                "vc142-x86",
-                "shared",
-                "release",
-                "vcpkg"
-            ]
+            "configurePreset": "vc142-x86-shared",
+            "inherits": "release"
+        },
+        {
+            "name": "vc142-x86-static-debug",
+            "displayName": "VS2019 x86 Static Debug",
+            "configurePreset": "vc142-x86-static",
+            "inherits": "debug"
         },
         {
             "name": "vc142-x86-static-release",
             "displayName": "VS2019 x86 Static Release",
-            "inherits": [
-                "core",
-                "vc142-x86",
-                "static",
-                "release",
-                "vcpkg"
-            ]
+            "configurePreset": "vc142-x86-static",
+            "inherits": "release"
         },
         {
             "name": "linux-x64-gcc-shared-debug",
             "displayName": "Linux x64 GCC Shared Debug",
-            "inherits": [
-                "linux",
-                "core",
-                "gcc",
-                "shared",
-                "debug"
-            ]
-        },
-        {
-            "name": "linux-x64-gcc-static-debug",
-            "displayName": "Linux x64 GCC Static Debug",
-            "inherits": [
-                "linux",
-                "core",
-                "gcc",
-                "static",
-                "debug"
-            ]
+            "configurePreset": "linux-x64-gcc-shared",
+            "inherits": "debug"
         },
         {
             "name": "linux-x64-gcc-shared-release",
             "displayName": "Linux x64 GCC Shared Release",
-            "inherits": [
-                "linux",
-                "core",
-                "gcc",
-                "shared",
-                "release"
-            ]
+            "configurePreset": "linux-x64-gcc-shared",
+            "inherits": "release"
+        },
+        {
+            "name": "linux-x64-gcc-static-debug",
+            "displayName": "Linux x64 GCC Static Debug",
+            "configurePreset": "linux-x64-gcc-static",
+            "inherits": "debug"
         },
         {
             "name": "linux-x64-gcc-static-release",
             "displayName": "Linux x64 GCC Static Release",
-            "inherits": [
-                "linux",
-                "core",
-                "gcc",
-                "static",
-                "release"
-            ]
+            "configurePreset": "linux-x64-gcc-static",
+            "inherits": "release"
         },
         {
             "name": "linux-x64-gcc-shared-debug-vcpkg",
             "displayName": "Linux x64 GCC Shared Debug Vcpkg",
-            "inherits": [
-                "linux",
-                "core",
-                "gcc",
-                "debug",
-                "vcpkg-x64-linux-shared"
-            ]
-        },
-        {
-            "name": "linux-x64-gcc-static-debug-vcpkg",
-            "displayName": "Linux x64 GCC Static Debug Vcpkg",
-            "inherits": [
-                "linux",
-                "core",
-                "gcc",
-                "static",
-                "debug",
-                "vcpkg"
-            ]
+            "configurePreset": "linux-x64-gcc-shared-vcpkg",
+            "inherits": "debug"
         },
         {
             "name": "linux-x64-gcc-shared-release-vcpkg",
             "displayName": "Linux x64 GCC Shared Release Vcpkg",
-            "inherits": [
-                "linux",
-                "core",
-                "gcc",
-                "release",
-                "vcpkg-x64-linux-shared"
-            ]
+            "configurePreset": "linux-x64-gcc-shared-vcpkg",
+            "inherits": "release"
+        },
+        {
+            "name": "linux-x64-gcc-static-debug-vcpkg",
+            "displayName": "Linux x64 GCC Static Debug Vcpkg",
+            "configurePreset": "linux-x64-gcc-static-vcpkg",
+            "inherits": "debug"
         },
         {
             "name": "linux-x64-gcc-static-release-vcpkg",
             "displayName": "Linux x64 GCC Static Release Vcpkg",
-            "inherits": [
-                "linux",
-                "core",
-                "gcc",
-                "static",
-                "release",
-                "vcpkg"
-            ]
+            "configurePreset": "linux-x64-gcc-static-vcpkg",
+            "inherits": "release"
         }
     ]
 }

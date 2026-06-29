@@ -8,9 +8,11 @@
 #pragma once
 
 #include <boost/json/conversion.hpp>
-#include <boost/json/detail/value_from.hpp>
-#include <boost/json/detail/value_to.hpp>
+#include <boost/json/value.hpp>
+#include <boost/json/value_from.hpp>
+#include <boost/json/value_to.hpp>
 #include <boost/optional/optional.hpp>
+#include <boost/version.hpp>
 
 #include <type_traits>
 
@@ -63,6 +65,12 @@ boost::optional<T> tag_invoke(const value_to_tag<boost::optional<T>>&, const val
 	}
 }
 
+#if BOOST_VERSION < 108700
+// Up to Boost 1.86, Boost.JSON only auto-detected std::optional as "optional-like"
+// (via the internal boost::json::detail::is_optional trait). Mark boost::optional
+// too, so missing/null members convert to boost::none instead of erroring.
+// Boost 1.87 replaced this with the public boost::json::is_optional_like trait,
+// which already recognises boost::optional, so no specialization is needed there.
 namespace detail {
 
 template<class T>
@@ -71,6 +79,7 @@ struct is_optional<boost::optional<T>> : std::true_type
 };
 
 } // namespace detail
+#endif
 
 } // namespace json
 } // namespace boost

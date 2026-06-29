@@ -8,6 +8,8 @@
 #include "zoo/spider/tag_invoke/date.h"
 #include "zoo/common/conversion/conversion.h"
 
+#include <boost/json/value.hpp>
+
 namespace std::chrono {
 
 void tag_invoke(const boost::json::value_from_tag&, boost::json::value& out, const year_month_day& in)

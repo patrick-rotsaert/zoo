@@ -14,6 +14,7 @@
 
 #include <boost/url/url_view.hpp>
 #include <boost/json.hpp>
+#include <boost/system/result.hpp>
 #include <boost/regex.hpp>
 
 #include <memory>
@@ -35,7 +36,7 @@ class ZOO_SPIDER_API request_router final : public irequest_handler
 	using request_handler = std::function<response_wrapper(request&& req, url_view&& url, string_view path, const svmatch& match)>;
 	template<ConvertibleFromBoostJson T>
 	using json_request_handler = std::function<
-	    response_wrapper(request&& req, url_view&& url, string_view path, const svmatch& match, boost::json::result<T>&& data)>;
+	    response_wrapper(request&& req, url_view&& url, string_view path, const svmatch& match, boost::system::result<T>&& data)>;
 
 	response_wrapper handle_request(request&& req) override;
 	response_wrapper route_request(request&& req, url_view&& url, string_view path);
@@ -66,7 +67,7 @@ public:
 		    std::move(methods),
 		    std::move(pattern),
 		    [handler = std::move(handler)](request&& req, url_view&& url, string_view path, const svmatch& match) -> response_wrapper {
-			    using result = boost::json::result<T>;
+			    using result = boost::system::result<T>;
 
 			    auto       ec = std::error_code{};
 			    const auto jv = boost::json::parse(req.body(), ec);

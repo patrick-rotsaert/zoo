@@ -27,23 +27,28 @@ Building on Windows has currently only been tested with:
 - Visual Studio 2019
 - Vcpkg
 
-To build using vcpkg, set the CMake variable `CMAKE_TOOLCHAIN_FILE` to the path of `vcpkg/scripts/buildsystems/vcpkg.cmake`.
+vcpkg is no longer bundled as a git submodule. Install it separately (once per machine) and point the
+`VCPKG_ROOT` environment variable at it. The CMake presets and the vcpkg toolchain file are located via
+this variable.
 
-Configurations in [CMakePresets.json](CMakePresets.json) for windows do this automatically.
-
-Make sure git submodules are pulled:
+Clone and bootstrap vcpkg anywhere outside this repository:
 ```bat
-git submodule update --init --recursive
+git clone https://github.com/microsoft/vcpkg C:\vcpkg
+C:\vcpkg\bootstrap-vcpkg.bat
+set VCPKG_ROOT=C:\vcpkg
 ```
 
-Bootstrap vcpkg, this needs to be done once before the first CMake configure:
-```bat
-.\vcpkg\bootstrap-vcpkg.bat
-```
+The presets in [CMakePresets.json](CMakePresets.json) for windows pick up vcpkg automatically via
+`%VCPKG_ROOT%`. To use vcpkg without the presets, set the CMake variable `CMAKE_TOOLCHAIN_FILE` to
+`%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake`.
 
-Finally, if using the CMake presets, e.g.
+Finally, if using the CMake presets, configure once and then build the desired
+configuration. The presets use multi-config generators, so Debug and Release are
+selected at build time rather than by separate configure presets, e.g.
 ```bat
-cmake --preset vc142-x64-static-debug
+cmake --preset vc142-x64-static
+cmake --build --preset vc142-x64-static-debug
+cmake --build --preset vc142-x64-static-release
 ```
 
 ### Linux
@@ -53,6 +58,16 @@ Package names mentioned below are for Debian and derivatives. For other distribu
 ```shell
 sudo apt install build-essential
 ```
+
+The Linux CMake presets (`linux-x64-gcc-*`) use [ccache](https://ccache.dev/) as the
+compiler launcher, so it must be installed when building with these presets:
+```shell
+sudo apt install ccache
+```
+The presets set `CCACHE_BASEDIR`, `CCACHE_NOHASHDIR` and `CCACHE_SLOPPINESS` so the cache
+is shared across build directories. To build without ccache, configure with
+`-DCMAKE_CXX_COMPILER_LAUNCHER= -DCMAKE_C_COMPILER_LAUNCHER=` or use your own configure
+preset that does not inherit it.
 
 #### Without vcpkg
 
@@ -110,28 +125,32 @@ sudo apt install google-mock libgmock-dev googletest libgtest-dev
 
 #### With vcpkg
 
-To build using vcpkg, set the CMake variable `CMAKE_TOOLCHAIN_FILE` to the path of `vcpkg/scripts/buildsystems/vcpkg.cmake`.
+vcpkg is no longer bundled as a git submodule. Install it separately (once per machine) and point the
+`VCPKG_ROOT` environment variable at it. The CMake presets and the vcpkg toolchain file are located via
+this variable.
 
-Configurations in [CMakePresets.json](CMakePresets.json) with a name ending with "-vcpkg" do this automatically.
-
-Make sure git submodules are pulled:
+Clone and bootstrap vcpkg anywhere outside this repository:
 ```shell
-git submodule update --init --recursive
+git clone https://github.com/microsoft/vcpkg ~/vcpkg
+~/vcpkg/bootstrap-vcpkg.sh
+export VCPKG_ROOT=~/vcpkg
 ```
 
-Bootstrap vcpkg, this needs to be done once before the first CMake configure:
-```shell
-./vcpkg/bootstrap-vcpkg.sh
-```
+The presets in [CMakePresets.json](CMakePresets.json) with a name ending with "-vcpkg" pick up vcpkg
+automatically via `$VCPKG_ROOT`. To use vcpkg without the presets, set the CMake variable
+`CMAKE_TOOLCHAIN_FILE` to `$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake`.
 
 When using the presets [CMakePresets.json](CMakePresets.json), Nina is used as the generator.
 ```shell
 sudo apt install ninja-build
 ```
 
-Finally, if using the CMake presets, e.g.
+Finally, if using the CMake presets, configure once and then build the desired
+configuration. The presets use multi-config generators, so Debug and Release are
+selected at build time rather than by separate configure presets, e.g.
 ```shell
-cmake --preset linux-x64-gcc-static-release-vcpkg
+cmake --preset linux-x64-gcc-static-vcpkg
+cmake --build --preset linux-x64-gcc-static-release-vcpkg
 ```
 
 All dependencies will be downloaded and built by vcpkg.
