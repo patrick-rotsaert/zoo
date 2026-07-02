@@ -38,11 +38,13 @@ class handler final
 {
 };
 
-template<typename Controller, typename Result, typename... Args>
-class handler<Result (Controller::*)(Args...)> final
+// Shared implementation for every cv-/noexcept-qualified member-function pointer. The full method
+// type is carried as `Method` (used only for diagnostics); the call `(controller->*method)(args...)`
+// is valid regardless of the const/noexcept qualifiers, so no per-qualifier logic is needed.
+template<typename Method, typename Controller, typename Result, typename... Args>
+class handler_impl
 {
 public:
-	using Method     = Result (Controller::*)(Args...);
 	using ArgsTuple  = std::tuple<typename std::remove_const_t<typename std::remove_reference_t<Args>>...>;
 	using ResultType = typename std::remove_const_t<typename std::remove_reference_t<Result>>;
 	using Callback   = std::function<ResultType(Args...)>;
@@ -50,7 +52,7 @@ public:
 	static constexpr size_t N = sizeof...(Args);
 
 	template<typename Owner, typename... Descriptors>
-	handler(Owner* owner, Method method, Descriptors... descriptors)
+	handler_impl(Owner* owner, Method method, Descriptors... descriptors)
 	    : callback_{}
 	    , descriptors_{ { parameters::descriptor{ descriptors }... } }
 	{
@@ -313,6 +315,36 @@ private:
 private:
 	Callback                              callback_;
 	std::array<parameters::descriptor, N> descriptors_;
+};
+
+// One thin specialization per member-function qualifier combination; each just inherits
+// handler_impl's constructor and interface. This lets a controller expose an operation as a plain,
+// const, noexcept or const-noexcept member function.
+template<typename Controller, typename Result, typename... Args>
+class handler<Result (Controller::*)(Args...)> final : public handler_impl<Result (Controller::*)(Args...), Controller, Result, Args...>
+{
+	using handler_impl<Result (Controller::*)(Args...), Controller, Result, Args...>::handler_impl;
+};
+
+template<typename Controller, typename Result, typename... Args>
+class handler<Result (Controller::*)(Args...) const> final
+    : public handler_impl<Result (Controller::*)(Args...) const, Controller, Result, Args...>
+{
+	using handler_impl<Result (Controller::*)(Args...) const, Controller, Result, Args...>::handler_impl;
+};
+
+template<typename Controller, typename Result, typename... Args>
+class handler<Result (Controller::*)(Args...) noexcept> final
+    : public handler_impl<Result (Controller::*)(Args...) noexcept, Controller, Result, Args...>
+{
+	using handler_impl<Result (Controller::*)(Args...) noexcept, Controller, Result, Args...>::handler_impl;
+};
+
+template<typename Controller, typename Result, typename... Args>
+class handler<Result (Controller::*)(Args...) const noexcept> final
+    : public handler_impl<Result (Controller::*)(Args...) const noexcept, Controller, Result, Args...>
+{
+	using handler_impl<Result (Controller::*)(Args...) const noexcept, Controller, Result, Args...>::handler_impl;
 };
 
 } // namespace spider

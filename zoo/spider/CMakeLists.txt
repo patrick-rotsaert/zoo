@@ -106,6 +106,7 @@ add_zoo_library(spider
 		test/unit/rest/test_authorization.cpp
 		test/unit/rest/test_router.cpp
 		test/unit/rest/test_controller.cpp
+		test/unit/rest/test_handler.cpp
 		test/unit/messages/test_file_response.cpp
 		test/unit/messages/test_json_response.cpp
 		test/unit/messages/test_content_container.cpp
