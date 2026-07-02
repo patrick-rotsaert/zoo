@@ -88,5 +88,23 @@ TEST(PathSpecTest, TestMatch)
 	EXPECT_THAT(path_spec{ "a/{b}/{c}" }.match(path{ "a/x/y" }).value().at("c"), testing::Eq("y"));
 }
 
+// A path_spec must own its segment text: building one from a temporary/local string and using it
+// after that string is gone must be safe (regression guard for the non-owning string_view design).
+TEST(PathSpecTest, OwnsSegmentsBuiltFromTemporary)
+{
+	path_spec spec{};
+	{
+		std::string source = "users/{id}";
+		spec               = path_spec{ source };
+	} // source destroyed here
+
+	EXPECT_EQ(spec.to_string(), "users/{id}");
+
+	const path p{ std::string_view{ "users/42" } };
+	const auto m = spec.match(p);
+	ASSERT_TRUE(m.has_value());
+	EXPECT_EQ(m->at("id"), "42");
+}
+
 } // namespace spider
 } // namespace zoo

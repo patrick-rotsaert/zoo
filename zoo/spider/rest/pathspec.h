@@ -24,7 +24,7 @@ class ZOO_SPIDER_API path_spec final
 public:
 	struct segment
 	{
-		string_view s;
+		std::string s; // owns its text (a spec may be built from a temporary/computed string)
 		bool        is_parameter;
 
 		bool operator==(const segment& other) const;

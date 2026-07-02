@@ -34,10 +34,10 @@ public:
 	verify(request& req, const url_view& url, const std::vector<std::string_view>& scopes) const override;
 
 private:
-	std::string_view scheme_name_;
-	source           in_;
-	std::string_view name_;
-	std::string      key_;
+	std::string scheme_name_;
+	source      in_;
+	std::string name_;
+	std::string key_;
 };
 
 } // namespace spider

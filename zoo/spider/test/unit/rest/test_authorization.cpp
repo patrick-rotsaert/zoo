@@ -69,5 +69,16 @@ TEST(AuthScheme, BearerSchemeNameIsCaseInsensitive)
 	EXPECT_TRUE(auth.verify(req, url, {}).has_value());
 }
 
+// The scheme name may be supplied as a temporary; the object must own it (regression guard for the
+// non-owning string_view member design).
+TEST(AuthScheme, SchemeNameIsOwnedFromTemporary)
+{
+	basic_authorization auth{ std::string{ "TemporaryScheme" },
+		                      [](std::string_view, std::string_view) -> std::expected<auth_data, std::string> { return auth_data{}; },
+		                      "realm" };
+
+	EXPECT_EQ(auth.scheme_name(), "TemporaryScheme");
+}
+
 } // namespace spider
 } // namespace zoo

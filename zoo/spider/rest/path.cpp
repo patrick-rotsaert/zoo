@@ -17,11 +17,11 @@ namespace zoo {
 namespace spider {
 namespace {
 
-std::vector<string_view> split(string_view v)
+std::vector<std::string> split(string_view v)
 {
-	std::vector<string_view> segments{};
+	std::vector<std::string> segments{};
 	boost::algorithm::split(segments, v, boost::is_any_of("/"), boost::token_compress_on);
-	segments.erase(std::remove_if(segments.begin(), segments.end(), [](const string_view s) { return s.empty(); }), segments.end());
+	segments.erase(std::remove_if(segments.begin(), segments.end(), [](const std::string& s) { return s.empty(); }), segments.end());
 	return segments;
 }
 
@@ -29,7 +29,7 @@ std::vector<string_view> split(string_view v)
 
 path::path() = default;
 
-path::path(std::vector<string_view> segments)
+path::path(std::vector<std::string> segments)
     : segments_{ std::move(segments) }
 {
 }
@@ -45,7 +45,7 @@ path& path::operator=(path&&) noexcept = default;
 path::path(const path&)            = default;
 path& path::operator=(const path&) = default;
 
-const std::vector<string_view>& path::segments() const
+const std::vector<std::string>& path::segments() const
 {
 	return segments_;
 }

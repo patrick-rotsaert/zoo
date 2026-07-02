@@ -10,6 +10,7 @@
 #include "zoo/spider/config.h"
 #include "zoo/spider/aliases.h"
 
+#include <string>
 #include <vector>
 
 namespace zoo {
@@ -20,7 +21,7 @@ class ZOO_SPIDER_API path final
 public:
 	explicit path();
 	explicit path(string_view v);
-	explicit path(std::vector<string_view> segments);
+	explicit path(std::vector<std::string> segments);
 
 	path(path&&) noexcept;
 	path& operator=(path&&) noexcept;
@@ -28,7 +29,7 @@ public:
 	path(const path&);
 	path& operator=(const path&);
 
-	const std::vector<string_view>& segments() const;
+	const std::vector<std::string>& segments() const;
 	std::string                     to_string() const;
 
 	path& operator/=(const path& p);
@@ -38,7 +39,7 @@ public:
 	path  operator/(string_view v);
 
 private:
-	std::vector<string_view> segments_;
+	std::vector<std::string> segments_;
 };
 
 } // namespace spider

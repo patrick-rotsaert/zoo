@@ -28,6 +28,8 @@
 #include <algorithm>
 #include <cstddef>
 #include <functional>
+#include <string>
+#include <vector>
 
 namespace zoo {
 namespace spider {
@@ -78,7 +80,23 @@ private:
 			                             fmt::format("Failed to parse the target '{}': {}", req.target(), url.error().message())));
 		}
 
-		return route_request(std::move(req), std::move(url.value()), path{ url.value().path() });
+		auto& u = url.value();
+
+		// Build the request path from decoded per-segment strings. Using url.segments() (which decodes
+		// each segment individually) rather than url.path() (which decodes the whole path) keeps a
+		// percent-encoded slash (%2F) inside a single segment instead of splitting the path on it. The
+		// path owns the decoded strings, so its segments (and the param_map views into them) stay valid
+		// for the whole synchronous dispatch.
+		std::vector<std::string> segments;
+		for (auto seg : u.segments())
+		{
+			if (!seg.empty())
+			{
+				segments.push_back(std::move(seg));
+			}
+		}
+
+		return route_request(std::move(req), std::move(u), path{ std::move(segments) });
 	}
 
 	// Strict weak ordering used to keep routes_ sorted so the first match is the most specific one.

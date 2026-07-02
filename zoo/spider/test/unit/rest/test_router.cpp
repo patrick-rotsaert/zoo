@@ -84,5 +84,23 @@ TEST(RestRouter, StaticSegmentBeatsParameterRegardlessOfOrder)
 	EXPECT_EQ(hit, "by_id");
 }
 
+// A percent-encoded slash (%2F) in a request must stay within a single path segment, so it is
+// captured whole by a {parameter} rather than splitting the path into extra segments.
+TEST(RestRouter, EncodedSlashStaysWithinPathParameter)
+{
+	rest_router<test_error> router;
+
+	std::string captured;
+	router.add_route(get_op("files/{name}", "file"), [&](request&&, url_view&&, path_spec::param_map&& m) {
+		captured = std::string{ m.at("name") };
+		return ok();
+	});
+
+	auto& handler = static_cast<irequest_handler&>(router);
+	handler.handle_request(request{ verb::get, "/files/a%2Fb", 11 });
+
+	EXPECT_EQ(captured, "a/b");
+}
+
 } // namespace spider
 } // namespace zoo

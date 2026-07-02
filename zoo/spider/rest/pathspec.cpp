@@ -27,11 +27,11 @@ std::vector<path_spec::segment> split(string_view v)
 	std::transform(path.begin(), path.end(), std::back_inserter(segments), [](const string_view& v) {
 		if (v.length() > 2u && v.front() == '{' && v.back() == '}')
 		{
-			return path_spec::segment{ v.substr(1u, v.length() - 2u), true };
+			return path_spec::segment{ std::string{ v.substr(1u, v.length() - 2u) }, true };
 		}
 		else
 		{
-			return path_spec::segment{ v, false };
+			return path_spec::segment{ std::string{ v }, false };
 		}
 	});
 	return segments;

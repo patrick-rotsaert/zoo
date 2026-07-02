@@ -34,7 +34,7 @@ public:
 	auth_error make_verification_error(std::string message, std::vector<std::pair<std::string_view, std::string>> auth_params) const;
 
 private:
-	std::string_view      scheme_name_;
+	std::string           scheme_name_;
 	verification_callback callback_;
 	std::string           challenge_realm_;
 };
