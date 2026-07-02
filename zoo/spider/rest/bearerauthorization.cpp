@@ -8,6 +8,8 @@
 #include "zoo/spider/rest/bearerauthorization.h"
 #include "zoo/common/misc/quoted_c.h"
 
+#include <boost/beast/core/string.hpp>
+
 #include <fmt/format.h>
 
 namespace zoo {
@@ -44,12 +46,14 @@ std::expected<auth_data, auth_error> bearer_authorization::verify(request& req, 
 	{
 		return std::unexpected(make_verification_error(fmt::format("{}: Missing '{}' header.", scheme_name_, header), {}));
 	}
-	const auto authorization = req[header];
-	if (!authorization.starts_with("Bearer "))
+	const auto                          authorization = req[header];
+	constexpr boost::beast::string_view scheme_prefix = "Bearer "; // RFC 7235: auth-scheme is case-insensitive
+	if (authorization.size() < scheme_prefix.size() ||
+	    !boost::beast::iequals(authorization.substr(0u, scheme_prefix.size()), scheme_prefix))
 	{
 		return std::unexpected(make_verification_error(fmt::format("{}: Invalid scheme in '{}' header.", scheme_name_, header), {}));
 	}
-	const auto token = authorization.substr(7u);
+	const auto token = authorization.substr(scheme_prefix.size());
 	return callback_(*this, token);
 }
 

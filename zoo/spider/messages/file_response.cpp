@@ -122,10 +122,17 @@ response_wrapper create_impl(const request& req, const boost::filesystem::path& 
 		ZOO_LOG(err, "{}: {}", file_path.string(), ec.message());
 	}
 
-	// Handle the case where the file doesn't exist
-	if (ec == beast::errc::no_such_file_or_directory)
+	// The file does not exist, or the path resolves to a directory: 404.
+	if (ec == beast::errc::no_such_file_or_directory || ec == beast::errc::is_a_directory)
 	{
 		return not_found::create(req);
+	}
+
+	// The file exists but cannot be opened due to permissions: 403 (not 500, which is both the wrong
+	// status and discloses server-side detail).
+	if (ec == beast::errc::permission_denied)
+	{
+		return error_response<status::forbidden>::create(req);
 	}
 
 	// Handle an unknown error
@@ -178,10 +185,16 @@ response_wrapper create_impl(const boost::filesystem::path& doc_root, beast::str
 		ZOO_LOG(err, "{}: {}", file_path.string(), ec.message());
 	}
 
-	// Handle the case where the file doesn't exist
-	if (ec == beast::errc::no_such_file_or_directory)
+	// The file does not exist, or the path resolves to a directory: 404.
+	if (ec == beast::errc::no_such_file_or_directory || ec == beast::errc::is_a_directory)
 	{
 		return not_found::create();
+	}
+
+	// The file exists but cannot be opened due to permissions: 403.
+	if (ec == beast::errc::permission_denied)
+	{
+		return error_response<status::forbidden>::create();
 	}
 
 	// Handle an unknown error

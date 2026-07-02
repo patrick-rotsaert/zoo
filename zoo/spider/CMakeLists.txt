@@ -101,6 +101,10 @@ add_zoo_library(spider
 	UNIT_TEST_SOURCES
 		test/unit/rest/test_pathspec.cpp
 		test/unit/rest/test_concepts.cpp
+		test/unit/rest/test_authorization.cpp
+		test/unit/rest/test_router.cpp
+		test/unit/messages/test_file_response.cpp
+		test/unit/tag_invoke/test_byte_string.cpp
 		test/unit/test_http_session_pipelining.cpp
 	PUBLIC_LIBRARIES
 		zoo::zoocommon

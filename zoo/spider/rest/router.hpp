@@ -25,6 +25,8 @@
 
 #include <fmt/format.h>
 
+#include <algorithm>
+#include <cstddef>
 #include <functional>
 
 namespace zoo {
@@ -53,7 +55,14 @@ public:
 
 	void add_route(rest_operation op, request_handler handler)
 	{
-		routes_.emplace_back(std::move(op), std::move(handler));
+		// Keep routes ordered most-specific-first so that route_request can return on the first match.
+		// This ordering work happens only while routes are added (typically at startup), keeping the
+		// per-request path cheap. upper_bound + insert preserves registration order among routes of
+		// equal specificity (e.g. same path, different methods).
+		const auto pos = std::upper_bound(routes_.begin(), routes_.end(), op, [](const rest_operation& value, const route& r) {
+			return path_precedes(value.path, r.op.path);
+		});
+		routes_.emplace(pos, std::move(op), std::move(handler));
 	}
 
 private:
@@ -72,8 +81,33 @@ private:
 		return route_request(std::move(req), std::move(url.value()), path{ url.value().path() });
 	}
 
+	// Strict weak ordering used to keep routes_ sorted so the first match is the most specific one.
+	// Routes are grouped by segment count (only same-length specs can match a given path), and within
+	// a group a spec whose first differing segment is literal precedes one whose segment is a
+	// {parameter}. So a literal route (/users/me) is ordered before a parameter route (/users/{id})
+	// and is therefore matched first regardless of registration order.
+	static bool path_precedes(const path_spec& a, const path_spec& b)
+	{
+		const auto& sa = a.segments();
+		const auto& sb = b.segments();
+		if (sa.size() != sb.size())
+		{
+			return sa.size() < sb.size();
+		}
+		for (std::size_t i = 0; i < sa.size(); ++i)
+		{
+			if (sa[i].is_parameter != sb[i].is_parameter)
+			{
+				return !sa[i].is_parameter; // literal before parameter
+			}
+		}
+		return false;
+	}
+
 	response_wrapper route_request(request&& req, url_view&& url, path&& p)
 	{
+		// routes_ is kept most-specific-first by add_route, so the first matching route is the most
+		// specific one and we can return immediately on the first match.
 		auto found = false;
 
 		for (const auto& route : routes_)
