@@ -33,12 +33,16 @@ class listener_impl final : public std::enable_shared_from_this<listener_impl>
 	boost::asio::io_context&          ioc_;
 	tcp::acceptor                     acceptor_;
 	std::shared_ptr<irequest_handler> request_handler_;
+	http_session_settings             settings_;
 
 public:
-	listener_impl(boost::asio::io_context& ioc, const std::shared_ptr<irequest_handler>& request_handler)
+	listener_impl(boost::asio::io_context&                 ioc,
+	              const std::shared_ptr<irequest_handler>& request_handler,
+	              const http_session_settings&             settings)
 	    : ioc_{ ioc }
 	    , acceptor_{ boost::asio::make_strand(ioc) }
 	    , request_handler_{ request_handler }
+	    , settings_{ settings }
 	{
 	}
 
@@ -114,7 +118,7 @@ private:
 			}
 
 			// Create the http session and run it
-			http_session::run(std::move(socket), this->request_handler_);
+			http_session::run(std::move(socket), this->request_handler_, this->settings_);
 		}
 
 		// Accept another connection
@@ -126,7 +130,8 @@ void listener::run(net::io_context&                         ioc,
                    const std::string_view&                  address,
                    std::uint16_t                            port,
                    const std::shared_ptr<irequest_handler>& request_handler,
-                   beast::error_code&                       ec)
+                   beast::error_code&                       ec,
+                   const http_session_settings&             settings)
 {
 	const auto addr = net::ip::make_address(address, ec);
 	if (ec)
@@ -134,7 +139,7 @@ void listener::run(net::io_context&                         ioc,
 		return fail(ec, "make_address");
 	}
 
-	return std::make_shared<listener_impl>(ioc, request_handler)->run(tcp::endpoint{ addr, port }, ec);
+	return std::make_shared<listener_impl>(ioc, request_handler, settings)->run(tcp::endpoint{ addr, port }, ec);
 }
 
 } // namespace spider

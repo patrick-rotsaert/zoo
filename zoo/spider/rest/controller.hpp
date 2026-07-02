@@ -64,7 +64,14 @@ public:
 
 	virtual ~rest_controller() = default;
 
-	const std::shared_ptr<irequest_handler> router() const
+	// Registered handlers capture this controller's `this`, so it must not be relocated or copied
+	// (that would leave the shared router_'s handlers pointing at the original/moved-from object).
+	rest_controller(const rest_controller&)            = delete;
+	rest_controller& operator=(const rest_controller&) = delete;
+	rest_controller(rest_controller&&)                 = delete;
+	rest_controller& operator=(rest_controller&&)      = delete;
+
+	std::shared_ptr<irequest_handler> router() const
 	{
 		return router_;
 	}

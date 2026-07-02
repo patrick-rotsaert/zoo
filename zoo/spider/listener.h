@@ -10,6 +10,7 @@
 #include "zoo/spider/config.h"
 #include "zoo/spider/irequest_handler.h"
 #include "zoo/spider/aliases.h"
+#include "zoo/spider/http_session_settings.h"
 
 #include <string_view>
 #include <cstdint>
@@ -27,7 +28,8 @@ public:
 	                const std::string_view&                  address,
 	                std::uint16_t                            port,
 	                const std::shared_ptr<irequest_handler>& request_handler,
-	                beast::error_code&                       ec);
+	                beast::error_code&                       ec,
+	                const http_session_settings&             settings = {});
 };
 
 } // namespace spider

@@ -44,8 +44,8 @@ tcp::socket::endpoint_type safe_remote_endpoint(const tcp::socket& socket)
 // Handles an HTTP server connection
 class http_session_impl final : public std::enable_shared_from_this<http_session_impl>
 {
-	static constexpr std::size_t queue_limit = 8; // max responses
-
+	http_session_settings             settings_;
+	std::size_t                       queue_limit; // max responses queued (>= 1)
 	tcp::socket::endpoint_type        endpoint_;
 	beast::tcp_stream                 stream_;
 	std::shared_ptr<irequest_handler> request_handler_;
@@ -58,15 +58,16 @@ class http_session_impl final : public std::enable_shared_from_this<http_session
 
 public:
 	// Take ownership of the socket
-	http_session_impl(tcp::socket&& socket, const std::shared_ptr<irequest_handler>& request_handler)
-	    : endpoint_{ safe_remote_endpoint(socket) }
+	http_session_impl(tcp::socket&& socket, const std::shared_ptr<irequest_handler>& request_handler, const http_session_settings& settings)
+	    : settings_{ settings }
+	    , queue_limit{ settings.pipeline_queue_limit > 0u ? settings.pipeline_queue_limit : 1u }
+	    , endpoint_{ safe_remote_endpoint(socket) }
 	    , stream_{ std::move(socket) }
 	    , request_handler_{ request_handler }
 	    , buffer_{}
 	    , response_queue_{}
 	    , parser_{}
 	{
-		static_assert(queue_limit > 0, "queue limit must be positive");
 		this->response_queue_.reserve(queue_limit);
 	}
 
@@ -91,12 +92,11 @@ private:
 		// Construct a new parser for each message
 		this->parser_.emplace();
 
-		// Apply a reasonable limit to the allowed size
-		// of the body in bytes to prevent abuse.
-		this->parser_->body_limit(10000);
+		// Apply the configured limit to the allowed size of the body in bytes to prevent abuse.
+		this->parser_->body_limit(this->settings_.body_limit);
 
 		// Set the timeout.
-		this->stream_.expires_after(30s);
+		this->stream_.expires_after(this->settings_.timeout);
 
 		// Read a request using the parser-oriented interface
 		http::async_read(
@@ -227,9 +227,11 @@ private:
 	}
 };
 
-void http_session::run(tcp::socket&& socket, const std::shared_ptr<irequest_handler>& request_handler)
+void http_session::run(tcp::socket&&                            socket,
+                       const std::shared_ptr<irequest_handler>& request_handler,
+                       const http_session_settings&             settings)
 {
-	std::make_shared<http_session_impl>(std::move(socket), request_handler)->run();
+	std::make_shared<http_session_impl>(std::move(socket), request_handler, settings)->run();
 }
 
 } // namespace spider

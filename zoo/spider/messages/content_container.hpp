@@ -33,16 +33,30 @@ public:
 
 	explicit content_container() = default;
 
-	content_container(content_container&& other)
+	content_container(content_container&& other) noexcept
 	    : value_{ std::move(other.value_) }
 	    , content_type_{ other.content_type_ }
 	    , content_{ other.content_ }
 	{
 		if (value_)
 		{
+			// content_type_/content_ view into value_, so re-point them at this object's storage.
 			content_type_ = value_->content_type;
 			content_      = value_->content;
 		}
+	}
+
+	content_container& operator=(content_container&& other) noexcept
+	{
+		value_        = std::move(other.value_);
+		content_type_ = other.content_type_;
+		content_      = other.content_;
+		if (value_)
+		{
+			content_type_ = value_->content_type;
+			content_      = value_->content;
+		}
+		return *this;
 	}
 
 	static content_container create(std::string content_type, string_type content)

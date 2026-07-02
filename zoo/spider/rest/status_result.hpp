@@ -10,6 +10,7 @@
 #include "zoo/spider/aliases.h"
 
 #include <type_traits>
+#include <utility>
 
 namespace zoo {
 namespace spider {
@@ -27,6 +28,14 @@ struct status_result
 	{
 	}
 };
+
+// Factory that deduces the value type and works for both lvalues (copied) and rvalues (moved), so
+// callers don't have to spell out status_result<Status, T> or reimplement this helper themselves.
+template<http::status Status, typename T>
+status_result<Status, std::decay_t<T>> make_status_result(T&& value)
+{
+	return status_result<Status, std::decay_t<T>>{ std::decay_t<T>{ std::forward<T>(value) } };
+}
 
 } // namespace spider
 } // namespace zoo

@@ -10,6 +10,9 @@
 #include "zoo/spider/rest/concepts.hpp"
 #include "zoo/spider/rest/status_result.hpp"
 
+#include <string>
+#include <type_traits>
+
 namespace zoo {
 namespace spider {
 namespace {
@@ -46,6 +49,20 @@ TEST(RestConcepts, IsStatusResultRecognisesResultTypes)
 
 	// A plain payload is not a status_result.
 	EXPECT_FALSE(IsStatusResult<default_constructible_payload>);
+}
+
+TEST(StatusResult, MakeStatusResultDeducesTypeAndPreservesLvalue)
+{
+	std::string s = "hello";
+
+	auto r = make_status_result<status::created>(s); // lvalue -> copied
+	static_assert(decltype(r)::STATUS == status::created);
+	static_assert(std::is_same_v<decltype(r)::value_type, std::string>);
+	EXPECT_EQ(r.result, "hello");
+	EXPECT_EQ(s, "hello");
+
+	auto r2 = make_status_result<status::ok>(std::string{ "world" }); // rvalue -> moved
+	EXPECT_EQ(r2.result, "world");
 }
 
 } // namespace spider

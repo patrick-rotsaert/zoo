@@ -48,6 +48,7 @@ add_zoo_library(spider
 		apilinktest.h
 		aliases.h
 		listener.h
+		http_session_settings.h
 		irequest_handler.h
 		request_router.h
 		controller.hpp
@@ -100,10 +101,14 @@ add_zoo_library(spider
 		/wd4702 # for boost\beast\core\impl\buffers_cat.hpp(186): warning C4702: unreachable code
 	UNIT_TEST_SOURCES
 		test/unit/rest/test_pathspec.cpp
+		test/unit/test_http_session_settings.cpp
 		test/unit/rest/test_concepts.cpp
 		test/unit/rest/test_authorization.cpp
 		test/unit/rest/test_router.cpp
+		test/unit/rest/test_controller.cpp
 		test/unit/messages/test_file_response.cpp
+		test/unit/messages/test_json_response.cpp
+		test/unit/messages/test_content_container.cpp
 		test/unit/tag_invoke/test_byte_string.cpp
 		test/unit/test_http_session_pipelining.cpp
 	PUBLIC_LIBRARIES

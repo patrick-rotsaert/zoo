@@ -13,6 +13,8 @@
 
 #include <boost/json.hpp>
 
+#include <type_traits>
+
 namespace zoo {
 namespace spider {
 
@@ -28,7 +30,11 @@ public:
 		return create_impl(req, status, boost::json::serialize(boost::json::value_from(data)));
 	}
 
+	// Rvalue-only: without the constraint this forwarding-reference overload also binds non-const
+	// lvalues (out-ranking the const T& overload) and value_from(std::move(data)) would move from the
+	// caller's named object.
 	template<typename T>
+	    requires(!std::is_lvalue_reference_v<T>)
 	static response create(const request& req, http::status status, T&& data)
 	{
 		return create_impl(req, status, boost::json::serialize(boost::json::value_from(std::move(data))));
@@ -41,6 +47,7 @@ public:
 	}
 
 	template<typename T>
+	    requires(!std::is_lvalue_reference_v<T>)
 	static response create(http::status status, T&& data)
 	{
 		return create_impl(status, boost::json::serialize(boost::json::value_from(std::move(data))));

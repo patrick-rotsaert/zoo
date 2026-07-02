@@ -10,6 +10,7 @@
 #include "zoo/spider/config.h"
 #include "zoo/spider/irequest_handler.h"
 #include "zoo/spider/aliases.h"
+#include "zoo/spider/http_session_settings.h"
 
 #include <boost/asio/ip/tcp.hpp>
 
@@ -22,7 +23,8 @@ namespace spider {
 class ZOO_SPIDER_API http_session final : public std::enable_shared_from_this<http_session>
 {
 public:
-	static void run(tcp::socket&& socket, const std::shared_ptr<irequest_handler>& request_handler);
+	static void
+	run(tcp::socket&& socket, const std::shared_ptr<irequest_handler>& request_handler, const http_session_settings& settings = {});
 };
 
 } // namespace spider
