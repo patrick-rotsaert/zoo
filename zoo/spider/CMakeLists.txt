@@ -100,6 +100,8 @@ add_zoo_library(spider
 		/wd4702 # for boost\beast\core\impl\buffers_cat.hpp(186): warning C4702: unreachable code
 	UNIT_TEST_SOURCES
 		test/unit/rest/test_pathspec.cpp
+		test/unit/rest/test_concepts.cpp
+		test/unit/test_http_session_pipelining.cpp
 	PUBLIC_LIBRARIES
 		zoo::zoocommon
 		Boost::system

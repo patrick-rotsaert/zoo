@@ -68,7 +68,7 @@ beast::string_view mime_type(const boost::filesystem::path& path)
 		return "image/svg+xml";
 	if (iequals(ext, ".svgz"))
 		return "image/svg+xml";
-	return "application/text";
+	return "application/octet-stream";
 }
 
 template<class FileBody, class CreateFile>
@@ -76,11 +76,39 @@ response_wrapper create_impl(const request& req, const boost::filesystem::path& 
 {
 	const auto file_path = doc_root / std::string{ path };
 
-	const auto rel_path = boost::filesystem::relative(file_path, doc_root);
+	// Use the non-throwing overload: relative() calls weakly_canonical() which stat()s the path and
+	// throws on e.g. an over-long request path (ENAMETOOLONG), a symlink loop or EACCES. A throw here
+	// would escape into the Asio completion handler and terminate the server.
+	auto       rel_ec   = beast::error_code{};
+	const auto rel_path = boost::filesystem::relative(file_path, doc_root, rel_ec);
+	if (rel_ec)
+	{
+		ZOO_LOG(err, "Cannot resolve {} relative to {}: {}", file_path, doc_root, rel_ec.message());
+		return bad_request::create(req);
+	}
 	if (!rel_path.empty() && rel_path.begin()->filename_is_dot_dot())
 	{
 		ZOO_LOG(err, "{} is not a child path of {}", file_path, doc_root);
 		return bad_request::create(req);
+	}
+
+	// A HEAD response carries no body, so do not open or track the file (opening a tracked file would
+	// fire spurious open/close events, e.g. a bogus "incomplete download"). Report the size only.
+	if (req.method() == verb::head)
+	{
+		auto       size_ec = beast::error_code{};
+		const auto size    = boost::filesystem::file_size(file_path, size_ec);
+		if (size_ec)
+		{
+			return not_found::create(req);
+		}
+
+		auto res = http::response<http::empty_body>{ http::status::ok, req.version() };
+		res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+		res.set(http::field::content_type, mime_type(file_path));
+		res.content_length(size);
+		res.keep_alive(req.keep_alive());
+		return res;
 	}
 
 	auto file = create_file();
@@ -111,16 +139,6 @@ response_wrapper create_impl(const request& req, const boost::filesystem::path& 
 
 	const auto size = body.size();
 
-	if (req.method() == verb::head)
-	{
-		auto res = http::response<http::empty_body>{ http::status::ok, req.version() };
-		res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-		res.set(http::field::content_type, mime_type(file_path));
-		res.content_length(size);
-		res.keep_alive(req.keep_alive());
-		return res;
-	}
-
 	auto res =
 	    http::response<FileBody>{ std::piecewise_construct, std::make_tuple(std::move(body)), std::make_tuple(status::ok, req.version()) };
 	res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
@@ -135,7 +153,14 @@ response_wrapper create_impl(const boost::filesystem::path& doc_root, beast::str
 {
 	const auto file_path = doc_root / std::string{ path };
 
-	const auto rel_path = boost::filesystem::relative(file_path, doc_root);
+	// Use the non-throwing overload (see the other create_impl for the rationale).
+	auto       rel_ec   = beast::error_code{};
+	const auto rel_path = boost::filesystem::relative(file_path, doc_root, rel_ec);
+	if (rel_ec)
+	{
+		ZOO_LOG(err, "Cannot resolve {} relative to {}: {}", file_path, doc_root, rel_ec.message());
+		return bad_request::create();
+	}
 	if (!rel_path.empty() && rel_path.begin()->filename_is_dot_dot())
 	{
 		ZOO_LOG(err, "{} is not a child path of {}", file_path, doc_root);

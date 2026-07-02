@@ -9,9 +9,13 @@ std::optional<std::string> base64::decode_to_string(std::string_view in)
 {
 	namespace b64 = boost::beast::detail::base64;
 
-	const auto  dest_size = b64::decoded_size(in.length());
+	// beast::detail::base64::decoded_size(n) == n / 4 * 3 and assumes padded input (n % 4 == 0).
+	// For attacker-supplied, possibly-unpadded input, beast::decode writes up to 2 bytes beyond
+	// that (it emits the partial trailing group), which would overflow the buffer. Allocate the
+	// worst-case size and shrink to the number of bytes actually written.
+	const auto  capacity = ((in.length() + 3u) / 4u) * 3u;
 	std::string dest{};
-	dest.resize(dest_size);
+	dest.resize(capacity);
 	const auto [bytes_written, bytes_read] = b64::decode(dest.data(), in.data(), in.length());
 	if (bytes_read < in.length())
 	{
@@ -20,10 +24,7 @@ std::optional<std::string> base64::decode_to_string(std::string_view in)
 			return std::nullopt;
 		}
 	}
-	if (bytes_written != dest_size)
-	{
-		dest.resize(bytes_written);
-	}
+	dest.resize(bytes_written);
 	return dest;
 }
 

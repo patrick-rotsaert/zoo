@@ -12,6 +12,7 @@
 
 #include <boost/asio/strand.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/error.hpp>
 #include <boost/beast/core.hpp>
 
 namespace zoo {
@@ -93,10 +94,25 @@ private:
 		if (ec)
 		{
 			fail(ec, "accept");
+
+			// Do not re-arm on shutdown (the acceptor was closed) or on resource-exhaustion errors:
+			// re-accepting immediately on e.g. EMFILE/ENOMEM would busy-loop at 100% CPU. Transient
+			// per-connection errors (e.g. a connection aborted before accept) fall through and retry.
+			if (ec == boost::asio::error::operation_aborted || ec == boost::asio::error::no_descriptors ||
+			    ec == boost::asio::error::no_memory)
+			{
+				return;
+			}
 		}
 		else
 		{
-			ZOO_LOG(trace, "Connection accepted from {}", socket.remote_endpoint());
+			auto       rep_ec   = beast::error_code{};
+			const auto endpoint = socket.remote_endpoint(rep_ec); // non-throwing: peer may have reset
+			if (!rep_ec)
+			{
+				ZOO_LOG(trace, "Connection accepted from {}", endpoint);
+			}
+
 			// Create the http session and run it
 			http_session::run(std::move(socket), this->request_handler_);
 		}

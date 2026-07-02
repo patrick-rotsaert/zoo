@@ -7,6 +7,7 @@
 
 #include "zoo/spider/http_session.h"
 #include "zoo/spider/irequest_handler.h"
+#include "zoo/spider/messages/error_response.h"
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/formatters.hpp"
 
@@ -30,6 +31,14 @@ void fail(beast::error_code ec, char const* what)
 	ZOO_LOG(err, "{}: {} ({})", what, ec.message(), ec);
 }
 
+// Non-throwing remote_endpoint(): the throwing overload would throw (and escape the accept handler
+// that constructs the session) if the peer reset the connection between accept and here.
+tcp::socket::endpoint_type safe_remote_endpoint(const tcp::socket& socket)
+{
+	auto ec = beast::error_code{};
+	return socket.remote_endpoint(ec);
+}
+
 } // namespace
 
 // Handles an HTTP server connection
@@ -50,7 +59,7 @@ class http_session_impl final : public std::enable_shared_from_this<http_session
 public:
 	// Take ownership of the socket
 	http_session_impl(tcp::socket&& socket, const std::shared_ptr<irequest_handler>& request_handler)
-	    : endpoint_{ socket.remote_endpoint() }
+	    : endpoint_{ safe_remote_endpoint(socket) }
 	    , stream_{ std::move(socket) }
 	    , request_handler_{ request_handler }
 	    , buffer_{}
@@ -121,8 +130,27 @@ private:
 		}
 #endif
 
-		// Send the response
-		this->queue_write(this->request_handler_->handle_request(parser_->release()));
+		// Send the response. This runs inside an Asio completion handler, so an exception escaping
+		// the request handler would propagate into io_context::run() on a worker thread and call
+		// std::terminate. Translate any handler exception into a 500 response instead.
+		response_wrapper response = [&]() -> response_wrapper {
+			try
+			{
+				return this->request_handler_->handle_request(this->parser_->release());
+			}
+			catch (const std::exception& e)
+			{
+				ZOO_LOG(err, "Unhandled exception in request handler: {}", e.what());
+				return internal_server_error::create();
+			}
+			catch (...)
+			{
+				ZOO_LOG(err, "Unhandled exception in request handler");
+				return internal_server_error::create();
+			}
+		}();
+
+		this->queue_write(std::move(response));
 
 		// If we aren't at the queue limit, try to pipeline another request
 		if (this->response_queue_.size() < queue_limit)
@@ -143,27 +171,21 @@ private:
 		}
 	}
 
-	// Called to start/continue the write-loop. Should not be called when
-	// write_loop is already active.
-	//
-	// Returns `true` if the caller may initiate a new read
-	bool do_write()
+	// Called to start/continue the write-loop. Should not be called when a write is already in
+	// progress. The message being written is kept at the front of the queue until on_write() runs,
+	// so response_queue_.size() reflects the in-flight write. This is what prevents queue_write()
+	// from starting a second, concurrent async_write on the same stream (which is undefined
+	// behaviour). Mirrors the Boost.Beast advanced_server example.
+	void do_write()
 	{
-		const auto was_full = this->response_queue_.size() == queue_limit;
-
 		if (!this->response_queue_.empty())
 		{
-			auto msg = std::move(this->response_queue_.front());
-			this->response_queue_.erase(this->response_queue_.begin());
-
-			const auto keep_alive = msg.keep_alive();
+			const auto keep_alive = this->response_queue_.front().keep_alive();
 
 			beast::async_write(this->stream_,
-			                   std::move(msg),
+			                   std::move(this->response_queue_.front()),
 			                   beast::bind_front_handler(&http_session_impl::on_write, this->shared_from_this(), keep_alive));
 		}
-
-		return was_full;
 	}
 
 	void on_write(bool keep_alive, beast::error_code ec, std::size_t bytes_transferred)
@@ -182,12 +204,17 @@ private:
 			return this->do_close();
 		}
 
-		// Inform the queue that a write completed
-		if (this->do_write())
+		// If the queue was full the read loop was paused (see on_read); resume it now that a slot
+		// is about to free up. Checked before erasing, while size() still counts the completed write.
+		if (this->response_queue_.size() == queue_limit)
 		{
-			// Read another request
 			this->do_read();
 		}
+
+		// Remove the completed response and continue the write loop with the next one, if any.
+		this->response_queue_.erase(this->response_queue_.begin());
+
+		this->do_write();
 	}
 
 	void do_close()

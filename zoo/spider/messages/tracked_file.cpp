@@ -52,10 +52,17 @@ void tracked_file::close(error_code& ec)
 {
 	if (this->event_listener_)
 	{
-		const auto pos  = this->pos(ec);
-		const auto size = this->size(ec);
+		// Use a separate error_code for each query so an earlier failure is not masked by a later
+		// call. `ec` (the caller's out-parameter) reflects the close() result per this function's
+		// contract; the listener is told the first error that actually occurred.
+		auto       pos_ec  = error_code{};
+		auto       size_ec = error_code{};
+		const auto pos     = this->pos(pos_ec);
+		const auto size    = this->size(size_ec);
 		this->file_.close(ec);
-		this->event_listener_->on_close(ec, size, pos);
+
+		const auto& report_ec = ec ? ec : (pos_ec ? pos_ec : size_ec);
+		this->event_listener_->on_close(report_ec, size, pos);
 	}
 	else
 	{

@@ -10,6 +10,7 @@
 #include "zoo/spider/config.h"
 
 #include <string>
+#include <string_view>
 #include <vector>
 #include <utility>
 #include <unordered_map>

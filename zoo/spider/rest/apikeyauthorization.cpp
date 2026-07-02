@@ -9,9 +9,28 @@
 
 #include <fmt/format.h>
 
+#include <algorithm>
+#include <cstddef>
+#include <string_view>
+
 namespace zoo {
 namespace spider {
 namespace {
+
+// Constant-time comparison: the running time depends only on the input lengths, not on how many
+// leading bytes match, so it does not leak the API key through response-timing measurements.
+bool constant_time_equal(std::string_view a, std::string_view b)
+{
+	const std::size_t n    = std::max(a.size(), b.size());
+	unsigned int      diff = static_cast<unsigned int>(a.size() ^ b.size());
+	for (std::size_t i = 0; i < n; ++i)
+	{
+		const unsigned int ca = i < a.size() ? static_cast<unsigned char>(a[i]) : 0u;
+		const unsigned int cb = i < b.size() ? static_cast<unsigned char>(b[i]) : 0u;
+		diff |= (ca ^ cb);
+	}
+	return diff == 0u;
+}
 
 using source = api_key_authorization::source;
 
@@ -89,7 +108,7 @@ api_key_authorization::verify(request& req, const url_view& url, const std::vect
 	break;
 	}
 
-	if (key == key_)
+	if (constant_time_equal(key, key_))
 	{
 		return auth_data{};
 	}

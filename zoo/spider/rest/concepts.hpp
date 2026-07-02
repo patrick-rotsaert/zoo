@@ -51,7 +51,9 @@ concept IsStatusResult = requires {
 	{ T::STATUS } -> std::convertible_to<http::status>;
 	typename T::value_type;
 } && requires(const T& t) {
-	{ std::remove_cvref_t<decltype(t.result)>() } -> std::same_as<typename T::value_type>;
+	// Check the type of the `result` member without value-initialising it: value_type need not be
+	// default-constructible (status_result only ever constructs it from an rvalue).
+	{ t.result } -> std::same_as<const typename T::value_type&>;
 };
 
 template<typename T>
