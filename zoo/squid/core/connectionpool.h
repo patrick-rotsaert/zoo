@@ -21,7 +21,7 @@ namespace squid {
 class ZOO_SQUID_CORE_API connection_pool final
 {
 	class impl;
-	std::unique_ptr<impl> pimpl_;
+	std::shared_ptr<impl> pimpl_;
 
 public:
 	/// Create a pool of @a count connections using the connection factory @a factory and a connection

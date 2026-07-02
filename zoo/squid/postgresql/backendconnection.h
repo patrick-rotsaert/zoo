@@ -46,6 +46,12 @@ public:
 	std::unique_ptr<ibackend_statement> create_prepared_statement(std::string_view query) override;
 	void                                execute(const std::string& query) override;
 
+	// Asynchronous operations.
+	//
+	// The supplied io_context must be run single-threaded (all handlers for a given connection must
+	// run on one thread): a connection's async state is not protected against concurrent handler
+	// execution. Do not call more than one async operation on the same connection concurrently, and
+	// do not run the io_context from multiple threads.
 	void run_async_exec(boost::asio::io_context&                                               io,
 	                    std::string_view                                                       query,
 	                    std::initializer_list<std::pair<std::string_view, parameter_by_value>> params,

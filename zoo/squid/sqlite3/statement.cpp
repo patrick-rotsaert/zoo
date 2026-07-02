@@ -101,6 +101,11 @@ public:
 				{
 					ZOO_THROW_EXCEPTION(error{ *this->api_, "sqlite3_reset failed", *this->connection_ });
 				}
+				// sqlite3_reset does not clear parameter bindings.
+				if (SQLITE_OK != this->api_->clear_bindings(this->statement_.get()))
+				{
+					ZOO_THROW_EXCEPTION(error{ *this->api_, "sqlite3_clear_bindings failed", *this->connection_ });
+				}
 			}
 			else
 			{

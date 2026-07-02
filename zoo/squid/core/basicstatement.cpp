@@ -67,6 +67,11 @@ void basic_statement::execute()
 		else
 		{
 			this->statement_ = this->create_statement(this->connection_, this->query_.value().str());
+
+			// The query text has been consumed into the backend statement. Clear it so that streaming
+			// a new query with operator<< after this execute() starts fresh instead of appending to the
+			// previous query text. Re-executing this statement uses statement_ and does not need query_.
+			this->query_.reset();
 		}
 	}
 

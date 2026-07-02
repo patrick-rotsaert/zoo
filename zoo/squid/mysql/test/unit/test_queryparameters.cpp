@@ -147,6 +147,20 @@ TEST(MysqlQueryparametersTest, FloatParameter)
 	test(42.42, MYSQL_TYPE_DOUBLE);
 }
 
+TEST(MysqlQueryparametersTest, LongDoubleParameter)
+{
+	// MySQL has no long double wire type, so it is bound as a double. The buffer_type
+	// must still be set (regression: it was previously left as MYSQL_TYPE_DECIMAL/0).
+	const long double      value = 42.42L;
+	query_parameter_binder qpb{ value };
+	const auto&            bind = qpb.bind();
+
+	EXPECT_EQ(bind.buffer_type, MYSQL_TYPE_DOUBLE);
+	EXPECT_EQ(bind.buffer_length, 8ul);
+	ASSERT_NE(bind.buffer, nullptr);
+	EXPECT_EQ(*reinterpret_cast<double*>(bind.buffer), static_cast<double>(value));
+}
+
 TEST(MysqlQueryparametersTest, StringParameter)
 {
 	auto&& test = [](const auto value) {

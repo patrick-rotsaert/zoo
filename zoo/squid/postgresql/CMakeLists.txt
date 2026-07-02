@@ -14,6 +14,7 @@ add_zoo_library(squid_postgresql
 		connection.cpp
 		resultset.cpp
 		resultsetiterator.cpp
+		notify_listener.cpp
 		asyncerror.cpp
 		asyncpreparedstatement.cpp
 		detail/asyncbackend.cpp
@@ -54,6 +55,7 @@ add_zoo_library(squid_postgresql
 		asyncprepare.h
 		asyncerror.h
 		asyncpreparedstatement.h
+		notify_listener.h
 		detail/libpqfwd.h
 		detail/ipqapifwd.h
 		detail/queryfwd.h

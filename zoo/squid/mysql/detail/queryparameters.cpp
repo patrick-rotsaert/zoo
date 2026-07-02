@@ -88,6 +88,8 @@ void bind_parameter(MYSQL_BIND& bind, std::string& buffer, const parameter& para
 		    else if constexpr (std::is_same_v<T, const long double*>)
 		    {
 			    static_assert(sizeof(double) == 8u, "Size of double must be 8");
+			    bind.buffer_type   = MYSQL_TYPE_DOUBLE;
+			    bind.buffer_length = 8u;
 			    buffer.resize(8u);
 			    bind.buffer = reinterpret_cast<void*>(buffer.data());
 			    auto& data  = *reinterpret_cast<double*>(buffer.data());
@@ -207,7 +209,14 @@ void query_parameters::bind(MYSQL_STMT& statement)
 		    "binds"_a       = this->binds_.size()) });
 	}
 
-	if (mysql_stmt_bind_param(&statement, &this->binds_.front()))
+	// A query with no placeholders has an empty binds_ vector; &binds_.front() would be UB
+	// (dereferencing the past-the-end iterator), and there is nothing to bind anyway.
+	if (this->binds_.empty())
+	{
+		return;
+	}
+
+	if (mysql_stmt_bind_param(&statement, this->binds_.data()))
 	{
 		ZOO_THROW_EXCEPTION(error{ "mysql_stmt_bind_param failed", statement });
 	}

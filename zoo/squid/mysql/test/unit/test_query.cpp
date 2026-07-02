@@ -118,6 +118,16 @@ TEST(PostgresqlQueryTest, CastingOperator)
 	}
 }
 
+TEST(PostgresqlQueryTest, BackslashEscapedQuoteInLiteralIsNotAParameter)
+{
+	// The literal is 'it\'s :x' — the \' is an escaped quote, so :x is inside the string and
+	// must not be treated as a parameter. (Without backslash handling the parser would close the
+	// string early and extract a spurious parameter.)
+	mysql_query q{ "SELECT 'it\\'s :x'" };
+	EXPECT_EQ(q.query(), "SELECT 'it\\'s :x'");
+	EXPECT_EQ(q.parameter_count(), 0);
+}
+
 } // namespace mysql
 } // namespace squid
 } // namespace zoo

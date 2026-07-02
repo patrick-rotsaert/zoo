@@ -58,6 +58,11 @@ int sqlite_api::reset(sqlite3_stmt* pStmt)
 	return sqlite3_reset(pStmt);
 }
 
+int sqlite_api::clear_bindings(sqlite3_stmt* pStmt)
+{
+	return sqlite3_clear_bindings(pStmt);
+}
+
 int sqlite_api::bind_parameter_index(sqlite3_stmt* pStmt, const char* zName)
 {
 	return sqlite3_bind_parameter_index(pStmt, zName);

@@ -17,6 +17,7 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include <memory>
 
 namespace zoo {
 namespace squid {
@@ -60,7 +61,7 @@ public:
 
 } // namespace
 
-class connection_pool::impl final
+class connection_pool::impl final : public std::enable_shared_from_this<impl>
 {
 	std::queue<std::shared_ptr<ibackend_connection>> queue_;
 	std::mutex                                       mutex_;
@@ -132,7 +133,13 @@ private:
 		this->queue_.pop();
 
 		return std::make_shared<backend_connection_wrapper>(
-		    std::move(connection), [this](std::shared_ptr<ibackend_connection>&& connection) { this->release(std::move(connection)); });
+		    std::move(connection),
+		    [weak = std::weak_ptr<impl>{ this->shared_from_this() }](std::shared_ptr<ibackend_connection>&& connection) {
+			    if (const auto self = weak.lock())
+			    {
+				    self->release(std::move(connection));
+			    }
+		    });
 	}
 
 	void release(std::shared_ptr<ibackend_connection>&& connection)
@@ -146,7 +153,7 @@ private:
 };
 
 connection_pool::connection_pool(const ibackend_connection_factory& factory, std::string_view connection_info, std::size_t count)
-    : pimpl_{ std::make_unique<impl>(factory, connection_info, count) }
+    : pimpl_{ std::make_shared<impl>(factory, connection_info, count) }
 {
 }
 

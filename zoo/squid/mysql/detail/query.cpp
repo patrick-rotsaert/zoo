@@ -111,6 +111,18 @@ mysql_query::mysql_query(std::string_view query)
 					state = normal;
 				}
 			}
+			else if (*it == '\\')
+			{
+				// Backslash escape inside a string literal: the next character is part of the literal
+				// (e.g. \' does not terminate the string). Copy both verbatim so a ':name' occurring
+				// inside the literal is not mistaken for a parameter placeholder. MySQL honours these
+				// escapes unless the server runs with NO_BACKSLASH_ESCAPES.
+				this->query_ += *it;
+				if (it + 1 != end)
+				{
+					this->query_ += *++it;
+				}
+			}
 			else
 			{
 				this->query_ += *it;

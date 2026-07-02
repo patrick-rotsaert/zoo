@@ -77,6 +77,43 @@ TEST(MysqlConversionsTest, TimeofdayWithFractionalSecondsToMysqlTime)
 	EXPECT_EQ(out.time_zone_displacement, 0);
 }
 
+TEST(MysqlConversionsTest, NegativeTimeofdayRoundTrip)
+{
+	// MySQL TIME is signed; a negative time_of_day must set MYSQL_TIME::neg and round-trip.
+	const auto original = time_of_day{ -(std::chrono::hours{ 2 } + std::chrono::minutes{ 3 } + std::chrono::seconds{ 4 }) };
+
+	MYSQL_TIME out{};
+	time_of_day_to_mysql_time(original, out);
+
+	EXPECT_TRUE(out.neg);
+	EXPECT_EQ(out.hour, 2u);
+	EXPECT_EQ(out.minute, 3u);
+	EXPECT_EQ(out.second, 4u);
+
+	time_of_day back{};
+	from_mysql_time(out, back);
+	EXPECT_EQ(back.to_duration(), original.to_duration());
+}
+
+TEST(MysqlConversionsTest, NegativeBoostTimeDurationRoundTrip)
+{
+	const auto original = boost::posix_time::time_duration{ 2, 3, 4 }.invert_sign(); // -02:03:04
+	ASSERT_TRUE(original.is_negative());
+
+	MYSQL_TIME out{};
+	boost_time_duration_to_mysql_time(original, out);
+
+	EXPECT_TRUE(out.neg);
+	EXPECT_EQ(out.hour, 2u);
+	EXPECT_EQ(out.minute, 3u);
+	EXPECT_EQ(out.second, 4u);
+
+	boost::posix_time::time_duration back{};
+	from_mysql_time(out, back);
+	EXPECT_TRUE(back.is_negative());
+	EXPECT_EQ(back, original);
+}
+
 TEST(MysqlConversionsTest, ToMysqlTimeFromDate)
 {
 	MYSQL_TIME out{};

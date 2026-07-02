@@ -247,13 +247,11 @@ struct query_results::column final
 {
 	result           res;
 	std::string_view name;
-	int              type;
 	int              index;
 
-	column(const result& res, std::string_view name, int type, int index)
+	column(const result& res, std::string_view name, int index)
 	    : res{ res }
 	    , name{ std::move(name) }
-	    , type{ type }
 	    , index{ index }
 	{
 	}
@@ -303,7 +301,7 @@ query_results::query_results(isqlite_api&                  api,
 			ZOO_THROW_EXCEPTION(error{ "sqlite3_column_name returned a nullptr" });
 		}
 
-		this->columns_.push_back(std::make_unique<column>(result, column_name, api.column_type(statement.get(), index), index));
+		this->columns_.push_back(std::make_unique<column>(result, column_name, index));
 
 		++index;
 	}
@@ -346,8 +344,7 @@ query_results::query_results(isqlite_api&                         api,
 		const auto index       = it->second;
 		const auto column_name = it->first;
 
-		this->columns_.push_back(std::make_unique<column>(
-		    result.second, column_name, api.column_type(statement.get(), static_cast<int>(index)), static_cast<int>(index)));
+		this->columns_.push_back(std::make_unique<column>(result.second, column_name, static_cast<int>(index)));
 	}
 }
 
@@ -383,7 +380,10 @@ void query_results::fetch()
 
 	for (const auto& column : this->columns_)
 	{
-		store_result(*this->api_, *this->connection_, *this->statement_, column->res, column->index, column->name, column->type);
+		// SQLite is dynamically typed: a column's type (and NULL-ness) is per-row, so read it for the
+		// current row on every fetch rather than caching the first row's type at construction.
+		const auto column_type = this->api_->column_type(this->statement_.get(), column->index);
+		store_result(*this->api_, *this->connection_, *this->statement_, column->res, column->index, column->name, column_type);
 	}
 }
 

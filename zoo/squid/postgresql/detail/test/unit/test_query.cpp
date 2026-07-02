@@ -118,6 +118,34 @@ TEST(PostgresqlQueryTest, CastingOperator)
 	}
 }
 
+TEST(PostgresqlQueryTest, ParameterNamesMayContainDigits)
+{
+	postgresql_query q{ "SELECT :param1, :a2b" };
+	EXPECT_EQ(q.query(), "SELECT $1, $2");
+	EXPECT_EQ(q.parameter_count(), 2);
+	auto map = q.parameter_name_pos_map();
+	EXPECT_EQ(map["param1"], 1);
+	EXPECT_EQ(map["a2b"], 2);
+}
+
+TEST(PostgresqlQueryTest, DigitImmediatelyAfterSigilIsNotAParameter)
+{
+	// A name must start with a letter or underscore, so ":1" is a literal, not a
+	// parameter. This also keeps PostgreSQL positional placeholders like "$1" intact.
+	postgresql_query q{ "SELECT :1, $1" };
+	EXPECT_EQ(q.query(), "SELECT :1, $1");
+	EXPECT_EQ(q.parameter_count(), 0);
+}
+
+TEST(PostgresqlQueryTest, NonAsciiBytesAreHandledWithoutUndefinedBehaviour)
+{
+	// High (non-ASCII) bytes must not be passed to std::isalpha/isalnum as a negative
+	// char. They are not name characters, so the text round-trips and yields no parameters.
+	postgresql_query q{ "SELECT '\xC3\xA9' AS x, :\xC3\xA9" };
+	EXPECT_EQ(q.query(), "SELECT '\xC3\xA9' AS x, :\xC3\xA9");
+	EXPECT_EQ(q.parameter_count(), 0);
+}
+
 } // namespace postgresql
 } // namespace squid
 } // namespace zoo

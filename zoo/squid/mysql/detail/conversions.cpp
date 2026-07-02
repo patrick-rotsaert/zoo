@@ -26,6 +26,9 @@ void date_to_mysql_time(const date& in, MYSQL_TIME& out)
 
 void time_of_day_to_mysql_time(const time_of_day& in, MYSQL_TIME& out)
 {
+	// hh_mm_ss stores the magnitude in its components and the sign separately, which maps directly
+	// onto MYSQL_TIME (magnitude + neg flag). MySQL TIME is a signed range (-838:59:59 .. 838:59:59).
+	out.neg         = in.is_negative() ? 1u : 0u;
 	out.hour        = static_cast<unsigned int>(in.hours().count());
 	out.minute      = static_cast<unsigned int>(in.minutes().count());
 	out.second      = static_cast<unsigned int>(in.seconds().count());
@@ -65,13 +68,17 @@ void boost_date_to_mysql_time(const boost::gregorian::date& in, MYSQL_TIME& out)
 
 void boost_time_duration_to_mysql_time(const boost::posix_time::time_duration& in, MYSQL_TIME& out)
 {
-	out.hour   = static_cast<unsigned int>(in.hours());
-	out.minute = static_cast<unsigned int>(in.minutes());
-	out.second = static_cast<unsigned int>(in.seconds());
+	// A negative Boost duration returns negative components; MYSQL_TIME expects the magnitude plus a
+	// separate neg flag, so take the absolute value for the components and record the sign in out.neg.
+	out.neg              = in.is_negative() ? 1u : 0u;
+	const auto magnitude = in.is_negative() ? in.invert_sign() : in;
+	out.hour             = static_cast<unsigned int>(magnitude.hours());
+	out.minute           = static_cast<unsigned int>(magnitude.minutes());
+	out.second           = static_cast<unsigned int>(magnitude.seconds());
 #ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
-	out.second_part = static_cast<unsigned long>(in.fractional_seconds() / 1000);
+	out.second_part = static_cast<unsigned long>(magnitude.fractional_seconds() / 1000);
 #else
-	out.second_part = static_cast<unsigned long>(in.fractional_seconds());
+	out.second_part = static_cast<unsigned long>(magnitude.fractional_seconds());
 #endif
 }
 
@@ -105,7 +112,7 @@ void from_mysql_time(const MYSQL_TIME& in, time_of_day& out)
 	const auto tmp = std::chrono::hours{ in.hour } + std::chrono::minutes{ in.minute } + std::chrono::seconds{ in.second } +
 	                 std::chrono::microseconds{ in.second_part };
 
-	out = time_of_day{ tmp };
+	out = time_of_day{ in.neg ? -tmp : tmp };
 }
 
 void from_mysql_time(const MYSQL_TIME& in, time_point& out)
@@ -130,6 +137,10 @@ void from_mysql_time(const MYSQL_TIME& in, boost::gregorian::date& out)
 void from_mysql_time(const MYSQL_TIME& in, boost::posix_time::time_duration& out)
 {
 	out = boost::posix_time::time_duration{ in.hour, in.minute, in.second } + boost::posix_time::microseconds{ in.second_part };
+	if (in.neg)
+	{
+		out = out.invert_sign();
+	}
 }
 
 void from_mysql_time(const MYSQL_TIME& in, boost::posix_time::ptime& out)

@@ -36,6 +36,7 @@ public:
 	virtual int finalize(sqlite3_stmt* pStmt)                                                                    = 0;
 	virtual int step(sqlite3_stmt* pStmt)                                                                        = 0;
 	virtual int reset(sqlite3_stmt* pStmt)                                                                       = 0;
+	virtual int clear_bindings(sqlite3_stmt* pStmt)                                                              = 0;
 
 	virtual int bind_parameter_index(sqlite3_stmt* pStmt, const char* zName)                                        = 0;
 	virtual int bind_null(sqlite3_stmt* pStmt, int index)                                                           = 0;

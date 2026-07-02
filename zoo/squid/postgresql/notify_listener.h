@@ -27,16 +27,17 @@ class ZOO_SQUID_POSTGRESQL_API notify_listener final : public std::enable_shared
 	using callback_type     = std::function<void(const std::string& channel, int pid)>;
 	using stream_descriptor = boost::asio::posix::stream_descriptor;
 
-	stream_descriptor stream_;
-	connection        connection_;
-	callback_type     callback_;
-	std::shared_ptr<PGconn>           native_conn_;
+	stream_descriptor       stream_;
+	connection              connection_;
+	callback_type           callback_;
+	std::shared_ptr<PGconn> native_conn_;
 
 	void on_wait(const boost::system::error_code& ec);
 	void async_wait();
 
 public:
-	notify_listener(boost::asio::io_context& ioc, connection&& connection, const std::string& channel, callback_type&& callback);
+	explicit notify_listener(boost::asio::io_context& ioc, connection&& connection, const std::string& channel, callback_type&& callback);
+	~notify_listener();
 
 	void run();
 };
@@ -44,5 +45,3 @@ public:
 } // namespace postgresql
 } // namespace squid
 } // namespace zoo
-
-#include "notify_listener.ipp"

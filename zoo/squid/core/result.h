@@ -103,6 +103,12 @@ private:
 			using V = typename T::value_type;
 			if constexpr (std::is_enum_v<V>)
 			{
+				// The backend stores enums by their underlying integer type. This aliases
+				// std::optional<enum> as std::optional<underlying_type>; assert the layouts match so
+				// it fails loudly on any platform where that assumption does not hold.
+				static_assert(sizeof(T) == sizeof(std::optional<std::underlying_type_t<V>>) &&
+				                  alignof(T) == alignof(std::optional<std::underlying_type_t<V>>),
+				              "std::optional<enum> and std::optional<underlying_type> must have the same layout");
 				return nullable_type{ reinterpret_cast<std::optional<std::underlying_type_t<V>>*>(&value) };
 			}
 			else
@@ -112,6 +118,8 @@ private:
 		}
 		else if constexpr (std::is_enum_v<T>)
 		{
+			static_assert(sizeof(T) == sizeof(std::underlying_type_t<T>) && alignof(T) == alignof(std::underlying_type_t<T>),
+			              "enum and its underlying type must have the same layout");
 			return non_nullable_type{ reinterpret_cast<std::underlying_type_t<T>*>(&value) };
 		}
 		else

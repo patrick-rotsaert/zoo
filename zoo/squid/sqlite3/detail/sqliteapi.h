@@ -36,6 +36,7 @@ public:
 	int finalize(sqlite3_stmt* pStmt) override;
 	int step(sqlite3_stmt* pStmt) override;
 	int reset(sqlite3_stmt* pStmt) override;
+	int clear_bindings(sqlite3_stmt* pStmt) override;
 
 	int bind_parameter_index(sqlite3_stmt* pStmt, const char* zName) override;
 	int bind_null(sqlite3_stmt* pStmt, int index) override;

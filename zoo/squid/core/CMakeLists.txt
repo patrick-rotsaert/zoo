@@ -49,6 +49,7 @@ add_zoo_library(squid_core
 	UNIT_TEST_SOURCES
 		test/unit/test_parameter.cpp
 		test/unit/test_result.cpp
+		test/unit/test_connectionpool.cpp
 	PUBLIC_LIBRARIES
 		zoo::zoocommon
 	FIND_PACKAGE_COMPONENT

@@ -110,14 +110,10 @@ TEST_F(QueryResultsTests, TestCtorVector)
 	{
 		auto seq = testing::Sequence{};
 
+		// The column type is read per row in fetch(), not at construction (SQLite is dynamically typed).
 		EXPECT_CALL(api, column_name(this->statement, testing::Eq(0))).WillOnce(testing::Return("x"));
-		EXPECT_CALL(api, column_type(this->statement, testing::Eq(0))).Times(1);
-
 		EXPECT_CALL(api, column_name(this->statement, testing::Eq(1))).WillOnce(testing::Return("x"));
-		EXPECT_CALL(api, column_type(this->statement, testing::Eq(1))).Times(1);
-
 		EXPECT_CALL(api, column_name(this->statement, testing::Eq(2))).WillOnce(testing::Return("x"));
-		EXPECT_CALL(api, column_type(this->statement, testing::Eq(2))).Times(1);
 	}
 
 	this->make_query_results(api, this->make_results_vector(n));
@@ -133,13 +129,10 @@ TEST_F(QueryResultsTests, TestCtorMap)
 	{
 		auto seq = testing::Sequence{};
 
+		// The column type is read per row in fetch(), not at construction (SQLite is dynamically typed).
 		EXPECT_CALL(api, column_name(this->statement, testing::Eq(0))).WillOnce(testing::Return("first"));
 		EXPECT_CALL(api, column_name(this->statement, testing::Eq(1))).WillOnce(testing::Return("second"));
 		EXPECT_CALL(api, column_name(this->statement, testing::Eq(2))).WillOnce(testing::Return("third"));
-
-		EXPECT_CALL(api, column_type(this->statement, testing::Eq(0))).Times(1);
-		EXPECT_CALL(api, column_type(this->statement, testing::Eq(1))).Times(1);
-		EXPECT_CALL(api, column_type(this->statement, testing::Eq(2))).Times(1);
 	}
 
 	auto dummy = int{};

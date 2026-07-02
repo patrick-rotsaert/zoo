@@ -212,13 +212,11 @@ public:
 		{
 			result_binder<basic_statement> binder{ *this };
 			first.bind(binder);
-			return *this;
 		}
 		else if constexpr (is_boost_serializable_v<T, bind_iarchive<result_binder<basic_statement>>>)
 		{
 			bind_iarchive<result_binder<basic_statement>> ar{ *this };
 			ar >> first;
-			return *this;
 		}
 		else
 		{

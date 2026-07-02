@@ -187,6 +187,10 @@ private:
 			using V = typename T::value_type;
 			if constexpr (std::is_enum_v<V>)
 			{
+				// See result.h: enums are handled by the backend as their underlying integer type.
+				static_assert(sizeof(T) == sizeof(std::optional<std::underlying_type_t<V>>) &&
+				                  alignof(T) == alignof(std::optional<std::underlying_type_t<V>>),
+				              "std::optional<enum> and std::optional<underlying_type> must have the same layout");
 				return reinterpret_cast<const std::optional<std::underlying_type_t<V>>*>(&value);
 			}
 			else
@@ -196,6 +200,8 @@ private:
 		}
 		else if constexpr (std::is_enum_v<T>)
 		{
+			static_assert(sizeof(T) == sizeof(std::underlying_type_t<T>) && alignof(T) == alignof(std::underlying_type_t<T>),
+			              "enum and its underlying type must have the same layout");
 			return reinterpret_cast<const std::underlying_type_t<T>*>(&value);
 		}
 		else

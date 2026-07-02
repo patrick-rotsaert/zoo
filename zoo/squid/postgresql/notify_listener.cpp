@@ -5,4 +5,84 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "notify_listener.ipp"
+#include "zoo/squid/postgresql/notify_listener.h"
+#include "zoo/squid/postgresql/backendconnection.h"
+#include "zoo/squid/postgresql/error.h"
+
+#include "zoo/common/misc/throw_exception.h"
+
+#include <boost/asio/post.hpp>
+
+#include <libpq-fe.h>
+
+namespace zoo {
+namespace squid {
+namespace postgresql {
+
+void notify_listener::on_wait(const boost::system::error_code& ec)
+{
+	if (!ec)
+	{
+		auto conn = this->native_conn_.get();
+		PQconsumeInput(conn);
+		while (auto notify = PQnotifies(conn))
+		{
+			auto channel = std::string{ notify->relname };
+			auto pid     = notify->be_pid;
+			PQfreemem(notify);
+			boost::asio::post(this->stream_.get_executor(),
+			                  [channel = std::move(channel), pid, self = this->shared_from_this()]() { self->callback_(channel, pid); });
+			PQconsumeInput(conn);
+		}
+		this->async_wait();
+	}
+}
+
+void notify_listener::async_wait()
+{
+	this->stream_.async_wait(stream_descriptor::wait_read,
+	                         std::bind(&notify_listener::on_wait, this->shared_from_this(), std::placeholders::_1));
+}
+
+notify_listener::notify_listener(boost::asio::io_context& ioc,
+                                 connection&&             connection,
+                                 const std::string&       channel,
+                                 callback_type&&          callback)
+    : stream_{ ioc }
+    , connection_{ std::move(connection) }
+    , callback_{ std::move(callback) }
+    , native_conn_{ connection_.backend().native_connection() }
+{
+	this->connection_.execute("LISTEN " + channel);
+
+	auto sock = PQsocket(this->native_conn_.get());
+	if (sock < 0)
+	{
+		ZOO_THROW_EXCEPTION(error{ std::string{ "PQsocket failed: " } + PQerrorMessage(this->native_conn_.get()) });
+	}
+
+	this->stream_.assign(sock);
+}
+
+notify_listener::~notify_listener()
+{
+	// The socket fd is owned by the PGconn (it is closed by PQfinish when the last shared_ptr to it
+	// is released). Release it from the stream_descriptor so it is not closed a second time when
+	// stream_ is destroyed. release() may throw, so swallow any error in this destructor.
+	try
+	{
+		this->stream_.release();
+	}
+	catch (...)
+	{
+	}
+}
+
+void notify_listener::run()
+{
+	this->async_wait();
+}
+
+} // namespace postgresql
+} // namespace squid
+} // namespace zoo

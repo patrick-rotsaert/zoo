@@ -27,7 +27,19 @@ sqlite3* connect_database(isqlite_api& api, std::string_view connection_info)
 	auto     err = api.open(std::string{ connection_info }.c_str(), &handle);
 	if (SQLITE_OK != err)
 	{
-		ZOO_THROW_EXCEPTION(error{ api, "sqlite3_open failed", err });
+		// sqlite3_open() allocates a connection handle even when it fails, so it must be closed to
+		// avoid leaking it. Capture the (more descriptive) message from the handle before closing.
+		std::string message = "sqlite3_open failed: ";
+		if (handle)
+		{
+			message += api.errmsg(handle);
+			api.close(handle);
+		}
+		else
+		{
+			message += api.errstr(err);
+		}
+		ZOO_THROW_EXCEPTION(error{ message });
 	}
 	else if (!handle)
 	{

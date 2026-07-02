@@ -52,6 +52,7 @@ public:
 	MOCK_METHOD(int, finalize, (sqlite3_stmt * pStmt), (override));
 	MOCK_METHOD(int, step, (sqlite3_stmt * pStmt), (override));
 	MOCK_METHOD(int, reset, (sqlite3_stmt * pStmt), (override));
+	MOCK_METHOD(int, clear_bindings, (sqlite3_stmt * pStmt), (override));
 
 	MOCK_METHOD(int, bind_parameter_index, (sqlite3_stmt * pStmt, const char* zName), (override));
 	MOCK_METHOD(int, bind_null, (sqlite3_stmt * pStmt, int index), (override));

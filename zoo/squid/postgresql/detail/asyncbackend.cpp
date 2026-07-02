@@ -207,7 +207,7 @@ protected:
 				return this->wait_read();
 			}
 
-			std::shared_ptr<PGresult> result{ this->api_->getResult(conn), [this](PGresult* res) { this->api_->clear(res); } };
+			std::shared_ptr<PGresult> result{ this->api_->getResult(conn), [api = this->api_](PGresult* res) { api->clear(res); } };
 			if (result)
 			{
 				if (!this->multi_result_possible_)
@@ -251,10 +251,10 @@ protected:
 	{
 		if (!this->waiting_read)
 		{
+			this->waiting_read = true;
 			this->stream_.async_wait(
 			    boost::asio::posix::stream_descriptor::wait_read,
 			    boost::asio::bind_executor(this->strand_, std::bind(&async_operation::on_read_ready, this->self(), std::placeholders::_1)));
-			this->waiting_read = true;
 		}
 	}
 
@@ -262,10 +262,10 @@ protected:
 	{
 		if (!this->waiting_write)
 		{
-			this->stream_.async_wait(
-			    boost::asio::posix::stream_descriptor::wait_write,
-			    boost::asio::bind_executor(this->strand_, std::bind(&async_operation::on_write_ready, this->self(), std::placeholders::_1)));
 			this->waiting_write = true;
+			this->stream_.async_wait(boost::asio::posix::stream_descriptor::wait_write,
+			                         boost::asio::bind_executor(
+			                             this->strand_, std::bind(&async_operation::on_write_ready, this->self(), std::placeholders::_1)));
 		}
 	}
 

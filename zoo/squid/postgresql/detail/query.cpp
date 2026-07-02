@@ -16,9 +16,14 @@ namespace postgresql {
 
 namespace {
 
+inline bool is_name_start_char(char c)
+{
+	return std::isalpha(static_cast<unsigned char>(c)) || c == '_';
+}
+
 inline bool is_name_char(char c)
 {
-	return std::isalpha(c) || c == '_';
+	return std::isalnum(static_cast<unsigned char>(c)) || c == '_';
 }
 } // namespace
 
@@ -75,7 +80,7 @@ postgresql_query::postgresql_query(std::string_view query)
 				auto next = it + 1;
 				if (next != end)
 				{
-					if (is_name_char(*next))
+					if (is_name_start_char(*next))
 					{
 						name_begin = next;
 						state      = in_name;

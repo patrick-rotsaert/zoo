@@ -48,9 +48,25 @@ TEST(BackendConnectionTests, TestOpenReturnsError)
 {
 	auto api = sqlite_api_mock_nice{};
 
+	// open() fails without allocating a handle: no close, message built from errstr(code).
 	EXPECT_CALL(api, open(testing::StrEq(g_connection_info), testing::NotNull())).WillOnce(testing::Return(SQLITE_ERROR));
+	EXPECT_CALL(api, errstr(SQLITE_ERROR)).WillOnce(testing::Return("mock error"));
 
 	EXPECT_CALL(api, close(sqlite_api_mock::test_connection)).Times(0);
+
+	EXPECT_ANY_THROW((backend_connection{ api, g_connection_info }));
+}
+
+TEST(BackendConnectionTests, TestOpenFailureClosesAllocatedHandle)
+{
+	auto api = sqlite_api_mock_nice{};
+
+	// sqlite3_open() can allocate a connection handle even when it returns an error; that handle
+	// must be closed to avoid a leak, and the message is taken from errmsg(handle).
+	EXPECT_CALL(api, open(testing::StrEq(g_connection_info), testing::NotNull()))
+	    .WillOnce(testing::DoAll(&set_connection_handle, testing::Return(SQLITE_ERROR)));
+	EXPECT_CALL(api, errmsg(sqlite_api_mock::test_connection)).WillOnce(testing::Return("mock error"));
+	EXPECT_CALL(api, close(sqlite_api_mock::test_connection)).Times(1);
 
 	EXPECT_ANY_THROW((backend_connection{ api, g_connection_info }));
 }

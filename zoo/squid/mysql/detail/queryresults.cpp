@@ -179,6 +179,15 @@ class query_results::column final
 
 	void post_verify_length(size_t length)
 	{
+		// For fixed-size numeric columns libmysqlclient signals an out-of-range/overflow value
+		// (one that does not fit the bound C type) via the per-column error indicator rather than
+		// via length, so a plain length check would silently accept a truncated/clipped value.
+		if (this->bind_->error_value)
+		{
+			std::ostringstream msg;
+			msg << "The value of column " << std::quoted(this->name_) << " was truncated when fetched into the bound type";
+			ZOO_THROW_EXCEPTION(error{ msg.str() });
+		}
 		if (this->bind_->length_value != length)
 		{
 			std::ostringstream msg;

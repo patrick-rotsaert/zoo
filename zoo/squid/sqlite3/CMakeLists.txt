@@ -27,6 +27,9 @@ add_zoo_library(squid_sqlite
 		test/unit/test_backendconnection.cpp
 		test/unit/test_backendconnectionfactory.cpp
 		test/unit/test_connection.cpp
+		test/unit/test_nullhandling.cpp
+		test/unit/test_bindresults.cpp
+		test/unit/test_querystreaming.cpp
 		detail/test/unit/test_queryparameters.cpp
 		detail/test/unit/test_queryresults.cpp
 	MOCK_SOURCES
