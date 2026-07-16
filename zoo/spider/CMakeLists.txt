@@ -114,7 +114,6 @@ add_zoo_library(spider
 		test/unit/test_http_session_pipelining.cpp
 	PUBLIC_LIBRARIES
 		zoo::zoocommon
-		Boost::system
 		Boost::url
 		Boost::filesystem
 		Boost::json
