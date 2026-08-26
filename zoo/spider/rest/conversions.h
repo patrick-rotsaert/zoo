@@ -20,12 +20,29 @@
 #include <fmt/format.h>
 
 #include <string>
+#include <string_view>
 #include <optional>
 #include <concepts>
 #include <stdexcept>
 
 namespace zoo {
 namespace spider {
+
+///
+/// Customisation point for converting a string parameter into a type this library does not know.
+///
+/// A type `T` opts in by providing, in a namespace that argument dependent lookup reaches from `T`,
+///
+///   T tag_invoke(const zoo::spider::from_string_view_tag<T>&, std::string_view in);
+///
+/// The overload is expected to throw when `in` does not spell a valid `T`; the REST handler turns
+/// that into a bad request. Without it, `T` cannot serve as a path, query or header parameter, and
+/// registering an operation that asks for one is rejected.
+///
+template<typename T>
+struct from_string_view_tag final
+{
+};
 
 class ZOO_SPIDER_API conversions final
 {
@@ -76,6 +93,15 @@ public:
 	static boost::optional<T> from_string_view(std::string_view in, const boost::optional<T>* const)
 	{
 		return boost::make_optional(from_string_view(in, static_cast<T*>(0)));
+	}
+
+	template<typename T>
+	    requires requires(std::string_view in) {
+		    { tag_invoke(from_string_view_tag<T>{}, in) } -> std::same_as<T>;
+	    }
+	static T from_string_view(std::string_view in, const T* const)
+	{
+		return tag_invoke(from_string_view_tag<T>{}, in);
 	}
 };
 

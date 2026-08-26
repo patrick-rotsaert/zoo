@@ -112,7 +112,7 @@ private:
 			    using P = std::decay_t<decltype(p)>;
 			    if constexpr (std::is_same_v<P, p::path> || std::is_same_v<P, p::query> || std::is_same_v<P, p::header>)
 			    {
-				    ok = true;
+				    ok = ConvertibleFromStringView<T>;
 			    }
 			    else if constexpr (std::is_same_v<P, p::auth>)
 			    {
@@ -231,7 +231,16 @@ private:
 			    {
 				    return boost::posix_time::microsec_clock::universal_time();
 			    }
-			    return T{};
+			    else
+			    {
+				    // Unreachable: validate_descriptor rejects an incompatible descriptor/argument pair when the
+				    // operation is registered. Throwing rather than returning a default-constructed value keeps a
+				    // mismatch that slips through from silently reaching the operation as a zero-initialised
+				    // argument, which reads as a valid-but-absent record instead of an error.
+				    ZOO_THROW_EXCEPTION(std::logic_error{ fmt::format("Descriptor type `{}` is incompatible with argument type `{}`",
+				                                                      demangled_type_name(param),
+				                                                      demangled_type_name<T>()) });
+			    }
 		    },
 		    descriptor);
 	}
