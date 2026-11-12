@@ -7,7 +7,10 @@
 
 #include <gtest/gtest.h>
 #include <zoo/common/conversion/conversion.h>
+#include <boost/date_time/gregorian/greg_date.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <cmath>
+#include <stdexcept>
 
 namespace zoo {
 namespace conversion {
@@ -314,6 +317,21 @@ TEST(ConversionsTest, TimeOfDayToString)
 	EXPECT_EQ(time_of_day_to_string(make_time_of_day_micro(3, 4, 5.12345)), "03:04:05.123450");
 	EXPECT_EQ(time_of_day_to_string(make_time_of_day_micro(3, 4, 5.123456)), "03:04:05.123456");
 	EXPECT_EQ(time_of_day_to_string(make_time_of_day_micro(3, 4, 5.1234567)), "03:04:05.123457");
+}
+
+TEST(ConversionsTest, BoostPtimeToTimePoint)
+{
+	const auto ptime2200 = boost::posix_time::ptime{ boost::gregorian::date{ 2200, 1, 1 }, boost::posix_time::time_duration{ 3, 4, 5 } };
+	EXPECT_EQ(boost_ptime_to_timepoint(ptime2200), make_time_point(2200, 1, 1, 3, 4, 5));
+
+	const auto ptime4138 = boost::posix_time::ptime{ boost::gregorian::date{ 4138, 1, 1 }, boost::posix_time::time_duration{ 0, 0, 0 } };
+	EXPECT_THROW(boost_ptime_to_timepoint(ptime4138), std::out_of_range);
+}
+
+TEST(ConversionsTest, StringToTimePointOutsideSystemClockRange)
+{
+	EXPECT_EQ(string_to_time_point("2200-01-01T03:04:05Z"), make_time_point(2200, 1, 1, 3, 4, 5));
+	EXPECT_THROW(string_to_time_point("4138-01-01T00:00:00Z"), std::out_of_range);
 }
 
 // TODO: test boost variants
