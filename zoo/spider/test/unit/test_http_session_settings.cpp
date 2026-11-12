@@ -19,6 +19,7 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/ip/address.hpp>
+#include <boost/asio/write.hpp>
 #include <boost/beast/core/error.hpp>
 #include <boost/beast/core/flat_buffer.hpp>
 #include <boost/beast/http.hpp>
@@ -88,6 +89,42 @@ post_result run_post(const http_session_settings& settings, std::size_t body_siz
 	http::write(client, req, wec);
 
 	post_result        r;
+	beast::flat_buffer buffer;
+	http::read(client, buffer, r.res, r.ec);
+
+	auto ic = beast::error_code{};
+	client.shutdown(tcp::socket::shutdown_both, ic);
+	server_ioc.stop();
+	server_thread.join();
+
+	return r;
+}
+
+// Runs a single http_session with default settings, sends `bytes` as they are, and returns the response (or the read error).
+post_result run_raw(std::string_view bytes)
+{
+	net::io_context server_ioc;
+	tcp::acceptor   acceptor{ server_ioc, tcp::endpoint{ tcp::v4(), 0 } };
+	const auto      port    = acceptor.local_endpoint().port();
+	auto            handler = std::make_shared<echo_size_handler>();
+
+	acceptor.async_accept([handler](beast::error_code ec, tcp::socket socket) {
+		if (!ec)
+		{
+			http_session::run(std::move(socket), handler, http_session_settings{});
+		}
+	});
+
+	std::thread server_thread{ [&server_ioc]() { server_ioc.run(); } };
+
+	net::io_context client_ioc;
+	tcp::socket     client{ client_ioc };
+	client.connect(tcp::endpoint{ net::ip::make_address("127.0.0.1"), port });
+
+	auto wec = beast::error_code{};
+	net::write(client, net::buffer(bytes), wec);
+
+	auto               r = post_result{ {}, {} };
 	beast::flat_buffer buffer;
 	http::read(client, buffer, r.res, r.ec);
 
@@ -177,11 +214,44 @@ slow_read_result run_slow_reader(const http_session_settings& settings, std::chr
 
 } // namespace
 
-// The default body limit (10 KB) rejects a larger body.
+// The default body limit (10 KB) rejects a larger body with 413 and closes the connection.
 TEST(HttpSessionSettings, DefaultBodyLimitRejectsLargeBody)
 {
 	const auto r = run_post(http_session_settings{}, 50u * 1024u);
-	EXPECT_TRUE(r.ec || r.res.result() != http::status::ok);
+
+	ASSERT_FALSE(r.ec) << r.ec.message();
+	EXPECT_EQ(r.res.result(), http::status::payload_too_large);
+	EXPECT_FALSE(r.res.keep_alive());
+}
+
+// A header beyond the default header limit (16 KB) is answered with 431.
+TEST(HttpSessionSettings, DefaultHeaderLimitRejectsLargeHeader)
+{
+	const auto r = run_raw("GET / HTTP/1.1\r\nHost: test\r\nX-Big: " + std::string(20u * 1024u, 'x') + "\r\n\r\n");
+
+	ASSERT_FALSE(r.ec) << r.ec.message();
+	EXPECT_EQ(r.res.result(), http::status::request_header_fields_too_large);
+	EXPECT_FALSE(r.res.keep_alive());
+}
+
+// Bytes that are not HTTP (here the start of a TLS handshake) are answered with 400.
+TEST(HttpSessionSettings, NonHttpBytesGetBadRequest)
+{
+	const auto r = run_raw(std::string_view{ "\x16\x03\x01\x02\x00\x01\x00\x01\xfc\x03\x03", 11u });
+
+	ASSERT_FALSE(r.ec) << r.ec.message();
+	EXPECT_EQ(r.res.result(), http::status::bad_request);
+	EXPECT_FALSE(r.res.keep_alive());
+}
+
+// A request with two different Content-Length headers is answered with 400.
+TEST(HttpSessionSettings, ConflictingContentLengthGetsBadRequest)
+{
+	const auto r = run_raw("POST / HTTP/1.1\r\nHost: test\r\nContent-Length: 1\r\nContent-Length: 2\r\n\r\nxx");
+
+	ASSERT_FALSE(r.ec) << r.ec.message();
+	EXPECT_EQ(r.res.result(), http::status::bad_request);
+	EXPECT_FALSE(r.res.keep_alive());
 }
 
 // Raising the body limit allows the larger body through.

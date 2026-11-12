@@ -44,6 +44,12 @@ tcp::socket::endpoint_type safe_remote_endpoint(const tcp::socket& socket)
 	return socket.remote_endpoint(ec);
 }
 
+// Beast has no public accessor for its HTTP error category; any of its codes yields it.
+bool is_http_parse_error(const beast::error_code& ec)
+{
+	return ec.category() == http::make_error_code(http::error::bad_method).category();
+}
+
 } // namespace
 
 // Handles an HTTP server connection
@@ -64,7 +70,7 @@ class http_session_impl final : public std::enable_shared_from_this<http_session
 	// What the request handler authenticated from the header of the request being read, passed on with its body.
 	std::optional<auth_map> preverified_;
 
-	// Set once a request was refused on its header: its body is never read, so nothing after it can be parsed.
+	// Set once a request was refused on its header or could not be parsed: nothing after it can be parsed.
 	bool stop_reading_;
 
 public:
@@ -111,7 +117,8 @@ private:
 		this->parser_.emplace();
 		this->preverified_.reset();
 
-		// Apply the configured limit to the allowed size of the body in bytes to prevent abuse.
+		// Apply the configured limits to the allowed size of the header and the body in bytes to prevent abuse.
+		this->parser_->header_limit(this->settings_.header_limit);
 		this->parser_->body_limit(this->settings_.body_limit);
 
 		// Set the timeout.
@@ -133,6 +140,11 @@ private:
 		{
 			ZOO_LOG(debug, "read header: {}", ec.message());
 			return this->do_close();
+		}
+
+		if (this->answer_parse_error(ec))
+		{
+			return;
 		}
 
 		if (ec)
@@ -184,6 +196,11 @@ private:
 			return this->do_close();
 		}
 
+		if (this->answer_parse_error(ec))
+		{
+			return;
+		}
+
 		if (ec)
 		{
 			return fail(ec, "read");
@@ -227,6 +244,29 @@ private:
 		{
 			this->do_read();
 		}
+	}
+
+	// Answers a request that Beast could not parse (non-HTTP bytes included) with a status, and closes the connection once it is
+	// written: nothing after the bad bytes can be parsed. Returns false when ec is not a parse error.
+	bool answer_parse_error(beast::error_code ec)
+	{
+		if (!is_http_parse_error(ec))
+		{
+			return false;
+		}
+
+		ZOO_LOG(debug, "read: {} ({})", ec.message(), ec);
+
+		const auto status = ec == http::error::header_limit ? http::status::request_header_fields_too_large
+		                    : ec == http::error::body_limit ? http::status::payload_too_large
+		                                                    : http::status::bad_request;
+
+		// No complete request to answer: the response is built from the status alone.
+		auto response = response_wrapper{ error_response_factory::create(status) };
+		response.keep_alive(false);
+		this->stop_reading_ = true;
+		this->queue_write(std::move(response));
+		return true;
 	}
 
 	void queue_write(message_generator&& response)
