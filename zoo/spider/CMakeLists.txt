@@ -112,6 +112,7 @@ add_zoo_library(spider
 		test/unit/messages/test_content_container.cpp
 		test/unit/tag_invoke/test_byte_string.cpp
 		test/unit/test_http_session_pipelining.cpp
+		test/unit/test_http_session_early_reject.cpp
 	PUBLIC_LIBRARIES
 		zoo::zoocommon
 		Boost::url

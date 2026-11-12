@@ -8,6 +8,8 @@
 #include "zoo/spider/http_session.h"
 #include "zoo/spider/irequest_handler.h"
 #include "zoo/spider/messages/error_response.h"
+#include "zoo/spider/messages/response_wrapper.hpp"
+#include "zoo/spider/rest/auth.h"
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/formatters.hpp"
 
@@ -17,6 +19,9 @@
 #include <boost/asio/dispatch.hpp>
 #include <boost/optional/optional.hpp>
 
+#include <exception>
+#include <optional>
+#include <utility>
 #include <vector>
 
 namespace zoo {
@@ -56,6 +61,12 @@ class http_session_impl final : public std::enable_shared_from_this<http_session
 	// construct it from scratch it at the beginning of each new message.
 	boost::optional<http::request_parser<http::string_body>> parser_;
 
+	// What the request handler authenticated from the header of the request being read, passed on with its body.
+	std::optional<auth_map> preverified_;
+
+	// Set once a request was refused on its header: its body is never read, so nothing after it can be parsed.
+	bool stop_reading_;
+
 public:
 	// Take ownership of the socket
 	http_session_impl(tcp::socket&& socket, const std::shared_ptr<irequest_handler>& request_handler, const http_session_settings& settings)
@@ -67,6 +78,8 @@ public:
 	    , buffer_{}
 	    , response_queue_{}
 	    , parser_{}
+	    , preverified_{}
+	    , stop_reading_{ false }
 	{
 		this->response_queue_.reserve(queue_limit);
 	}
@@ -89,8 +102,14 @@ public:
 private:
 	void do_read()
 	{
+		if (this->stop_reading_)
+		{
+			return;
+		}
+
 		// Construct a new parser for each message
 		this->parser_.emplace();
+		this->preverified_.reset();
 
 		// Apply the configured limit to the allowed size of the body in bytes to prevent abuse.
 		this->parser_->body_limit(this->settings_.body_limit);
@@ -98,7 +117,58 @@ private:
 		// Set the timeout.
 		this->stream_.expires_after(this->settings_.timeout);
 
-		// Read a request using the parser-oriented interface
+		// Read the header first, so the request handler can refuse the request before its body is read.
+		http::async_read_header(this->stream_,
+		                        this->buffer_,
+		                        *this->parser_,
+		                        beast::bind_front_handler(&http_session_impl::on_read_header, this->shared_from_this()));
+	}
+
+	void on_read_header(beast::error_code ec, std::size_t bytes_transferred)
+	{
+		boost::ignore_unused(bytes_transferred);
+
+		// Client closed the connection or read timed out
+		if (ec == http::error::end_of_stream || ec == beast::error::timeout)
+		{
+			ZOO_LOG(debug, "read header: {}", ec.message());
+			return this->do_close();
+		}
+
+		if (ec)
+		{
+			return fail(ec, "read header");
+		}
+
+		// Same as in on_read(): no handler exception may escape into io_context::run().
+		auto refused = [&]() -> std::optional<response_wrapper> {
+			try
+			{
+				return this->request_handler_->handle_request_header(this->parser_->get().base(), this->preverified_);
+			}
+			catch (const std::exception& e)
+			{
+				ZOO_LOG(err, "Unhandled exception in request header handler: {}", e.what());
+				return response_wrapper{ internal_server_error::create() };
+			}
+			catch (...)
+			{
+				ZOO_LOG(err, "Unhandled exception in request header handler");
+				return response_wrapper{ internal_server_error::create() };
+			}
+		}();
+
+		if (refused.has_value())
+		{
+			// The unread body is still on the wire, so the connection cannot be reused: the write loop closes it once the
+			// response is sent (see on_write).
+			this->stop_reading_ = true;
+			refused->keep_alive(false);
+			this->queue_write(std::move(refused.value()));
+			return;
+		}
+
+		// Continue with the body, on the same parser.
 		http::async_read(
 		    this->stream_, this->buffer_, *this->parser_, beast::bind_front_handler(&http_session_impl::on_read, this->shared_from_this()));
 	}
@@ -136,7 +206,7 @@ private:
 		response_wrapper response = [&]() -> response_wrapper {
 			try
 			{
-				return this->request_handler_->handle_request(this->parser_->release());
+				return this->request_handler_->handle_request(this->parser_->release(), std::move(this->preverified_));
 			}
 			catch (const std::exception& e)
 			{
