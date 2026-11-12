@@ -9,9 +9,16 @@ include_guard(GLOBAL)
 
 include(${PROJECT_SOURCE_DIR}/cmake/options.cmake)
 
-if(ZOO_TEST)
+# If this project is included as a subdirectory, the GTest targets may already be defined.
+if(ZOO_TEST AND NOT TARGET GTest::gtest)
 	# libgtest-dev
 	find_package(GTest CONFIG REQUIRED)
+endif()
+
+# A GTest bundle with gmock compiled into gtest may provide no GTest::gmock_main.
+if(ZOO_TEST AND NOT TARGET GTest::gmock_main)
+	add_library(GTest::gmock_main INTERFACE IMPORTED)
+	set_target_properties(GTest::gmock_main PROPERTIES INTERFACE_LINK_LIBRARIES GTest::gtest_main)
 endif()
 
 if(ZOO_TEST AND ZOO_RUN_UNIT_TESTS_ON_BUILD)

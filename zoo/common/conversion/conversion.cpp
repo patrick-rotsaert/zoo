@@ -23,6 +23,8 @@
 #include <regex>
 #include <cmath>
 #include <cassert>
+#include <chrono>
+#include <stdexcept>
 
 #if defined(_MSC_VER)
 #pragma warning(disable : 4456)
@@ -163,6 +165,14 @@ parsed_time_of_day parse_time_of_day(std::string_view in)
 	return out;
 }
 
+// The sub-second part is added after the whole seconds, so whole seconds equal to the limit already overflow.
+bool fits_in_system_clock(std::chrono::seconds timeSinceEpoch)
+{
+	constexpr auto maxSeconds = std::chrono::duration_cast<std::chrono::seconds>(time_point::duration::max());
+	constexpr auto minSeconds = std::chrono::duration_cast<std::chrono::seconds>(time_point::duration::min());
+	return timeSinceEpoch > minSeconds && timeSinceEpoch < maxSeconds;
+}
+
 } // namespace
 
 void string_to_time_point(std::string_view in, time_point& out)
@@ -174,17 +184,20 @@ void string_to_time_point(std::string_view in, time_point& out)
 
 	const auto parsed = parse_time_point(in);
 
-	out = std::chrono::sys_days{ std::chrono::year{ parsed.year } / std::chrono::month{ parsed.month } / parsed.day } +
-	      std::chrono::hours{ parsed.hours } + std::chrono::minutes{ parsed.minutes } + std::chrono::seconds{ parsed.seconds };
+	// Computed in whole seconds, which cannot overflow, so that the range is checked before converting to the clock's resolution.
+	const auto utcTime = std::chrono::sys_days{ std::chrono::year{ parsed.year } / std::chrono::month{ parsed.month } / parsed.day } +
+	                     std::chrono::hours{ parsed.hours } + std::chrono::minutes{ parsed.minutes } +
+	                     std::chrono::seconds{ parsed.seconds } - std::chrono::minutes{ parsed.utc_offset_minutes.value_or(0) };
+	if (!fits_in_system_clock(utcTime.time_since_epoch()))
+	{
+		ZOO_THROW_EXCEPTION(std::out_of_range{ fmt::format("time point {} is outside the range of system_clock", in) });
+	}
+
+	out = utcTime;
 
 	if (parsed.fracseconds)
 	{
 		out += std::chrono::microseconds{ static_cast<uint32_t>(parsed.fracseconds.value() * 1e6 + .5) };
-	}
-
-	if (parsed.utc_offset_minutes)
-	{
-		out -= std::chrono::minutes{ parsed.utc_offset_minutes.value() };
 	}
 }
 
@@ -412,9 +425,14 @@ std::string boost_ptime_to_sql(const boost::posix_time::ptime& in)
 void boost_ptime_to_timepoint(const boost::posix_time::ptime& in, time_point& out)
 {
 	const auto timeSinceEpoch = in - boost::posix_time::from_time_t(0);
-	const auto t              = std::chrono::system_clock::from_time_t(timeSinceEpoch.total_seconds());
-	const auto nsec           = timeSinceEpoch.fractional_seconds() * (1000000000 / timeSinceEpoch.ticks_per_second());
-	out                       = t + std::chrono::nanoseconds(nsec);
+	if (!fits_in_system_clock(std::chrono::seconds{ timeSinceEpoch.total_seconds() }))
+	{
+		ZOO_THROW_EXCEPTION(std::out_of_range{
+		    fmt::format("ptime {} is outside the range of system_clock", boost::posix_time::to_iso_extended_string(in)) });
+	}
+	const auto t    = std::chrono::system_clock::from_time_t(timeSinceEpoch.total_seconds());
+	const auto nsec = timeSinceEpoch.fractional_seconds() * (1000000000 / timeSinceEpoch.ticks_per_second());
+	out             = t + std::chrono::nanoseconds(nsec);
 }
 
 time_point boost_ptime_to_timepoint(const boost::posix_time::ptime& in)

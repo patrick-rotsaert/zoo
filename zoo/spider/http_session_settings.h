@@ -20,6 +20,9 @@ struct http_session_settings
 	// Maximum size of a request body, in bytes. Requests with a larger body are rejected.
 	std::uint64_t body_limit = 10000;
 
+	// Maximum size of a request header (start line and fields), in bytes. Requests with a larger header are answered with 431.
+	std::uint32_t header_limit = 16384;
+
 	// Per-request inactivity timeout.
 	std::chrono::steady_clock::duration timeout = std::chrono::seconds{ 30 };
 

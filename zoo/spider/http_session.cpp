@@ -8,6 +8,8 @@
 #include "zoo/spider/http_session.h"
 #include "zoo/spider/irequest_handler.h"
 #include "zoo/spider/messages/error_response.h"
+#include "zoo/spider/messages/response_wrapper.hpp"
+#include "zoo/spider/rest/auth.h"
 #include "zoo/common/logging/logging.h"
 #include "zoo/common/misc/formatters.hpp"
 
@@ -16,7 +18,12 @@
 #include <boost/beast/http/message_generator.hpp>
 #include <boost/asio/dispatch.hpp>
 #include <boost/optional/optional.hpp>
+#include <fmt/format.h>
 
+#include <chrono>
+#include <exception>
+#include <optional>
+#include <utility>
 #include <vector>
 
 namespace zoo {
@@ -39,6 +46,12 @@ tcp::socket::endpoint_type safe_remote_endpoint(const tcp::socket& socket)
 	return socket.remote_endpoint(ec);
 }
 
+// Beast has no public accessor for its HTTP error category; any of its codes yields it.
+bool is_http_parse_error(const beast::error_code& ec)
+{
+	return ec.category() == http::make_error_code(http::error::bad_method).category();
+}
+
 } // namespace
 
 // Handles an HTTP server connection
@@ -56,6 +69,12 @@ class http_session_impl final : public std::enable_shared_from_this<http_session
 	// construct it from scratch it at the beginning of each new message.
 	boost::optional<http::request_parser<http::string_body>> parser_;
 
+	// What the request handler authenticated from the header of the request being read, passed on with its body.
+	std::optional<auth_map> preverified_;
+
+	// Set once a request was refused on its header or could not be parsed: nothing after it can be parsed.
+	bool stop_reading_;
+
 public:
 	// Take ownership of the socket
 	http_session_impl(tcp::socket&& socket, const std::shared_ptr<irequest_handler>& request_handler, const http_session_settings& settings)
@@ -67,6 +86,8 @@ public:
 	    , buffer_{}
 	    , response_queue_{}
 	    , parser_{}
+	    , preverified_{}
+	    , stop_reading_{ false }
 	{
 		this->response_queue_.reserve(queue_limit);
 	}
@@ -89,16 +110,79 @@ public:
 private:
 	void do_read()
 	{
+		if (this->stop_reading_)
+		{
+			return;
+		}
+
 		// Construct a new parser for each message
 		this->parser_.emplace();
+		this->preverified_.reset();
 
-		// Apply the configured limit to the allowed size of the body in bytes to prevent abuse.
+		// Apply the configured limits to the allowed size of the header and the body in bytes to prevent abuse.
+		this->parser_->header_limit(this->settings_.header_limit);
 		this->parser_->body_limit(this->settings_.body_limit);
 
 		// Set the timeout.
 		this->stream_.expires_after(this->settings_.timeout);
 
-		// Read a request using the parser-oriented interface
+		// Read the header first, so the request handler can refuse the request before its body is read.
+		http::async_read_header(this->stream_,
+		                        this->buffer_,
+		                        *this->parser_,
+		                        beast::bind_front_handler(&http_session_impl::on_read_header, this->shared_from_this()));
+	}
+
+	void on_read_header(beast::error_code ec, std::size_t bytes_transferred)
+	{
+		boost::ignore_unused(bytes_transferred);
+
+		// Client closed the connection or read timed out
+		if (ec == http::error::end_of_stream || ec == beast::error::timeout)
+		{
+			ZOO_LOG(debug, "read header: {}", ec.message());
+			return this->do_close();
+		}
+
+		if (this->answer_parse_error(ec))
+		{
+			return;
+		}
+
+		if (ec)
+		{
+			return fail(ec, "read header");
+		}
+
+		// Same as in on_read(): no handler exception may escape into io_context::run().
+		auto refused = [&]() -> std::optional<response_wrapper> {
+			try
+			{
+				return this->request_handler_->handle_request_header(this->parser_->get().base(), this->preverified_);
+			}
+			catch (const std::exception& e)
+			{
+				ZOO_LOG(err, "Unhandled exception in request header handler: {}", e.what());
+				return response_wrapper{ internal_server_error::create() };
+			}
+			catch (...)
+			{
+				ZOO_LOG(err, "Unhandled exception in request header handler");
+				return response_wrapper{ internal_server_error::create() };
+			}
+		}();
+
+		if (refused.has_value())
+		{
+			// The unread body is still on the wire, so the connection cannot be reused: the write loop closes it once the
+			// response is sent (see on_write).
+			this->stop_reading_ = true;
+			refused->keep_alive(false);
+			this->queue_write(std::move(refused.value()));
+			return;
+		}
+
+		// Continue with the body, on the same parser.
 		http::async_read(
 		    this->stream_, this->buffer_, *this->parser_, beast::bind_front_handler(&http_session_impl::on_read, this->shared_from_this()));
 	}
@@ -112,6 +196,11 @@ private:
 		{
 			ZOO_LOG(debug, "read: {}", ec.message());
 			return this->do_close();
+		}
+
+		if (this->answer_parse_error(ec))
+		{
+			return;
 		}
 
 		if (ec)
@@ -136,7 +225,7 @@ private:
 		response_wrapper response = [&]() -> response_wrapper {
 			try
 			{
-				return this->request_handler_->handle_request(this->parser_->release());
+				return this->request_handler_->handle_request(this->parser_->release(), std::move(this->preverified_));
 			}
 			catch (const std::exception& e)
 			{
@@ -159,8 +248,38 @@ private:
 		}
 	}
 
-	void queue_write(message_generator&& response)
+	// Answers a request that Beast could not parse (non-HTTP bytes included) with a status, and closes the connection once it is
+	// written: nothing after the bad bytes can be parsed. Returns false when ec is not a parse error.
+	bool answer_parse_error(beast::error_code ec)
 	{
+		if (!is_http_parse_error(ec))
+		{
+			return false;
+		}
+
+		ZOO_LOG(debug, "read: {} ({})", ec.message(), ec);
+
+		const auto status = ec == http::error::header_limit ? http::status::request_header_fields_too_large
+		                    : ec == http::error::body_limit ? http::status::payload_too_large
+		                                                    : http::status::bad_request;
+
+		// No complete request to answer: the response is built from the status alone.
+		auto response = response_wrapper{ error_response_factory::create(status) };
+		response.keep_alive(false);
+		this->stop_reading_ = true;
+		this->queue_write(std::move(response));
+		return true;
+	}
+
+	void queue_write(response_wrapper&& response)
+	{
+		// Tells the client how long an idle connection is kept, so it does not reuse one the server is about to close.
+		if (response.keep_alive())
+		{
+			const auto seconds = std::chrono::duration_cast<std::chrono::seconds>(this->settings_.timeout).count();
+			response.set(http::field::keep_alive, fmt::format("timeout={}", seconds));
+		}
+
 		// Allocate and store the work
 		this->response_queue_.push_back(std::move(response));
 
@@ -182,6 +301,10 @@ private:
 		{
 			const auto keep_alive = this->response_queue_.front().keep_alive();
 
+			// Each write gets its own deadline: the one left from the read may have passed while the handler ran, and a client that
+			// does not take the response is cut off like one that does not send its request.
+			this->stream_.expires_after(this->settings_.timeout);
+
 			beast::async_write(this->stream_,
 			                   std::move(this->response_queue_.front()),
 			                   beast::bind_front_handler(&http_session_impl::on_write, this->shared_from_this(), keep_alive));
@@ -191,6 +314,13 @@ private:
 	void on_write(bool keep_alive, beast::error_code ec, std::size_t bytes_transferred)
 	{
 		boost::ignore_unused(bytes_transferred);
+
+		// Client did not take the response in time
+		if (ec == beast::error::timeout)
+		{
+			ZOO_LOG(debug, "write: {}", ec.message());
+			return this->do_close();
+		}
 
 		if (ec)
 		{

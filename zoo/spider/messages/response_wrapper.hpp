@@ -11,6 +11,7 @@
 #include "zoo/spider/messages/tracked_file.h"
 
 #include <boost/beast/http/empty_body.hpp>
+#include <boost/beast/http/field.hpp>
 #include <boost/beast/http/string_body.hpp>
 #include <boost/beast/http/file_body.hpp>
 #include <boost/beast/http/buffer_body.hpp>
@@ -19,6 +20,7 @@
 
 #include <variant>
 #include <cstdint>
+#include <string_view>
 
 namespace zoo {
 namespace spider {
@@ -45,9 +47,19 @@ public:
 		return std::visit([](auto&& arg) -> message_generator { return std::move(arg); }, this->value_);
 	}
 
+	bool keep_alive() const
+	{
+		return std::visit([](const auto& arg) { return arg.keep_alive(); }, this->value_);
+	}
+
 	void keep_alive(bool value)
 	{
 		std::visit([&](auto&& arg) { arg.keep_alive(value); }, this->value_);
+	}
+
+	void set(http::field name, std::string_view value)
+	{
+		std::visit([&](auto&& arg) { arg.set(name, value); }, this->value_);
 	}
 
 	void version(unsigned value)

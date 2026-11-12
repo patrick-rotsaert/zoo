@@ -12,6 +12,9 @@
 #include "zoo/spider/irequest_handler.h"
 #include "zoo/spider/exception.h"
 #include "zoo/spider/messages/json_response.h"
+#include "zoo/spider/messages/message.h"
+#include "zoo/spider/messages/response_wrapper.hpp"
+#include "zoo/spider/rest/auth.h"
 #include "zoo/spider/rest/concepts.hpp"
 #include "zoo/spider/rest/operation.h"
 #include "zoo/spider/rest/path.h"
@@ -27,8 +30,11 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <expected>
 #include <functional>
+#include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace zoo {
@@ -39,10 +45,18 @@ class rest_router final : public irequest_handler
 {
 	using request_handler = std::function<response_wrapper(request&& req, url_view&& url, path_spec::param_map&& param)>;
 
+	// Gets what the header phase authenticated, if anything (see handle_request_header).
+	using verified_request_handler =
+	    std::function<response_wrapper(request&& req, url_view&& url, path_spec::param_map&& param, std::optional<auth_map>&& preverified)>;
+
+	// Authenticates a request from its header alone; the request passed in has an empty body.
+	using security_verifier = std::function<std::expected<auth_map, response>(request& req, const url_view& url)>;
+
 	struct route final
 	{
-		rest_operation  op;
-		request_handler handler;
+		rest_operation           op;
+		verified_request_handler handler;
+		security_verifier        verifier;
 	};
 
 public:
@@ -57,6 +71,16 @@ public:
 
 	void add_route(rest_operation op, request_handler handler)
 	{
+		add_route(
+		    std::move(op),
+		    [handler = std::move(handler)](request&& req, url_view&& url, path_spec::param_map&& param, std::optional<auth_map>&&)
+		        -> response_wrapper { return handler(std::move(req), std::move(url), std::move(param)); },
+		    security_verifier{});
+	}
+
+	// A route with a verifier is authenticated on the request header, before the body is read.
+	void add_route(rest_operation op, verified_request_handler handler, security_verifier verifier)
+	{
 		// Keep routes ordered most-specific-first so that route_request can return on the first match.
 		// This ordering work happens only while routes are added (typically at startup), keeping the
 		// per-request path cheap. upper_bound + insert preserves registration order among routes of
@@ -64,11 +88,53 @@ public:
 		const auto pos = std::upper_bound(routes_.begin(), routes_.end(), op, [](const rest_operation& value, const route& r) {
 			return path_precedes(value.path, r.op.path);
 		});
-		routes_.emplace(pos, std::move(op), std::move(handler));
+		routes_.emplace(pos, std::move(op), std::move(handler), std::move(verifier));
 	}
 
 private:
+	std::optional<response_wrapper> handle_request_header(const http::request_header<>& header,
+	                                                      std::optional<auth_map>&      preverified) override
+	{
+		// A target that does not parse or match is answered after the body, as before.
+		auto url = boost::urls::parse_origin_form(header.target());
+		if (url.has_error())
+		{
+			return std::nullopt;
+		}
+
+		const auto p = make_path(url.value());
+
+		// The same route that route_request() will pick: the first one, in most-specific-first order, that matches.
+		for (const auto& route : routes_)
+		{
+			if (route.op.method == header.method() && route.op.path.match(p).has_value())
+			{
+				if (!route.verifier)
+				{
+					return std::nullopt;
+				}
+
+				auto req      = request{ header };
+				auto verified = route.verifier(req, url.value());
+				if (!verified.has_value())
+				{
+					return response_wrapper{ std::move(verified.error()) };
+				}
+
+				preverified = std::move(verified.value());
+				return std::nullopt;
+			}
+		}
+
+		return std::nullopt;
+	}
+
 	response_wrapper handle_request(request&& req) override
+	{
+		return handle_request(std::move(req), std::nullopt);
+	}
+
+	response_wrapper handle_request(request&& req, std::optional<auth_map>&& preverified) override
 	{
 		auto url = boost::urls::parse_origin_form(req.target());
 		if (url.has_error())
@@ -82,11 +148,17 @@ private:
 
 		auto& u = url.value();
 
-		// Build the request path from decoded per-segment strings. Using url.segments() (which decodes
-		// each segment individually) rather than url.path() (which decodes the whole path) keeps a
-		// percent-encoded slash (%2F) inside a single segment instead of splitting the path on it. The
-		// path owns the decoded strings, so its segments (and the param_map views into them) stay valid
-		// for the whole synchronous dispatch.
+		auto p = make_path(u);
+		return route_request(std::move(req), std::move(u), std::move(p), std::move(preverified));
+	}
+
+	// Build the request path from decoded per-segment strings. Using url.segments() (which decodes
+	// each segment individually) rather than url.path() (which decodes the whole path) keeps a
+	// percent-encoded slash (%2F) inside a single segment instead of splitting the path on it. The
+	// path owns the decoded strings, so its segments (and the param_map views into them) stay valid
+	// for the whole synchronous dispatch.
+	static path make_path(const url_view& u)
+	{
 		std::vector<std::string> segments;
 		for (auto seg : u.segments())
 		{
@@ -95,8 +167,7 @@ private:
 				segments.push_back(std::move(seg));
 			}
 		}
-
-		return route_request(std::move(req), std::move(u), path{ std::move(segments) });
+		return path{ std::move(segments) };
 	}
 
 	// Strict weak ordering used to keep routes_ sorted so the first match is the most specific one.
@@ -122,7 +193,7 @@ private:
 		return false;
 	}
 
-	response_wrapper route_request(request&& req, url_view&& url, path&& p)
+	response_wrapper route_request(request&& req, url_view&& url, path&& p, std::optional<auth_map>&& preverified)
 	{
 		// routes_ is kept most-specific-first by add_route, so the first matching route is the most
 		// specific one and we can return immediately on the first match.
@@ -135,7 +206,7 @@ private:
 				auto param_map = route.op.path.match(p);
 				if (param_map.has_value())
 				{
-					return route.handler(std::move(req), std::move(url), std::move(param_map.value()));
+					return route.handler(std::move(req), std::move(url), std::move(param_map.value()), std::move(preverified));
 				}
 			}
 			else if (route.op.path.match(p).has_value())

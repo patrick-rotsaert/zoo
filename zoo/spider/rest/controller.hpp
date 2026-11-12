@@ -23,7 +23,9 @@
 #include "zoo/spider/rest/router.hpp"
 #include "zoo/spider/rest/parameters.h"
 #include "zoo/spider/rest/security.h"
+#include "zoo/spider/rest/auth.h"
 #include "zoo/spider/messages/response_wrapper.hpp"
+#include "zoo/spider/messages/message.h"
 #include "zoo/spider/messages/json_response.h"
 #include "zoo/spider/messages/binary_response.h"
 #include "zoo/spider/messages/string_response.h"
@@ -43,6 +45,9 @@
 #include <map>
 #include <vector>
 #include <expected>
+#include <optional>
+#include <exception>
+#include <utility>
 
 namespace zoo {
 namespace spider {
@@ -94,12 +99,19 @@ protected:
 		// I would have preferred to use a unique_ptr, but then the handler would need to be
 		// move-captured, thus making the lambda non-copyable and std::function would fail to create.
 		auto   h       = std::make_shared<handler<Callback>>(this, callback, descriptors...);
-		auto&& handler = [sec = op.sec, method = op.method, handler = h, this](
-		                     request&& req, url_view&& url, path_spec::param_map&& param) -> response_wrapper {
+		auto&& handler = [sec = op.sec, method = op.method, handler = h, this](request&&                 req,
+		                                                                       url_view&&                url,
+		                                                                       path_spec::param_map&&    param,
+		                                                                       std::optional<auth_map>&& preverified) -> response_wrapper {
 			try
 			{
+				// A request authenticated on its header (see verifier below) is not verified again.
 				auth_map auth{};
-				if (auto verified = verify_security(sec.value_or(global_security_), req, url); verified)
+				if (preverified.has_value())
+				{
+					auth = std::move(preverified.value());
+				}
+				else if (auto verified = verify_security(sec.value_or(global_security_), req, url); verified)
 				{
 					auth = std::move(verified.value());
 				}
@@ -131,7 +143,20 @@ protected:
 			}
 		};
 
-		router_->add_route(op, handler);
+		// Runs on the request header, before the body is read, so an unauthenticated client cannot make the server read a body.
+		auto&& verifier = [sec = op.sec, this](request& req, const url_view& url) -> std::expected<auth_map, response> {
+			try
+			{
+				return verify_security(sec.value_or(global_security_), req, url);
+			}
+			catch (const std::exception& e)
+			{
+				ZOO_LOG(err, "{}", boost::diagnostic_information(e));
+				return std::unexpected(make_error_response(e, req));
+			}
+		};
+
+		router_->add_route(op, handler, verifier);
 	}
 
 	void set_global_security(security sec)
