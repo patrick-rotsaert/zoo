@@ -252,6 +252,10 @@ private:
 		{
 			const auto keep_alive = this->response_queue_.front().keep_alive();
 
+			// Each write gets its own deadline: the one left from the read may have passed while the handler ran, and a client that
+			// does not take the response is cut off like one that does not send its request.
+			this->stream_.expires_after(this->settings_.timeout);
+
 			beast::async_write(this->stream_,
 			                   std::move(this->response_queue_.front()),
 			                   beast::bind_front_handler(&http_session_impl::on_write, this->shared_from_this(), keep_alive));
@@ -261,6 +265,13 @@ private:
 	void on_write(bool keep_alive, beast::error_code ec, std::size_t bytes_transferred)
 	{
 		boost::ignore_unused(bytes_transferred);
+
+		// Client did not take the response in time
+		if (ec == beast::error::timeout)
+		{
+			ZOO_LOG(debug, "write: {}", ec.message());
+			return this->do_close();
+		}
 
 		if (ec)
 		{
