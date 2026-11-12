@@ -34,6 +34,7 @@
 #include <unordered_map>
 #include <typeindex>
 #include <typeinfo>
+#include <utility>
 
 namespace zoo {
 namespace spider {
@@ -381,13 +382,24 @@ private:
 	template<typename T>
 	std::enable_if_t<is_optional_v<T>, boost::json::object> value_schema()
 	{
-		return value_schema<typename T::value_type>();
+		return nullable_schema(value_schema<typename T::value_type>());
 	}
 
 	template<typename T>
 	std::enable_if_t<is_shared_ptr_v<T>, boost::json::object> value_schema()
 	{
-		return value_schema<typename T::element_type>();
+		return nullable_schema(value_schema<typename T::element_type>());
+	}
+
+	// OpenAPI 3.0 ignores every keyword next to a $ref, so a nullable reference is wrapped in an allOf.
+	static boost::json::object nullable_schema(boost::json::object schema)
+	{
+		if (schema.contains("$ref"))
+		{
+			schema = boost::json::object{ { "allOf", boost::json::array{ std::move(schema) } } };
+		}
+		schema["nullable"] = true;
+		return schema;
 	}
 
 	template<typename T>
