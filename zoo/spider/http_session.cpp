@@ -18,7 +18,9 @@
 #include <boost/beast/http/message_generator.hpp>
 #include <boost/asio/dispatch.hpp>
 #include <boost/optional/optional.hpp>
+#include <fmt/format.h>
 
+#include <chrono>
 #include <exception>
 #include <optional>
 #include <utility>
@@ -269,8 +271,15 @@ private:
 		return true;
 	}
 
-	void queue_write(message_generator&& response)
+	void queue_write(response_wrapper&& response)
 	{
+		// Tells the client how long an idle connection is kept, so it does not reuse one the server is about to close.
+		if (response.keep_alive())
+		{
+			const auto seconds = std::chrono::duration_cast<std::chrono::seconds>(this->settings_.timeout).count();
+			response.set(http::field::keep_alive, fmt::format("timeout={}", seconds));
+		}
+
 		// Allocate and store the work
 		this->response_queue_.push_back(std::move(response));
 

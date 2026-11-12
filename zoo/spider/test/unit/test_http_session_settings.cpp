@@ -267,6 +267,24 @@ TEST(HttpSessionSettings, RaisedBodyLimitAcceptsLargeBody)
 	EXPECT_EQ(r.res.body(), std::to_string(50u * 1024u));
 }
 
+// A keep-alive response tells the client how long the server keeps an idle connection.
+TEST(HttpSessionSettings, KeepAliveResponseAdvertisesTimeout)
+{
+	const auto byDefault = run_post(http_session_settings{}, 10u);
+
+	ASSERT_FALSE(byDefault.ec) << byDefault.ec.message();
+	EXPECT_TRUE(byDefault.res.keep_alive());
+	EXPECT_EQ(byDefault.res[http::field::keep_alive], "timeout=30");
+
+	http_session_settings settings;
+	settings.timeout = 5s;
+
+	const auto configured = run_post(settings, 10u);
+
+	ASSERT_FALSE(configured.ec) << configured.ec.message();
+	EXPECT_EQ(configured.res[http::field::keep_alive], "timeout=5");
+}
+
 // A client that takes nothing of the response is closed `timeout` after the write started. The handler runs longer than the
 // timeout, so the response is only started if the write gets a deadline of its own rather than the one left from the read.
 TEST(HttpSessionSettings, SlowReaderIsClosedAfterTimeout)
