@@ -7,7 +7,9 @@
 
 #include "controller.h"
 
+#include "zoo/spider/forwarding_request_handler.h"
 #include "zoo/spider/listener.h"
+#include "zoo/spider/rest/auth.h"
 #include "zoo/common/logging/logging.h"
 
 #include <boost/asio/io_context.hpp>
@@ -20,25 +22,26 @@
 
 #include <thread>
 #include <atomic>
+#include <optional>
+#include <utility>
 
 namespace demo {
 
 using namespace zoo::spider;
 using namespace fmt::literals;
 
-class LoggingHandler : public irequest_handler
+class LoggingHandler : public forwarding_request_handler
 {
-	std::shared_ptr<irequest_handler> handler_;
-	std::atomic<unsigned>             reqNum_;
+	std::atomic<unsigned> reqNum_;
 
-	response_wrapper handle_request(request&& req) override
+	response_wrapper handle_request(request&& req, std::optional<auth_map>&& preverified) override
 	{
 		// Log the request
 		const auto reqNum = ++reqNum_;
 		ZOO_LOG(trace, "[{}]>>>\n{}", reqNum, fmt::streamed(req));
 
 		// Get the response
-		auto res = handler_->handle_request(std::move(req));
+		auto res = forwarding_request_handler::handle_request(std::move(req), std::move(preverified));
 
 		// Log the response
 		std::visit(
@@ -56,7 +59,7 @@ class LoggingHandler : public irequest_handler
 
 public:
 	explicit LoggingHandler(std::shared_ptr<irequest_handler> handler)
-	    : handler_{ std::move(handler) }
+	    : forwarding_request_handler{ std::move(handler) }
 	    , reqNum_{}
 	{
 	}
