@@ -14,6 +14,11 @@
 #include "zoo/spider/messages/message.h"
 #include "zoo/spider/messages/response_wrapper.hpp"
 #include "zoo/spider/rest/auth.h"
+#include "zoo/spider/rest/controller.hpp"
+#include "zoo/spider/rest/openapi.hpp"
+#include "zoo/spider/rest/operation.h"
+#include "zoo/spider/rest/pathspec.h"
+#include "zoo/spider/rest/security.h"
 
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/io_context.hpp>
@@ -23,9 +28,16 @@
 #include <boost/beast/core/error.hpp>
 #include <boost/beast/core/flat_buffer.hpp>
 #include <boost/beast/http.hpp>
+#include <boost/describe/class.hpp>
+#include <boost/json/object.hpp>
+#include <boost/json/parse.hpp>
+#include <boost/json/string.hpp>
+#include <boost/json/value.hpp>
 #include <fmt/format.h>
 
 #include <chrono>
+#include <cstddef>
+#include <exception>
 #include <memory>
 #include <optional>
 #include <stdexcept>
@@ -163,6 +175,58 @@ std::string big_request()
 
 constexpr std::string_view plain_request{ "GET / HTTP/1.1\r\nHost: test\r\n\r\n" };
 
+struct test_error
+{
+	std::string message;
+	int         error_code{};
+
+	static test_error create(const std::exception& e)
+	{
+		return test_error{ e.what(), 0 };
+	}
+	static test_error create(int ec, std::string m)
+	{
+		return test_error{ std::move(m), ec };
+	}
+	http::status status() const noexcept
+	{
+		return static_cast<http::status>(error_code);
+	}
+};
+BOOST_DESCRIBE_STRUCT(test_error, (), (message, error_code))
+
+// PUT /open answers with the size of the body it got; PUT /throws throws something the controller does not catch.
+class error_type_controller final : public rest_controller<test_error>
+{
+public:
+	error_type_controller()
+	    : rest_controller{ openapi_settings{} }
+	{
+		add_operation(
+		    rest_operation{
+		        .method = verb::put, .path = path_spec{ "open" }, .operation_id = "putOpen", .summary = "Open", .sec = security{} },
+		    &error_type_controller::put,
+		    p::request{});
+
+		add_operation(
+		    rest_operation{
+		        .method = verb::put, .path = path_spec{ "throws" }, .operation_id = "putThrows", .summary = "Throws", .sec = security{} },
+		    &error_type_controller::put_throws,
+		    p::request{});
+	}
+
+	std::size_t put(const request& req)
+	{
+		return req.body().size();
+	}
+
+	std::size_t put_throws(const request&)
+	{
+		// Not a std::exception, so the controller cannot turn it into an error response.
+		throw 42;
+	}
+};
+
 } // namespace
 
 TEST(HttpSessionErrorResponse, ParseErrorIsAnsweredByTheHandler)
@@ -232,6 +296,39 @@ TEST(HttpSessionErrorResponse, HandlerThatFailsToMakeTheErrorResponseGetsTheStoc
 	ASSERT_FALSE(r.ec) << r.ec.message();
 	EXPECT_EQ(r.res.result(), http::status::request_header_fields_too_large);
 	EXPECT_EQ(r.res[http::field::content_type], "text/html");
+}
+
+TEST(HttpSessionErrorResponse, RestRouterAnswersAParseErrorInItsErrorType)
+{
+	error_type_controller controller;
+	test_server           server{ controller.router() };
+
+	const auto r = send_raw(server.port(), big_request());
+
+	ASSERT_FALSE(r.ec) << r.ec.message();
+	EXPECT_EQ(r.res.result(), http::status::request_header_fields_too_large);
+	EXPECT_EQ(r.res[http::field::content_type], "application/json");
+	const auto body = boost::json::parse(r.res.body()).as_object();
+	EXPECT_EQ(body.at("error_code").as_int64(), 431);
+	EXPECT_TRUE(body.at("message").as_string().starts_with("Failed to parse the request: ")) << r.res.body();
+	EXPECT_FALSE(r.res.keep_alive());
+}
+
+TEST(HttpSessionErrorResponse, RestRouterAnswersAnEscapedExceptionInItsErrorType)
+{
+	error_type_controller controller;
+	test_server           server{ controller.router() };
+
+	const auto r = send_raw(server.port(),
+	                        "PUT /throws HTTP/1.1\r\nHost: test\r\nContent-Type: application/octet-stream\r\nContent-Length: 1\r\n\r\nx");
+
+	ASSERT_FALSE(r.ec) << r.ec.message();
+	EXPECT_EQ(r.res.result(), http::status::internal_server_error);
+	EXPECT_EQ(r.res[http::field::content_type], "application/json");
+	const auto body = boost::json::parse(r.res.body()).as_object();
+	EXPECT_EQ(body.at("error_code").as_int64(), 500);
+	EXPECT_EQ(body.at("message").as_string(), "Internal server error");
+	EXPECT_TRUE(r.res.keep_alive());
 }
 
 } // namespace spider
