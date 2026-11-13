@@ -10,13 +10,18 @@
 #include "zoo/spider/rest/router.hpp"
 #include "zoo/spider/rest/operation.h"
 #include "zoo/spider/rest/pathspec.h"
+#include "zoo/spider/irequest_handler.h"
 #include "zoo/spider/messages/message.h"
+#include "zoo/spider/messages/response_wrapper.hpp"
 
+#include <boost/beast/http/field.hpp>
+#include <boost/beast/http/status.hpp>
 #include <boost/beast/http/verb.hpp>
 #include <boost/describe/class.hpp>
 
 #include <optional>
 #include <string>
+#include <variant>
 
 namespace zoo {
 namespace spider {
@@ -100,6 +105,19 @@ TEST(RestRouter, EncodedSlashStaysWithinPathParameter)
 	handler.handle_request(request{ verb::get, "/files/a%2Fb", 11 });
 
 	EXPECT_EQ(captured, "a/b");
+}
+
+TEST(RestRouter, MakesErrorResponsesInItsErrorType)
+{
+	rest_router<test_error> router;
+
+	auto&      handler = static_cast<irequest_handler&>(router);
+	const auto wrapper = handler.make_error_response(http::status::payload_too_large, "too big");
+
+	const auto& res = std::get<response>(wrapper.value());
+	EXPECT_EQ(res.result(), http::status::payload_too_large);
+	EXPECT_EQ(res[http::field::content_type], "application/json");
+	EXPECT_EQ(res.body(), R"({"message":"too big","error_code":413})");
 }
 
 } // namespace spider

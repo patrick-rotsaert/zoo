@@ -34,6 +34,7 @@
 #include <functional>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -150,6 +151,11 @@ private:
 
 		auto p = make_path(u);
 		return route_request(std::move(req), std::move(u), std::move(p), std::move(preverified));
+	}
+
+	response_wrapper make_error_response(http::status status, std::string_view message) override
+	{
+		return json_response::create(status, DefaultErrorType::create(static_cast<int>(status), std::string{ message }));
 	}
 
 	// Build the request path from decoded per-segment strings. Using url.segments() (which decodes

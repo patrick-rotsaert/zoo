@@ -15,8 +15,10 @@
 
 #include <boost/beast/http/fields.hpp>
 #include <boost/beast/http/message.hpp>
+#include <boost/beast/http/status.hpp>
 
 #include <optional>
+#include <string_view>
 
 namespace zoo {
 namespace spider {
@@ -34,7 +36,7 @@ public:
 
 	// Called as soon as the request header is in, before the body is read. A response returned here is sent instead of reading
 	// the body, and the connection is closed. Authentication done here is put in `preverified` and passed on to handle_request().
-	// A handler that wraps another one (a logger, a filter) must forward all three virtuals, or the wrapped handler's header-phase
+	// A handler that wraps another one (a logger, a filter) derives from forwarding_request_handler, or the wrapped handler's header-phase
 	// work is skipped.
 	virtual std::optional<response_wrapper> handle_request_header(const http::request_header<>& header,
 	                                                              std::optional<auth_map>&      preverified);
@@ -43,6 +45,11 @@ public:
 
 	// Called with the complete request. `preverified` holds what handle_request_header() authenticated, if anything.
 	virtual response_wrapper handle_request(request&& req, std::optional<auth_map>&& preverified);
+
+	// Called when the session has to answer without a response from the handler: the request could not be parsed (400, 413, 431)
+	// or a handler call threw (500). `message` says what went wrong, in words fit for the client. The default answers the stock
+	// HTML page for the status.
+	virtual response_wrapper make_error_response(http::status status, std::string_view message);
 };
 
 } // namespace spider
