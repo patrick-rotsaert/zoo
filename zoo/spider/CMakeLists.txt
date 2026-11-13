@@ -12,6 +12,7 @@ add_zoo_library(spider
 		http_session.cpp
 		http_session.h
 		irequest_handler.cpp
+		forwarding_request_handler.cpp
 		request_router.cpp
 		controller.cpp
 		exception.cpp
@@ -50,6 +51,7 @@ add_zoo_library(spider
 		listener.h
 		http_session_settings.h
 		irequest_handler.h
+		forwarding_request_handler.h
 		request_router.h
 		controller.hpp
 		json_util.h
@@ -115,6 +117,7 @@ add_zoo_library(spider
 		test/unit/test_http_session_pipelining.cpp
 		test/unit/test_http_session_early_reject.cpp
 		test/unit/test_http_session_error_response.cpp
+		test/unit/test_forwarding_request_handler.cpp
 	PUBLIC_LIBRARIES
 		zoo::zoocommon
 		Boost::url

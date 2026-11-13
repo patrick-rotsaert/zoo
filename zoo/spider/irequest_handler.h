@@ -36,7 +36,7 @@ public:
 
 	// Called as soon as the request header is in, before the body is read. A response returned here is sent instead of reading
 	// the body, and the connection is closed. Authentication done here is put in `preverified` and passed on to handle_request().
-	// A handler that wraps another one (a logger, a filter) must forward every virtual, or the wrapped handler's header-phase
+	// A handler that wraps another one (a logger, a filter) derives from forwarding_request_handler, or the wrapped handler's header-phase
 	// work is skipped.
 	virtual std::optional<response_wrapper> handle_request_header(const http::request_header<>& header,
 	                                                              std::optional<auth_map>&      preverified);
