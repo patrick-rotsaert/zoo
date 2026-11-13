@@ -6,14 +6,17 @@
 //
 
 #include "zoo/spider/irequest_handler.h"
+#include "zoo/spider/messages/error_response.h"
 #include "zoo/spider/messages/message.h"
 #include "zoo/spider/messages/response_wrapper.hpp"
 #include "zoo/spider/rest/auth.h"
 
 #include <boost/beast/http/fields.hpp>
 #include <boost/beast/http/message.hpp>
+#include <boost/beast/http/status.hpp>
 
 #include <optional>
+#include <string_view>
 #include <utility>
 
 namespace zoo {
@@ -35,6 +38,11 @@ std::optional<response_wrapper> irequest_handler::handle_request_header(const ht
 response_wrapper irequest_handler::handle_request(request&& req, std::optional<auth_map>&&)
 {
 	return this->handle_request(std::move(req));
+}
+
+response_wrapper irequest_handler::make_error_response(http::status status, std::string_view)
+{
+	return error_response_factory::create(status);
 }
 
 } // namespace spider

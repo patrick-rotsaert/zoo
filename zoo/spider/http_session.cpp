@@ -23,6 +23,7 @@
 #include <chrono>
 #include <exception>
 #include <optional>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -32,6 +33,8 @@ namespace spider {
 using namespace std::chrono_literals;
 
 namespace {
+
+constexpr std::string_view internal_server_error_message{ "Internal server error" };
 
 void fail(beast::error_code ec, char const* what)
 {
@@ -163,12 +166,12 @@ private:
 			catch (const std::exception& e)
 			{
 				ZOO_LOG(err, "Unhandled exception in request header handler: {}", e.what());
-				return response_wrapper{ internal_server_error::create() };
+				return this->make_error_response(http::status::internal_server_error, internal_server_error_message);
 			}
 			catch (...)
 			{
 				ZOO_LOG(err, "Unhandled exception in request header handler");
-				return response_wrapper{ internal_server_error::create() };
+				return this->make_error_response(http::status::internal_server_error, internal_server_error_message);
 			}
 		}();
 
@@ -230,12 +233,12 @@ private:
 			catch (const std::exception& e)
 			{
 				ZOO_LOG(err, "Unhandled exception in request handler: {}", e.what());
-				return internal_server_error::create();
+				return this->make_error_response(http::status::internal_server_error, internal_server_error_message);
 			}
 			catch (...)
 			{
 				ZOO_LOG(err, "Unhandled exception in request handler");
-				return internal_server_error::create();
+				return this->make_error_response(http::status::internal_server_error, internal_server_error_message);
 			}
 		}();
 
@@ -263,12 +266,31 @@ private:
 		                    : ec == http::error::body_limit ? http::status::payload_too_large
 		                                                    : http::status::bad_request;
 
-		// No complete request to answer: the response is built from the status alone.
-		auto response = response_wrapper{ error_response_factory::create(status) };
+		// No complete request to answer: the handler makes the response from the status and the parser's message.
+		auto response = this->make_error_response(status, fmt::format("Failed to parse the request: {}", ec.message()));
 		response.keep_alive(false);
 		this->stop_reading_ = true;
 		this->queue_write(std::move(response));
 		return true;
+	}
+
+	// Asks the request handler for the response to a request it was not given or failed on. Falls back to the stock response when
+	// the handler cannot make one: nothing may escape into io_context::run().
+	response_wrapper make_error_response(http::status status, std::string_view message)
+	{
+		try
+		{
+			return this->request_handler_->make_error_response(status, message);
+		}
+		catch (const std::exception& e)
+		{
+			ZOO_LOG(err, "Unhandled exception while making the {} response: {}", static_cast<int>(status), e.what());
+		}
+		catch (...)
+		{
+			ZOO_LOG(err, "Unhandled exception while making the {} response", static_cast<int>(status));
+		}
+		return error_response_factory::create(status);
 	}
 
 	void queue_write(response_wrapper&& response)
