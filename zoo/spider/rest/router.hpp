@@ -119,7 +119,7 @@ private:
 				auto verified = route.verifier(req, url.value());
 				if (!verified.has_value())
 				{
-					return response_wrapper{ std::move(verified.error()) };
+					return std::optional<response_wrapper>{ std::in_place, std::move(verified.error()) };
 				}
 
 				preverified = std::move(verified.value());
